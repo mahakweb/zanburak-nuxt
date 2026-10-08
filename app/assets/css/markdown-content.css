@@ -1,0 +1,398 @@
+/* Zanburak markdown rendered content — all typography & layout in one place */
+@import './code-block-themes.css';
+
+.zan-md-content {
+    @apply text-base leading-7 text-gray-800 dark:text-gray-100;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+.zan-md-content > *:first-child {
+    margin-top: 0 !important;
+}
+
+.zan-md-content > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Headings */
+.zan-md-content h1 {
+    @apply mb-4 mt-6 text-3xl font-extrabold leading-tight tracking-tight md:text-4xl;
+}
+
+.zan-md-content h2 {
+    @apply mb-3 mt-5 text-2xl font-extrabold leading-tight tracking-tight md:text-3xl;
+}
+
+.zan-md-content h3 {
+    @apply mb-2 mt-4 text-xl font-bold leading-snug md:text-2xl;
+}
+
+.zan-md-content h4 {
+    @apply mb-2 mt-4 text-lg font-bold leading-snug md:text-xl;
+}
+
+.zan-md-content h5 {
+    @apply mb-2 mt-3 text-base font-semibold md:text-lg;
+}
+
+.zan-md-content h6 {
+    @apply mb-2 mt-3 text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400;
+}
+
+/* Paragraphs */
+.zan-md-content p {
+    @apply my-3 leading-7;
+}
+
+/* Block line-height (editor [lh:…] blocks) */
+.zan-md-content .zan-lh-block :where(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th) {
+    line-height: inherit !important;
+}
+
+/* Legacy HTML line-height wrappers */
+.zan-md-content div[style*="line-height"]:not(.zan-lh-block) :where(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th) {
+    line-height: inherit !important;
+}
+
+/* Links */
+.zan-md-content a {
+    @apply font-medium text-blue-600 underline decoration-blue-400/50 underline-offset-2 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300;
+}
+
+/* Emphasis */
+.zan-md-content strong,
+.zan-md-content b {
+    @apply font-bold text-gray-900 dark:text-white;
+}
+
+.zan-md-content em,
+.zan-md-content i {
+    @apply italic;
+}
+
+.zan-md-content del,
+.zan-md-content s {
+    @apply text-gray-500 line-through dark:text-gray-400;
+}
+
+.zan-md-content mark {
+    @apply rounded px-1 bg-yellow-200 text-gray-900 dark:bg-yellow-500/30 dark:text-yellow-100;
+}
+
+.zan-md-content sub,
+.zan-md-content sup {
+    @apply text-xs;
+}
+
+/* Inline code */
+.zan-md-content :not(pre) > code {
+    @apply rounded-md bg-gray-100 px-1.5 py-0.5 font-mono text-[0.875em] text-rose-700 dark:bg-gray-800 dark:text-rose-300;
+}
+
+/* Code blocks */
+.zan-code-block-wrap {
+    @apply relative my-4 overflow-hidden rounded-xl;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.zan-code-toolbar {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    padding: 0;
+    direction: ltr;
+    pointer-events: none;
+}
+
+.zan-code-theme-btn,
+.zan-code-copy-btn {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 1.625rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(127, 127, 127, 0.22);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    backdrop-filter: blur(6px);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+}
+
+.zan-code-theme-btn {
+    width: 1.625rem;
+    padding: 0.125rem;
+}
+
+.zan-code-theme-btn:hover,
+.zan-code-copy-btn:hover {
+    border-color: rgba(127, 127, 127, 0.35);
+}
+
+.zan-code-btn-icon {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
+.zan-code-block-wrap pre,
+.zan-md-content pre.zan-code-block {
+    @apply relative rounded-none;
+    direction: ltr;
+    unicode-bidi: isolate;
+    text-align: left;
+    max-height: 28rem;
+    overflow: auto;
+    border: none !important;
+    padding: 0;
+    margin: 0;
+}
+
+.zan-md-content pre code {
+    @apply block font-mono text-sm leading-6;
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: isolate;
+    white-space: pre;
+    word-wrap: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    overflow: visible;
+    max-height: none;
+    width: max-content;
+    min-width: 100%;
+}
+
+.zan-md-content pre code:not(.hljs) {
+    @apply p-4;
+    background: rgb(243 244 246);
+}
+
+.dark .zan-md-content pre code:not(.hljs) {
+    background: rgb(31 41 55);
+}
+
+.zan-md-content pre code.hljs {
+    padding: 0 !important;
+    display: block;
+}
+
+.zan-md-content pre code.hljs .hljs-ln {
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.zan-md-content .hljs-ln,
+.zan-md-content .hljs-ln tbody,
+.zan-md-content .hljs-ln tr,
+.zan-md-content .hljs-ln td {
+    background: transparent !important;
+}
+
+.zan-md-content .hljs-ln-numbers {
+    -webkit-user-select: none;
+    user-select: none;
+    text-align: right;
+    white-space: nowrap;
+    color: color-mix(in srgb, currentColor 42%, transparent);
+    vertical-align: top;
+    min-width: 2.75rem;
+    padding: 0 0.75rem 0 0.5rem !important;
+    border-right: 1px solid color-mix(in srgb, currentColor 20%, transparent) !important;
+    background: color-mix(in srgb, currentColor 7%, transparent) !important;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+}
+
+.zan-md-content pre code.hljs .hljs-ln-code {
+    padding: 0 1rem 0 0.875rem !important;
+    vertical-align: top;
+    white-space: pre;
+    width: auto;
+    background: transparent !important;
+}
+
+.zan-md-content table.hljs-ln {
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+}
+
+.zan-md-content table.hljs-ln td,
+.zan-md-content table.hljs-ln tr {
+    border: none !important;
+    background: transparent !important;
+}
+
+.zan-md-content pre:not(:has(.hljs-ln)) code {
+    @apply p-4;
+}
+
+.zan-md-content pre code.hljs .hljs-ln tbody tr:first-child td {
+    padding-top: 1rem;
+}
+
+.zan-md-content pre code.hljs .hljs-ln tbody tr:last-child td {
+    padding-bottom: 1rem;
+}
+
+/* Blockquote */
+.zan-md-content blockquote {
+    @apply my-4 border-s-4 border-yellow-400 bg-gray-50 py-3 pe-4 ps-4 rounded-e-lg dark:border-yellow-500 dark:bg-gray-800/80;
+}
+
+.zan-md-content blockquote p {
+    @apply my-1 text-base italic leading-relaxed text-gray-700 dark:text-gray-200;
+}
+
+.zan-md-content blockquote p:last-child {
+    @apply mb-0;
+}
+
+/* Lists */
+.zan-md-content ul {
+    @apply my-3 list-disc space-y-1.5 ps-6;
+}
+
+.zan-md-content ol {
+    @apply my-3 list-decimal space-y-1.5 ps-6;
+}
+
+.zan-md-content li {
+    @apply leading-7;
+}
+
+.zan-md-content li > ul,
+.zan-md-content li > ol {
+    @apply my-1.5;
+}
+
+/* Task lists */
+.zan-md-content ul.contains-task-list {
+    @apply list-none ps-2;
+}
+
+.zan-md-content .task-list-item {
+    @apply flex items-start gap-2;
+}
+
+.zan-md-content .task-list-item input {
+    @apply mt-1.5;
+}
+
+/* Horizontal rule */
+.zan-md-content hr {
+    @apply my-6 h-px border-0 bg-gray-200 dark:bg-gray-600;
+}
+
+/* Images */
+.zan-md-content img {
+    @apply my-4 h-auto max-w-full rounded-lg shadow-md dark:shadow-gray-900/50;
+}
+
+/* Video (editor upload) */
+.zan-md-content video.zan-md-video {
+    @apply my-4 w-full max-w-full rounded-lg shadow-md dark:shadow-gray-900/50;
+    max-height: 32rem;
+    background: rgb(17 24 39);
+}
+
+/* File attachments */
+.zan-md-content .zan-file-attachment-wrap {
+    @apply my-3;
+}
+
+.zan-md-content a.zan-file-attachment {
+    @apply my-3 flex w-full max-w-md items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 no-underline shadow-sm transition hover:border-yellow-400 hover:bg-yellow-50/40 dark:border-gray-600 dark:bg-gray-800/80 dark:hover:border-yellow-500 dark:hover:bg-gray-800;
+}
+
+.zan-md-content .zan-file-attachment__icon {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-[0.65rem] font-extrabold tracking-wide text-white;
+}
+
+.zan-md-content .zan-file-attachment__body {
+    @apply flex min-w-0 flex-col gap-0.5;
+}
+
+.zan-md-content .zan-file-attachment__name {
+    @apply truncate text-sm font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.zan-md-content .zan-file-attachment__meta {
+    @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+/* Tables */
+.zan-md-content table {
+    @apply my-4 w-full border-collapse overflow-hidden rounded-lg text-sm shadow-sm;
+}
+
+.zan-md-content thead {
+    @apply bg-gray-100 dark:bg-gray-800;
+}
+
+.zan-md-content th {
+    @apply border border-gray-200 px-3 py-2.5 text-start font-semibold text-gray-900 dark:border-gray-600 dark:text-gray-100;
+}
+
+.zan-md-content td {
+    @apply border border-gray-200 px-3 py-2.5 align-top dark:border-gray-600;
+}
+
+.zan-md-content tbody tr:nth-child(even) {
+    @apply bg-gray-50/80 dark:bg-gray-800/40;
+}
+
+/* Footnotes */
+.zan-md-content .footnotes {
+    @apply mt-8 border-t border-gray-200 pt-4 text-sm dark:border-gray-700;
+}
+
+.zan-md-content .footnotes ol {
+    @apply ps-5;
+}
+
+/* Alignment blocks from editor */
+.zan-md-content div[dir="rtl"],
+.zan-md-content [style*="text-align: right"] {
+    text-align: right;
+}
+
+.zan-md-content div[dir="ltr"],
+.zan-md-content [style*="text-align: left"] {
+    text-align: left;
+}
+
+/* Abbreviations */
+.zan-md-content abbr {
+    @apply cursor-help border-b border-dotted border-gray-400;
+}
+
+/* TOC */
+.zan-md-content .table-of-contents {
+    @apply my-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50;
+}
+
+.zan-md-content .table-of-contents ul {
+    @apply my-0;
+}
+
+/* Preview inside editor */
+.editor-preview-active.zan-md-content {
+    @apply p-4;
+}

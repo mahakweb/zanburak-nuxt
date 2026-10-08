@@ -1,0 +1,846 @@
+{
+  "profile.about.whatIDo": {
+    "fa": "چه کاری انجام میدم! (تخصصم چیه)",
+    "en": "What do I do! (What's my expertise)"
+  },
+  "profile.account.about": {
+    "fa": "درباره من",
+    "en": "About me"
+  },
+  "profile.account.aboutPlaceholder": {
+    "fa": "توضیحی مختصر در مورد خودتان و حرفه ای که در آن تخصص دارید.",
+    "en": "A brief description about yourself and the profession you specialize in."
+  },
+  "profile.account.birthDate": {
+    "fa": "تاریخ تولد",
+    "en": "Birth date"
+  },
+  "profile.account.birthDateFormat": {
+    "fa": "فرمت صحیح (شمسی): 1376/01/29",
+    "en": "Correct format (Jalali): 1376/01/29"
+  },
+  "profile.account.contactInfo": {
+    "fa": "راه‌های ارتباطی",
+    "en": "Contact methods"
+  },
+  "profile.account.coverAlt": {
+    "fa": "تصویر کاور {name}",
+    "en": "Cover image of {name}"
+  },
+  "profile.account.coverUpdateSuccess": {
+    "fa": "تصویر کاور با موفقیت آپدیت شد.",
+    "en": "Cover image updated successfully."
+  },
+  "profile.account.day": {
+    "fa": "روز",
+    "en": "Day"
+  },
+  "profile.account.email": {
+    "fa": "ایمیل",
+    "en": "Email"
+  },
+  "profile.account.emailNotEditable": {
+    "fa": "در حال حاضر ایمیل قابل تغییر نمیباشد.",
+    "en": "Email cannot be changed at the moment."
+  },
+  "profile.account.firstNameFa": {
+    "fa": "نام (فارسی)",
+    "en": "First name (Persian)"
+  },
+  "profile.account.firstNamePlaceholder": {
+    "fa": "نام خود را وارد کنید",
+    "en": "Enter your first name"
+  },
+  "profile.account.github": {
+    "fa": "گیت هاب",
+    "en": "GitHub"
+  },
+  "profile.account.instagram": {
+    "fa": "اینستاگرام",
+    "en": "Instagram"
+  },
+  "profile.account.jobPlaceholder": {
+    "fa": "سمت یا حرفه ای که در آن مشغول هستید.",
+    "en": "The position or profession you are engaged in."
+  },
+  "profile.account.jobTitle": {
+    "fa": "تیتر شغل یا حرفه",
+    "en": "Job or profession title"
+  },
+  "profile.account.lastNameFa": {
+    "fa": "نام‌خانوادگی (فارسی)",
+    "en": "Last name (Persian)"
+  },
+  "profile.account.lastNamePlaceholder": {
+    "fa": "نام‌خانوادگی خود را وارد کنید",
+    "en": "Enter your last name"
+  },
+  "profile.account.linkedin": {
+    "fa": "لینکدین",
+    "en": "LinkedIn"
+  },
+  "profile.account.month": {
+    "fa": "ماه",
+    "en": "Month"
+  },
+  "profile.account.personalInfo": {
+    "fa": "اطلاعات فردی",
+    "en": "Personal information"
+  },
+  "profile.account.profileAddress": {
+    "fa": "آدرس پروفایل",
+    "en": "Profile address"
+  },
+  "profile.account.profilePicAlt": {
+    "fa": "تصویر پروفایل {name}",
+    "en": "Profile picture of {name}"
+  },
+  "profile.account.profilePicUpdateSuccess": {
+    "fa": "تصویر پروفایل با موفقیت آپدیت شد.",
+    "en": "Profile picture updated successfully."
+  },
+  "profile.account.telegram": {
+    "fa": "تلگرام",
+    "en": "Telegram"
+  },
+  "profile.account.title": {
+    "fa": "اطلاعات حساب",
+    "en": "Account information"
+  },
+  "profile.account.twitter": {
+    "fa": "توییتر",
+    "en": "Twitter"
+  },
+  "profile.account.updateSuccess": {
+    "fa": "اطلاعات با موفقیت آپدیت شد.",
+    "en": "Information updated successfully."
+  },
+  "profile.account.uploadError": {
+    "fa": "خطا در بارگذاری تصویر",
+    "en": "Error uploading image"
+  },
+  "profile.account.website": {
+    "fa": "وبسایت",
+    "en": "Website"
+  },
+  "profile.account.year": {
+    "fa": "سال",
+    "en": "Year"
+  },
+  "profile.articles.comingSoon": {
+    "fa": "این بخش به زودی تکمیل می گردد.",
+    "en": "This section will be completed soon."
+  },
+  "profile.common.cancel": {
+    "fa": "انصراف",
+    "en": "Cancel"
+  },
+  "profile.common.follow": {
+    "fa": "دنبال کردن",
+    "en": "Follow"
+  },
+  "profile.common.loading": {
+    "fa": "در حال بارگذاری...",
+    "en": "Loading..."
+  },
+  "profile.common.loadingServer": {
+    "fa": "در حال دریافت اطلاعات از سرور، لطفا منتظر بمانید...",
+    "en": "Loading data from the server, please wait..."
+  },
+  "profile.common.saveChanges": {
+    "fa": "ثبت تغییرات",
+    "en": "Save changes"
+  },
+  "profile.common.unfollow": {
+    "fa": "عدم دنبال کردن",
+    "en": "Unfollow"
+  },
+  "profile.follow.followers": {
+    "fa": "دنبال‌کنندگان",
+    "en": "Followers"
+  },
+  "profile.follow.followersTab": {
+    "fa": "دنبال‌کنندگان",
+    "en": "Followers"
+  },
+  "profile.follow.followings": {
+    "fa": "دنبال‌شده‌ها",
+    "en": "Following"
+  },
+  "profile.follow.followingsTab": {
+    "fa": "دنبال‌شده‌ها",
+    "en": "Following"
+  },
+  "profile.follow.noFollowers": {
+    "fa": "هنوز دنبال‌کننده‌ای ندارد.",
+    "en": "No followers yet."
+  },
+  "profile.follow.noFollowings": {
+    "fa": "هنوز کسی را دنبال نکرده است.",
+    "en": "Not following anyone yet."
+  },
+  "profile.follow.profileButton": {
+    "fa": "پروفایل",
+    "en": "Profile"
+  },
+  "profile.invite.codeCopied": {
+    "fa": "کد دعوت کپی شد",
+    "en": "Invite code copied"
+  },
+  "profile.invite.codeCopiedInline": {
+    "fa": "کد دعوت کپی شد!",
+    "en": "Invite code copied!"
+  },
+  "profile.invite.copy": {
+    "fa": "کپی",
+    "en": "Copy"
+  },
+  "profile.invite.documentTitle": {
+    "fa": "دعوت دوستان - زنبورک",
+    "en": "Invite friends - zanburak"
+  },
+  "profile.invite.fetchError": {
+    "fa": "خطا در دریافت اطلاعات دعوت",
+    "en": "Error fetching invite information"
+  },
+  "profile.invite.heading": {
+    "fa": "دعوت دوستان و دریافت پاداش",
+    "en": "Invite friends and earn rewards"
+  },
+  "profile.invite.inviteLink": {
+    "fa": "لینک دعوت",
+    "en": "Invite link"
+  },
+  "profile.invite.invitedPeople": {
+    "fa": "افراد دعوت‌شده",
+    "en": "Invited people"
+  },
+  "profile.invite.joined": {
+    "fa": "عضویت کرده",
+    "en": "Joined"
+  },
+  "profile.invite.linkCopied": {
+    "fa": "لینک دعوت کپی شد",
+    "en": "Invite link copied"
+  },
+  "profile.invite.linkCopiedInline": {
+    "fa": "لینک دعوت کپی شد!",
+    "en": "Invite link copied!"
+  },
+  "profile.invite.next": {
+    "fa": "بعدی",
+    "en": "Next"
+  },
+  "profile.invite.noneInvited": {
+    "fa": "هنوز کسی را دعوت نکرده‌اید",
+    "en": "You haven't invited anyone yet"
+  },
+  "profile.invite.prev": {
+    "fa": "قبلی",
+    "en": "Previous"
+  },
+  "profile.invite.shareHint": {
+    "fa": "کد دعوت خود را با دوستان به اشتراک بگذارید",
+    "en": "Share your invite code with friends"
+  },
+  "profile.invite.show": {
+    "fa": "نمایش:",
+    "en": "Show:"
+  },
+  "profile.invite.showingRange": {
+    "fa": "نمایش {from} تا {to} از {total}",
+    "en": "Showing {from} to {to} of {total}"
+  },
+  "profile.invite.subheading": {
+    "fa": "کد دعوت خود را با دوستان به اشتراک بگذارید و از مزایای ویژه بهره‌مند شوید",
+    "en": "Share your invite code with friends and enjoy special benefits"
+  },
+  "profile.invite.totalInvited": {
+    "fa": "کل دعوت‌شدگان",
+    "en": "Total invited"
+  },
+  "profile.invite.yourCode": {
+    "fa": "کد دعوت شما",
+    "en": "Your invite code"
+  },
+  "profile.login.activeSessions": {
+    "fa": "نشست‌های فعال",
+    "en": "Active sessions"
+  },
+  "profile.login.currentSession": {
+    "fa": "نشست فعلی",
+    "en": "Current session"
+  },
+  "profile.login.deleteSession": {
+    "fa": "حذف نشست",
+    "en": "Delete session"
+  },
+  "profile.login.device": {
+    "fa": "دستگاه:",
+    "en": "Device:"
+  },
+  "profile.login.ip": {
+    "fa": "آی پی:",
+    "en": "IP:"
+  },
+  "profile.login.lastUsed": {
+    "fa": "آخرین استفاده:",
+    "en": "Last used:"
+  },
+  "profile.login.neverUsed": {
+    "fa": "استفاده‌ای نداشته است!",
+    "en": "Has not been used!"
+  },
+  "profile.login.noOtherSessions": {
+    "fa": "نشست فعال دیگری موجود نیست",
+    "en": "No other active sessions"
+  },
+  "profile.login.noOtherSessionsDesc1": {
+    "fa": "شما می‌توانید در تلفن همراه، تبلت با رایانه‌های دیگر به حساب خود وارد شوید.",
+    "en": "You can sign in to your account on your mobile phone, tablet, or other computers."
+  },
+  "profile.login.noOtherSessionsDesc2": {
+    "fa": "تمامی داده‌های شما بلافاصله همگام‌سازی خواهند شد.",
+    "en": "All your data will be synchronized immediately."
+  },
+  "profile.login.notFound": {
+    "fa": "نشست یافت نشد.",
+    "en": "Session not found."
+  },
+  "profile.login.online": {
+    "fa": "آنلاین",
+    "en": "Online"
+  },
+  "profile.login.securityError": {
+    "fa": "به دلایل امنیتی، شما نمی‌توانید از دستگاهی که به تازگی به آن متصل شده‌اید به نشست‌های قبلی پایان دهید. لطفاً از یک اتصال قدیمی‌تر استفاده کرده یا چند ساعت صبر کنید.",
+    "en": "For security reasons, you cannot end previous sessions from a device you have recently connected from. Please use an older connection or wait a few hours."
+  },
+  "profile.login.terminateAllHint": {
+    "fa": "تمامی نشست‌های فعال به غیر از نشست فعلی حذف می‌شوند.",
+    "en": "All active sessions except the current one will be removed."
+  },
+  "profile.login.terminateAllOthers": {
+    "fa": "پایان دادن به تمامی نشست‌های دیگر",
+    "en": "End all other sessions"
+  },
+  "profile.login.terminateAllSuccess": {
+    "fa": "تمامی نشست‌های دیگر با موفقیت حذف شدند.",
+    "en": "All other sessions were removed successfully."
+  },
+  "profile.login.terminateSuccess": {
+    "fa": "نشست مورد نظر با موفقیت حذف شد.",
+    "en": "The session was removed successfully."
+  },
+  "profile.login.thisDevice": {
+    "fa": "این دستگاه",
+    "en": "This device"
+  },
+  "profile.nav.accountInformation": {
+    "fa": "اطلاعات حساب",
+    "en": "Account information"
+  },
+  "profile.nav.changePassword": {
+    "fa": "تغییر رمز عبور",
+    "en": "Change password"
+  },
+  "profile.nav.informationManagement": {
+    "fa": "مدیریت اطلاع‌رسانی",
+    "en": "Notification management"
+  },
+  "profile.nav.invite": {
+    "fa": "دعوت دوستان",
+    "en": "Invite friends"
+  },
+  "profile.nav.loginStatistics": {
+    "fa": "آمار ورود",
+    "en": "Login statistics"
+  },
+  "profile.nav.phoneNumber": {
+    "fa": "شماره موبایل",
+    "en": "Phone number"
+  },
+  "profile.notif.active": {
+    "fa": "فعال",
+    "en": "Active"
+  },
+  "profile.notif.allDisabled": {
+    "fa": "همه غیرفعال",
+    "en": "All disabled"
+  },
+  "profile.notif.allDisabledHint": {
+    "fa": "در حال حاضر همه اطلاع‌رسانی‌ها غیرفعال هستند. با فعال کردن این گزینه، اطلاع‌رسانی‌ها دوباره فعال می‌شوند.",
+    "en": "All notifications are currently disabled. Enabling this option will re-enable notifications."
+  },
+  "profile.notif.allDisabledSuccess": {
+    "fa": "همه اطلاع‌رسانی‌ها غیرفعال شدند",
+    "en": "All notifications have been disabled"
+  },
+  "profile.notif.allEnabled": {
+    "fa": "همه فعال",
+    "en": "All enabled"
+  },
+  "profile.notif.allEnabledSuccess": {
+    "fa": "همه اطلاع‌رسانی‌ها فعال شدند",
+    "en": "All notifications have been enabled"
+  },
+  "profile.notif.bulkActions": {
+    "fa": "عملیات دسته‌جمعی",
+    "en": "Bulk actions"
+  },
+  "profile.notif.bulkActionsDesc": {
+    "fa": "مدیریت سریع کانال‌های اطلاع‌رسانی",
+    "en": "Quickly manage notification channels"
+  },
+  "profile.notif.bulkError": {
+    "fa": "خطا در به‌روزرسانی دسته‌جمعی",
+    "en": "Error performing bulk update"
+  },
+  "profile.notif.bulkNoUpdate": {
+    "fa": "عملیات انجام شد اما اطلاعات به‌روزرسانی نشد.",
+    "en": "Operation completed but no data was updated."
+  },
+  "profile.notif.bulkSuccess": {
+    "fa": "عملیات با موفقیت انجام شد. {count} رویداد به‌روزرسانی شد.",
+    "en": "Operation completed successfully. {count} events updated."
+  },
+  "profile.notif.colAction": {
+    "fa": "عملیات",
+    "en": "Action"
+  },
+  "profile.notif.colEmail": {
+    "fa": "ایمیل",
+    "en": "Email"
+  },
+  "profile.notif.colSiteNotif": {
+    "fa": "اعلانات سایت",
+    "en": "Site notifications"
+  },
+  "profile.notif.colSms": {
+    "fa": "پیامک",
+    "en": "SMS"
+  },
+  "profile.notif.colTelegram": {
+    "fa": "تلگرام",
+    "en": "Telegram"
+  },
+  "profile.notif.disable": {
+    "fa": "غیرفعال",
+    "en": "Disable"
+  },
+  "profile.notif.disabledDesc": {
+    "fa": "برای استفاده از تنظیمات اطلاع‌رسانی، ابتدا آن‌ها را فعال کنید",
+    "en": "To use the notification settings, enable them first"
+  },
+  "profile.notif.disabledTitle": {
+    "fa": "اطلاع‌رسانی‌ها غیرفعال هستند",
+    "en": "Notifications are disabled"
+  },
+  "profile.notif.email": {
+    "fa": "ایمیل",
+    "en": "Email"
+  },
+  "profile.notif.telegram": {
+    "fa": "تلگرام",
+    "en": "Telegram"
+  },
+  "profile.notif.adminChannelOff": {
+    "fa": "مدیر این کانال‌ها را برای همه خاموش کرده است: {channels}",
+    "en": "An admin has turned these channels off for everyone: {channels}"
+  },
+  "profile.notif.enable": {
+    "fa": "فعال",
+    "en": "Enable"
+  },
+  "profile.notif.inactive": {
+    "fa": "غیرفعال",
+    "en": "Inactive"
+  },
+  "profile.notif.loadingUser": {
+    "fa": "در حال دریافت اطلاعات کاربر...",
+    "en": "Loading user information..."
+  },
+  "profile.notif.off": {
+    "fa": "خاموش",
+    "en": "Off"
+  },
+  "profile.notif.on": {
+    "fa": "روشن",
+    "en": "On"
+  },
+  "profile.notif.reqEmailRegistered": {
+    "fa": "برای فعال‌سازی اطلاع‌رسانی از طریق ایمیل، باید ایمیل شما ثبت شده باشد.",
+    "en": "To enable notifications via email, your email must be registered."
+  },
+  "profile.notif.reqEmailSmsRegistered": {
+    "fa": "برای فعال‌سازی اطلاع‌رسانی از طریق ایمیل و پیامک، باید هم ایمیل و هم شماره موبایل شما ثبت شده باشد.",
+    "en": "To enable notifications via email and SMS, both your email and mobile number must be registered."
+  },
+  "profile.notif.reqEmailSmsVerified": {
+    "fa": "برای فعال‌سازی اطلاع‌رسانی از طریق ایمیل و پیامک، باید هم ایمیل و هم شماره موبایل شما تایید شده باشد.",
+    "en": "To enable notifications via email and SMS, both your email and mobile number must be verified."
+  },
+  "profile.notif.reqEmailVerified": {
+    "fa": "برای فعال‌سازی اطلاع‌رسانی از طریق ایمیل، باید ایمیل شما تایید شده باشد.",
+    "en": "To enable notifications via email, your email must be verified."
+  },
+  "profile.notif.reqSmsRegistered": {
+    "fa": "برای فعال‌سازی اطلاع‌رسانی از طریق پیامک، باید شماره موبایل شما ثبت شده باشد.",
+    "en": "To enable notifications via SMS, your mobile number must be registered."
+  },
+  "profile.notif.reqSmsVerified": {
+    "fa": "برای فعال‌سازی اطلاع‌رسانی از طریق پیامک، باید شماره موبایل شما تایید شده باشد.",
+    "en": "To enable notifications via SMS, your mobile number must be verified."
+  },
+  "profile.notif.reset": {
+    "fa": "بازنشانی",
+    "en": "Reset"
+  },
+  "profile.notif.site": {
+    "fa": "سایت",
+    "en": "Site"
+  },
+  "profile.notif.sms": {
+    "fa": "پیامک",
+    "en": "SMS"
+  },
+  "profile.notif.status": {
+    "fa": "وضعیت اطلاع‌رسانی",
+    "en": "Notification status"
+  },
+  "profile.notif.title": {
+    "fa": "صفحه مدیریت اطلاع رسانی",
+    "en": "Notification management"
+  },
+  "profile.notif.toggleError": {
+    "fa": "خطا در تغییر وضعیت اطلاع‌رسانی‌ها",
+    "en": "Error changing notification status"
+  },
+  "profile.notif.turnOff": {
+    "fa": "خاموش کردن",
+    "en": "Turn off"
+  },
+  "profile.notif.turnOffNotifications": {
+    "fa": "خاموش کردن اعلان‌ها",
+    "en": "Turn off notifications"
+  },
+  "profile.notif.turnOn": {
+    "fa": "روشن کردن",
+    "en": "Turn on"
+  },
+  "profile.notif.turnOnNotifications": {
+    "fa": "روشن کردن اعلان‌ها",
+    "en": "Turn on notifications"
+  },
+  "profile.notif.updateError": {
+    "fa": "خطا در به‌روزرسانی تنظیمات",
+    "en": "Error updating settings"
+  },
+  "profile.password.changeSuccess": {
+    "fa": "رمز عبور شما با موفقیت تغییر کرد.",
+    "en": "Your password has been changed successfully."
+  },
+  "profile.password.continue": {
+    "fa": "ادامه عملیات",
+    "en": "Continue"
+  },
+  "profile.password.current": {
+    "fa": "پسورد فعلی",
+    "en": "Current password"
+  },
+  "profile.password.forgotCurrent": {
+    "fa": "رمز عبور فعلی رو فراموش کردی؟",
+    "en": "Forgot your current password?"
+  },
+  "profile.password.forgotModalDesc": {
+    "fa": "برای دسترسی به صفحه فراموشی رمز عبور ابتدا از سایت خارج می‌شوید و بعد به صفحه مورد نظر منتقل می‌شوید.",
+    "en": "To access the forgot password page, you will first be signed out and then redirected to the desired page."
+  },
+  "profile.password.new": {
+    "fa": "پسورد جدید",
+    "en": "New password"
+  },
+  "profile.password.ruleLowercase": {
+    "fa": "- حداقل یک حرف کوچک استفاده کنید",
+    "en": "- Use at least one lowercase letter"
+  },
+  "profile.password.ruleMinLength": {
+    "fa": "- پسورد حداقل باید ۸ کاراکتر باشد",
+    "en": "- Password must be at least 8 characters"
+  },
+  "profile.password.ruleNumber": {
+    "fa": "- حداقل از یک عدد استفاده کنید",
+    "en": "- Use at least one number"
+  },
+  "profile.password.ruleSpecialChar": {
+    "fa": "- حداقل یک کاراکتر خاص استفاده کنید (#?!{'@'}$%^&*-)",
+    "en": "- Use at least one special character (#?!{'@'}$%^&*-)"
+  },
+  "profile.password.ruleUppercase": {
+    "fa": "- حداقل یک حرف بزرگ استفاده کنید",
+    "en": "- Use at least one uppercase letter"
+  },
+  "profile.password.title": {
+    "fa": "تغییر رمز عبور",
+    "en": "Change password"
+  },
+  "profile.phone.benefit1": {
+    "fa": "۱.در آینده نزدیک ورود به سایت تماما با شماره تلفن همراه انجام خواهد شد. (به زودی)",
+    "en": "1. In the near future, signing in to the site will be done entirely with the mobile phone number. (Coming soon)"
+  },
+  "profile.phone.benefit2": {
+    "fa": "۲.در هنگام ورود به سایت پیامکی برای شما ارسال میشود تا از ورود‌های بدون اجازه مطلع شوید.",
+    "en": "2. When signing in to the site, an SMS will be sent to you so you are notified of unauthorized logins."
+  },
+  "profile.phone.benefit3": {
+    "fa": "۳.در صورت فعال‌سازی نوتیفیکشن یک دوره، قسمت‌های جدید آن دوره با پیامک به شما اطلاع داده خواهد شد. (به زودی)",
+    "en": "3. If you enable notifications for a course, new parts of that course will be announced to you via SMS. (Coming soon)"
+  },
+  "profile.phone.benefit4": {
+    "fa": "۴.در صورت اضافه شدن مورد جدید در این لیست اضافه خواهد شد ...",
+    "en": "4. If a new item is added, it will be appended to this list ..."
+  },
+  "profile.phone.changeNumber": {
+    "fa": "تغییر شماره",
+    "en": "Change number"
+  },
+  "profile.phone.changeSuccess": {
+    "fa": "شماره موبایل شما با موفقیت تغییر کرد.",
+    "en": "Your mobile number has been changed successfully."
+  },
+  "profile.phone.clickToVerify": {
+    "fa": "برای تایید کلیک کنید",
+    "en": "Click to verify"
+  },
+  "profile.phone.currentNumber": {
+    "fa": "شماره تماس فعلی",
+    "en": "Current phone number"
+  },
+  "profile.phone.intro": {
+    "fa": "شماره تلفن شما برای کارهای مختلفی در سایت مورد استفاده قرار میگیرد با وارد کردن شماره تلفن خود و فعال کردن آن میتوانید بخشی از فعالیت های خود را در زنبورک سریع تر انجام دهید. در زیر لیست کارهای که با شماره تلفن شما در سایت انجام میشود، را برایتان آورده ایم.",
+    "en": "Your phone number is used for various tasks on the site. By entering your phone number and activating it, you can perform some of your activities on zanburak faster. Below is a list of the tasks performed with your phone number on the site."
+  },
+  "profile.phone.mobile": {
+    "fa": "شماره موبایل",
+    "en": "Mobile number"
+  },
+  "profile.phone.notVerified": {
+    "fa": "شماره موبایل شما تایید نشده.",
+    "en": "Your mobile number is not verified."
+  },
+  "profile.phone.noteLabel": {
+    "fa": "توجه:",
+    "en": "Note:"
+  },
+  "profile.phone.otpResendHint": {
+    "fa": "اگر کدی دریافت نکرده اید روی دکمه ارسال مجدد کلیک کنید.",
+    "en": "If you have not received a code, click the resend button."
+  },
+  "profile.phone.otpResentPost": {
+    "fa": "ارسال شده است، لطفا در باکس زیر وارد کنید.",
+    "en": ", please enter it in the box below."
+  },
+  "profile.phone.otpResentPre": {
+    "fa": "کد تایید قبلا برای شماره",
+    "en": "The verification code was already sent to"
+  },
+  "profile.phone.otpSentPost": {
+    "fa": "ارسال شد، پس از دریافت در باکس زیر وارد کنید",
+    "en": ", after receiving it, enter it in the box below"
+  },
+  "profile.phone.otpSentPre": {
+    "fa": "کد تایید به شماره",
+    "en": "The verification code was sent to"
+  },
+  "profile.phone.resendCode": {
+    "fa": "ارسال مجدد کد",
+    "en": "Resend code"
+  },
+  "profile.phone.secondsToResend": {
+    "fa": "ثانیه تا ارسال مجدد",
+    "en": "seconds until resend"
+  },
+  "profile.phone.submitCode": {
+    "fa": "ثبت کد تایید",
+    "en": "Submit verification code"
+  },
+  "profile.phone.submitNumber": {
+    "fa": "ثبت شماره",
+    "en": "Submit number"
+  },
+  "profile.phone.title": {
+    "fa": "مدیریت شماره موبایل",
+    "en": "Manage mobile number"
+  },
+  "profile.phone.verificationCode": {
+    "fa": "کد تایید",
+    "en": "Verification code"
+  },
+  "profile.phone.verifySuccess": {
+    "fa": "شماره موبایل شما با موفقیت تایید شد.",
+    "en": "Your mobile number has been verified successfully."
+  },
+  "profile.public.aboutMe": {
+    "fa": "درباره من",
+    "en": "About me"
+  },
+  "profile.public.answerWord": {
+    "fa": "پاسخ",
+    "en": "answers"
+  },
+  "profile.public.answersCount": {
+    "fa": "تعداد پاسخ ها",
+    "en": "Number of answers"
+  },
+  "profile.public.birthDate": {
+    "fa": "تاریخ تولد",
+    "en": "Birth date"
+  },
+  "profile.public.discussions": {
+    "fa": "گفتگوها",
+    "en": "Discussions"
+  },
+  "profile.public.details": {
+    "fa": "جزئیات پروفایل",
+    "en": "Profile details"
+  },
+  "profile.public.socials": {
+    "fa": "شبکه‌های اجتماعی",
+    "en": "Social networks"
+  },
+  "profile.public.editProfile": {
+    "fa": "ویرایش پروفایل",
+    "en": "Edit profile"
+  },
+  "profile.public.experienceWord": {
+    "fa": "تجربه",
+    "en": "XP"
+  },
+  "profile.public.followers": {
+    "fa": "دنبال کننده",
+    "en": "Followers"
+  },
+  "profile.public.followings": {
+    "fa": "دنبال شده",
+    "en": "Following"
+  },
+  "profile.public.joinDate": {
+    "fa": "تاریخ عضویت",
+    "en": "Join date"
+  },
+  "profile.public.lastActivity": {
+    "fa": "آخرین فعالیت",
+    "en": "Last activity"
+  },
+  "profile.public.myAnswers": {
+    "fa": "پاسخ‌های من",
+    "en": "My answers"
+  },
+  "profile.public.myArticles": {
+    "fa": "مقالات من",
+    "en": "My articles"
+  },
+  "profile.public.myQuestions": {
+    "fa": "پرسش‌های من",
+    "en": "My questions"
+  },
+  "profile.public.questionWord": {
+    "fa": "پرسش",
+    "en": "questions"
+  },
+  "profile.public.questionsCount": {
+    "fa": "تعداد پرسش ها",
+    "en": "Number of questions"
+  },
+  "profile.public.userExperience": {
+    "fa": "تجربه کاربری",
+    "en": "User experience"
+  },
+  "profile.public.username": {
+    "fa": "نام کاربری",
+    "en": "Username"
+  },
+  "profile.seo.aboutDesc": {
+    "fa": "درباره {name} - پروفایل کاربری در زنبورک",
+    "en": "About {name} - user profile on zanburak"
+  },
+  "profile.seo.aboutTitle": {
+    "fa": "درباره {name}",
+    "en": "About {name}"
+  },
+  "profile.seo.answersDesc": {
+    "fa": "پاسخ‌های {name} در بخش پرسش و پاسخ زنبورک",
+    "en": "{name}'s answers in the zanburak Q&A section"
+  },
+  "profile.seo.answersTitle": {
+    "fa": "پاسخ‌های {name}",
+    "en": "{name}'s answers"
+  },
+  "profile.seo.answersViewDesc": {
+    "fa": "مشاهده پاسخ‌های {name} در بخش گفت‌وگوهای زنبورک",
+    "en": "View {name}'s answers in the zanburak discussions section"
+  },
+  "profile.seo.articlesDesc": {
+    "fa": "مقالات {name} در زنبورک",
+    "en": "{name}'s articles on zanburak"
+  },
+  "profile.seo.articlesTitle": {
+    "fa": "مقالات {name}",
+    "en": "{name}'s articles"
+  },
+  "profile.seo.kwDiscussion": {
+    "fa": "گفت‌وگو",
+    "en": "discussion"
+  },
+  "profile.seo.kwUserAnswers": {
+    "fa": "پاسخ‌های کاربر",
+    "en": "user answers"
+  },
+  "profile.seo.kwUserProfile": {
+    "fa": "پروفایل کاربری",
+    "en": "user profile"
+  },
+  "profile.seo.kwUserQuestions": {
+    "fa": "پرسش‌های کاربر",
+    "en": "user questions"
+  },
+  "profile.seo.kwZanburak": {
+    "fa": "زنبورک",
+    "en": "zanburak"
+  },
+  "profile.seo.kwZanburakUser": {
+    "fa": "کاربر زنبورک",
+    "en": "zanburak user"
+  },
+  "profile.seo.profileDesc": {
+    "fa": "پروفایل کاربری {name} در زنبورک",
+    "en": "{name}'s user profile on zanburak"
+  },
+  "profile.seo.profileTitle": {
+    "fa": "پروفایل {name}",
+    "en": "{name}'s profile"
+  },
+  "profile.seo.questionsDesc": {
+    "fa": "سوالات {name} در بخش پرسش و پاسخ زنبورک",
+    "en": "{name}'s questions in the zanburak Q&A section"
+  },
+  "profile.seo.questionsTitle": {
+    "fa": "سوالات {name}",
+    "en": "{name}'s questions"
+  },
+  "profile.seo.questionsViewDesc": {
+    "fa": "مشاهده پرسش‌های {name} در بخش گفت‌وگوهای زنبورک",
+    "en": "View {name}'s questions in the zanburak discussions section"
+  },
+  "profile.seo.questionsViewTitle": {
+    "fa": "پرسش‌های {name}",
+    "en": "{name}'s questions"
+  },
+  "profile.toast.cannotFollowSelf": {
+    "fa": "شما نمیتوانید خودتان رو دنبال کنید",
+    "en": "You cannot follow yourself"
+  },
+  "profile.toast.followLoginRequired": {
+    "fa": "برای دنبال کردن این کاربر ابتدا وارد سایت شوید",
+    "en": "Please sign in first to follow this user"
+  }
+}

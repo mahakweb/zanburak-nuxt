@@ -1,0 +1,1362 @@
+/* =====================================================================
+   Messenger theme — Telegram Web A look & feel.
+   Shared tokens + frosted-glass pop-up menus. Imported globally so it
+   also styles menus that are teleported to <body>.
+   ===================================================================== */
+
+/*
+ * Digits from a shipped text font file (NOT local() color-emoji faces).
+ * local('Roboto') / unicode-range is ignored on many mobile browsers, so
+ * Apple/Noto Color Emoji still painted 0-9 as blue keycaps. A real woff
+ * + unicode-range is respected and keeps digits monochrome text.
+ */
+@font-face {
+  font-family: 'MsgUiDigits';
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url('../fonts/YekanBakh/Yekan-Bakh-FaNum-04-Regular.woff') format('woff');
+  unicode-range:
+    U+002B, U+002C, U+002D, U+002E, U+002F,
+    U+0030-0039,
+    U+003A, U+0025,
+    U+06F0-06F9;
+}
+@font-face {
+  font-family: 'MsgUiDigits';
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: swap;
+  src: url('../fonts/YekanBakh/Yekan-Bakh-FaNum-06-Bold.woff') format('woff');
+  unicode-range:
+    U+002B, U+002C, U+002D, U+002E, U+002F,
+    U+0030-0039,
+    U+003A, U+0025,
+    U+06F0-06F9;
+}
+
+:root {
+  --tg-blue: #3390ec;
+  --tg-blue-hover: #4ea4f5;
+  --tg-blue-active: #2b82d9;
+  --tg-green: #4dcd5e;
+  --tg-red: #df3f40;
+
+  --tg-text: #1e2023;
+  --tg-text-secondary: #707579;
+  --tg-hint: #a2acb4;
+
+  --tg-bg: #f4f4f5;
+  --tg-bg-panel: #ffffff;
+  --tg-bg-chat: #c8d9e8;
+  --tg-bubble-out: #eeffde;
+  --tg-bubble-out-dark: #3e6b41;
+  --tg-bubble-in: #ffffff;
+  --tg-bubble-in-dark: #1e2c3a;
+
+  /* Telegram-like frosted glass — translucent + strong blur */
+  --tg-menu-bg: rgba(255, 255, 255, 0.62);
+  --tg-menu-border: rgba(255, 255, 255, 0.45);
+  --tg-menu-shadow: 0 10px 36px rgba(15, 23, 42, 0.16), 0 1px 0 rgba(255, 255, 255, 0.55) inset;
+  --tg-menu-hover: rgba(51, 144, 236, 0.12);
+  /* Telegram menuIconFg — readable on frosted glass */
+  --tg-menu-icon: #8e98a3;
+  --tg-menu-icon-well: transparent;
+  --tg-menu-divider: rgba(15, 23, 42, 0.1);
+  --tg-glass-blur: blur(40px) saturate(1.85);
+
+  /* Per-slot fonts (overridden by messenger shell inline style).
+     No color-emoji faces in UI stacks — digits stay plain text. */
+  --msg-font-stack-text: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'MsgUiDigits', sans-serif;
+  --msg-font-ui: var(--msg-font-stack-text);
+  --msg-font-message: var(--msg-font-stack-text);
+  --msg-font-meta: var(--msg-font-stack-text);
+  --msg-font-menu: var(--msg-font-stack-text);
+  --msg-font-settings: var(--msg-font-stack-text);
+  --msg-font-profile: var(--msg-font-stack-text);
+  --msg-font-composer: var(--msg-font-stack-text);
+  --msg-font-sidebar: var(--msg-font-stack-text);
+  --msg-font-search: var(--msg-font-stack-text);
+  --msg-font-header: var(--msg-font-stack-text);
+  --msg-font-date: var(--msg-font-stack-text);
+
+  /* Motion tokens — Telegram Web A timings */
+  --tg-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --tg-ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+  --tg-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --tg-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --tg-dur-instant: 100ms;
+  --tg-dur-fast: 140ms;
+  --tg-dur-normal: 200ms;
+  --tg-dur-med: 240ms;
+  --tg-dur-slow: 280ms;
+  --tg-dur-sheet: 320ms;
+
+  /* Spacing / radius / elevation tokens */
+  --tg-space-1: 4px;
+  --tg-space-2: 8px;
+  --tg-space-3: 12px;
+  --tg-space-4: 16px;
+  --tg-space-5: 20px;
+  --tg-space-6: 24px;
+  --tg-radius-sm: 6px;
+  --tg-radius-md: 10px;
+  --tg-radius-lg: 12px;
+  --tg-radius-xl: 16px;
+  --tg-radius-2xl: 20px;
+  --tg-icon-sm: 16px;
+  --tg-icon-md: 20px;
+  --tg-icon-lg: 24px;
+  --tg-shadow-dialog: 0 12px 40px rgba(15, 23, 42, 0.18), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  --tg-confirm-bg: rgba(255, 255, 255, 0.66);
+  --tg-confirm-surface: rgba(244, 244, 245, 0.55);
+  --tg-confirm-check-border: rgba(112, 117, 121, 0.55);
+  --tg-sheet-bg: rgba(255, 255, 255, 0.58);
+  --tg-sheet-border: rgba(255, 255, 255, 0.42);
+}
+
+:root[dir="rtl"],
+[dir="rtl"] {
+  --msg-font-ui: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-message: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-meta: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-menu: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-settings: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-profile: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-composer: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-sidebar: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-search: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-header: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --msg-font-date: 'YekanBakh', 'MsgUiDigits', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.dark {
+  --tg-text: #ffffff;
+  --tg-text-secondary: #aaaaaa;
+  --tg-hint: #7d8b99;
+
+  --tg-bg: #0e1621;
+  --tg-bg-panel: #17212b;
+  --tg-bg-chat: #0e1621;
+  --tg-bubble-out: #3e6b41;
+  --tg-bubble-in: #1e2c3a;
+
+  --tg-menu-bg: rgba(28, 36, 47, 0.58);
+  --tg-menu-border: rgba(255, 255, 255, 0.12);
+  --tg-menu-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  --tg-menu-hover: rgba(51, 144, 236, 0.18);
+  /* Telegram menuIconFg (~#a8a8a8) on dark glass */
+  --tg-menu-icon: #a8b0b8;
+  --tg-menu-icon-well: transparent;
+  --tg-menu-divider: rgba(255, 255, 255, 0.1);
+
+  --tg-shadow-dialog: 0 16px 48px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  --tg-confirm-bg: rgba(28, 36, 47, 0.62);
+  --tg-confirm-surface: rgba(36, 47, 61, 0.5);
+  --tg-confirm-check-border: rgba(170, 170, 170, 0.55);
+  --tg-sheet-bg: rgba(28, 36, 47, 0.56);
+  --tg-sheet-border: rgba(255, 255, 255, 0.1);
+  --tg-glass-blur: blur(44px) saturate(1.9);
+}
+
+/* Without backdrop-filter, keep panels readable (near-opaque fallback). */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  :root {
+    --tg-menu-bg: rgba(255, 255, 255, 0.97);
+    --tg-confirm-bg: rgba(255, 255, 255, 0.98);
+    --tg-sheet-bg: rgba(255, 255, 255, 0.97);
+  }
+  .dark {
+    --tg-menu-bg: rgba(28, 36, 47, 0.97);
+    --tg-confirm-bg: rgba(28, 36, 47, 0.97);
+    --tg-sheet-bg: rgba(28, 36, 47, 0.97);
+  }
+}
+
+/* ---------- Frosted-glass pop-up menu ---------- */
+.tg-menu {
+  /* Hug content — avoid fixed wide rails like w-56 */
+  width: max-content;
+  min-width: 0;
+  max-width: min(280px, calc(100vw - 1.5rem));
+  padding: 5px;
+  border-radius: 14px;
+  background: var(--tg-menu-bg);
+  -webkit-backdrop-filter: var(--tg-glass-blur, blur(40px) saturate(1.85));
+  backdrop-filter: var(--tg-glass-blur, blur(40px) saturate(1.85));
+  box-shadow: var(--tg-menu-shadow);
+  border: 1px solid var(--tg-menu-border);
+  color: var(--tg-text);
+  user-select: none;
+  box-sizing: border-box;
+  font-family: var(--msg-font-menu);
+  font-size: 13.5px;
+}
+
+/* Message / composer context menu — compact rows */
+.tg-menu--context {
+  width: max-content;
+  min-width: 0;
+  max-width: min(300px, calc(100vw - 1.5rem));
+  padding: 4px;
+  border-radius: 14px;
+  animation: tg-menu-pop var(--tg-dur-fast) var(--tg-ease-out) both;
+}
+
+@media (min-width: 640px) and (pointer: fine) {
+  .tg-menu {
+    max-width: min(280px, calc(100vw - 24px));
+  }
+  .tg-menu--context {
+    max-width: min(300px, calc(100vw - 24px));
+  }
+}
+
+@keyframes tg-menu-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.tg-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 11px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--tg-text);
+  text-align: start;
+  white-space: nowrap;
+  transition: background-color var(--tg-dur-fast, 140ms) ease, transform var(--tg-dur-instant, 100ms) ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tg-menu--context .tg-menu-item {
+  min-height: 34px;
+  gap: 10px;
+  padding: 5px 10px;
+  font-size: 13.5px;
+  border-radius: 9px;
+}
+
+.tg-menu-item:hover,
+.tg-menu-item.is-active {
+  background: var(--tg-menu-hover);
+}
+
+.tg-menu-item:active {
+  transform: scale(0.985);
+}
+
+.tg-menu-item.is-danger {
+  color: var(--tg-red);
+}
+
+.tg-menu-item.is-danger:hover,
+.tg-menu-item.is-danger.is-active {
+  background: rgba(223, 63, 64, 0.1);
+}
+
+.tg-menu-item.is-disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Telegram glass menus: bare glyphs (no icon wells), menuIconFg color */
+.tg-menu-item-glyph {
+  width: 22px;
+  height: 22px;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  pointer-events: none;
+  color: var(--tg-menu-icon);
+}
+
+.tg-menu--context .tg-menu-item-glyph {
+  width: 20px;
+  height: 20px;
+}
+
+.tg-menu--context .tg-menu-item-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.tg-menu-item.is-danger .tg-menu-item-glyph {
+  background: transparent;
+  color: var(--tg-red);
+}
+
+.tg-menu-item-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--tg-menu-icon);
+  pointer-events: none;
+}
+
+.tg-menu-item.is-danger .tg-menu-item-icon {
+  color: var(--tg-red);
+}
+
+.tg-menu-item:hover .tg-menu-item-icon,
+.tg-menu-item.is-active .tg-menu-item-icon,
+.tg-menu-item:hover .tg-menu-item-glyph,
+.tg-menu-item.is-active .tg-menu-item-glyph {
+  color: var(--tg-menu-icon);
+  opacity: 0.95;
+}
+
+.tg-menu-item.is-danger:hover .tg-menu-item-icon,
+.tg-menu-item.is-danger.is-active .tg-menu-item-icon,
+.tg-menu-item.is-danger:hover .tg-menu-item-glyph,
+.tg-menu-item.is-danger.is-active .tg-menu-item-glyph {
+  color: var(--tg-red);
+}
+
+.tg-menu-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.tg-menu-item-trailing {
+  flex-shrink: 0;
+  color: var(--tg-text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tg-menu-item-chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--tg-text-secondary);
+  opacity: 0.75;
+}
+
+.tg-menu-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--tg-menu-divider);
+}
+
+.tg-menu--context .tg-menu-divider {
+  margin: 3px 8px;
+}
+
+.tg-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 4px;
+  margin-bottom: 0;
+}
+
+.tg-menu-header-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(51, 144, 236, 0.12);
+  color: var(--tg-blue);
+}
+
+.tg-menu-header-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.tg-menu-header-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--tg-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Account header row inside the hamburger menu */
+.tg-menu-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: start;
+  transition: background-color 0.12s ease;
+  cursor: pointer;
+}
+
+.tg-menu-account:hover {
+  background: var(--tg-menu-hover);
+}
+
+.tg-menu-account-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tg-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-menu-account-status {
+  font-size: 11px;
+  color: var(--tg-blue);
+  margin-top: 1px;
+}
+
+/* Pop-up open animation (scale from the anchor corner) */
+.tg-pop-enter-active {
+  transition: opacity var(--tg-dur-fast) ease, transform var(--tg-dur-fast) var(--tg-ease-out);
+}
+.tg-pop-leave-active {
+  transition: opacity var(--tg-dur-instant) ease, transform var(--tg-dur-instant) ease;
+}
+.tg-pop-enter-from,
+.tg-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* "Animations" toggle (hamburger → More): disable motion when turned off */
+html.messenger-no-anim *,
+html.messenger-no-anim *::before,
+html.messenger-no-anim *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.001ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .messenger-shell *,
+  .messenger-shell *::before,
+  .messenger-shell *::after,
+  .tg-menu,
+  .tg-menu * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Shared scroll / paint performance ---------- */
+.tg-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-y;
+}
+.tg-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Message rows: isolate layout to cut style recalc during swipe/select */
+.messenger-shell .msg-row {
+  contain: layout style;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.messenger-shell .conv-row {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Empty / soft-error chips — consistent Telegram pills */
+.tg-empty-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: min(92%, 22rem);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #707579;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: tg-empty-in var(--tg-dur-med) var(--tg-ease-out) both;
+}
+.dark .tg-empty-chip {
+  color: #a2acb4;
+  background: rgba(30, 44, 58, 0.72);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+}
+.tg-empty-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.25rem;
+  gap: 6px;
+  animation: tg-empty-in var(--tg-dur-med) var(--tg-ease-out) both;
+}
+.tg-empty-block__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tg-text);
+}
+.tg-empty-block__hint {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--tg-text-secondary);
+  max-width: 16rem;
+}
+.tg-error-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tg-red);
+  background: rgba(223, 63, 64, 0.1);
+  animation: tg-empty-in var(--tg-dur-fast) var(--tg-ease-out) both;
+}
+@keyframes tg-empty-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Chat open: soft rise of the message column */
+.chat-open-enter {
+  animation: tg-chat-open var(--tg-dur-med) var(--tg-ease-out) both;
+}
+@keyframes tg-chat-open {
+  from {
+    opacity: 0.55;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Forwarded message header (Telegram Web A) ---------- */
+.msg-fwd {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1px;
+  margin: 0 0 4px;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--tg-blue, #3390ec);
+  line-height: 1.25;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.dark .msg-fwd {
+  color: #6ab2f2;
+}
+/* Outgoing bubbles: slightly softer green service tint (Telegram Desktop/Web). */
+.msg-bubble-mine .msg-fwd,
+.album-bubble.is-mine-fwd .msg-fwd {
+  color: #4fae4e;
+}
+.dark .msg-bubble-mine .msg-fwd,
+.dark .album-bubble.is-mine-fwd .msg-fwd {
+  color: #7ad07a;
+}
+.msg-fwd--padded {
+  padding: 6px 8px 2px;
+  margin-bottom: 2px;
+}
+.msg-fwd-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.msg-fwd-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  opacity: 0.92;
+  /* Default LTR: arrow points right (Telegram forward). */
+  transform: scaleX(1);
+}
+/* Forward arrow flips with document direction. */
+html[dir="rtl"] .msg-fwd-icon,
+[dir="rtl"] .msg-fwd-icon {
+  transform: scaleX(-1);
+}
+.msg-fwd-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  opacity: 0.92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.msg-fwd-name {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: start;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: inherit;
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
+.msg-fwd.is-tappable .msg-fwd-name {
+  cursor: pointer;
+}
+.msg-fwd.is-tappable:hover .msg-fwd-name,
+.msg-fwd.is-tappable:focus-within .msg-fwd-name {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.msg-fwd + .reply-quote,
+.msg-fwd + [data-reply-preview] {
+  margin-top: 2px;
+}
+
+/* Pressable surfaces — shared active scale without layout thrash */
+.tg-press {
+  transition: transform var(--tg-dur-instant) var(--tg-ease-out),
+    background-color var(--tg-dur-fast) ease,
+    opacity var(--tg-dur-fast) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.tg-press:active {
+  transform: scale(0.96);
+}
+
+/* ---------- Form fields (sheets / panels) ----------
+   Explicit text color is required: native inputs keep light
+   color-scheme (black text) unless we override. */
+.tg-field-inset,
+.tg-select {
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  background: #f4f4f5;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #111827;
+  outline: none;
+  color-scheme: light;
+  caret-color: var(--tg-blue);
+  transition: box-shadow 0.12s ease;
+}
+
+.tg-field-inset::placeholder,
+.tg-select::placeholder {
+  color: #a2acb4;
+  opacity: 1;
+}
+
+.dark .tg-field-inset,
+.dark .tg-select {
+  background: #0e1621;
+  color: #f3f4f6;
+  color-scheme: dark;
+}
+
+.tg-field-inset:focus,
+.tg-select:focus {
+  box-shadow: 0 0 0 2px rgba(51, 144, 236, 0.35);
+}
+
+/* Compound field (e.g. @username) */
+.tg-field-wrap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: 14px;
+  background: #f4f4f5;
+  overflow: hidden;
+  color: #111827;
+  color-scheme: light;
+  transition: box-shadow 0.12s ease;
+}
+
+.dark .tg-field-wrap {
+  background: #0e1621;
+  color: #f3f4f6;
+  color-scheme: dark;
+}
+
+.tg-field-wrap:focus-within {
+  box-shadow: 0 0 0 2px rgba(51, 144, 236, 0.35);
+}
+
+.tg-field-wrap > input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 10px 12px 10px 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: inherit;
+  outline: none;
+  caret-color: var(--tg-blue);
+}
+
+.tg-field-wrap > input::placeholder {
+  color: #a2acb4;
+  opacity: 1;
+}
+
+/* ---------- Sticky form action footer ---------- */
+.tg-form-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: #f4f4f5;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -6px 16px rgba(15, 23, 42, 0.04);
+}
+
+.dark .tg-form-footer {
+  background: #0e1621;
+  border-top-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.tg-form-footer--inset {
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.dark .tg-form-footer--inset {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: #17212b;
+}
+
+.tg-form-btn {
+  flex: 1;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: background-color 0.12s ease, opacity 0.12s ease, transform 0.1s ease;
+}
+
+.tg-form-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tg-form-btn:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.tg-form-btn--muted {
+  color: #707579;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.dark .tg-form-btn--muted {
+  color: #a2acb4;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tg-form-btn--muted:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.dark .tg-form-btn--muted:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tg-form-btn--primary {
+  color: #fff;
+  background: #3390ec;
+  box-shadow: 0 1px 3px rgba(51, 144, 236, 0.25);
+}
+
+.tg-form-btn--primary:hover:not(:disabled) {
+  background: #4ea4f5;
+}
+
+.tg-form-btn--grow {
+  flex: 1.25;
+}
+
+.tg-form-btn--full {
+  flex: 1 1 100%;
+}
+
+
+/* ---------- Per-slot typography ---------- */
+.messenger-shell,
+.tg-confirm-root,
+.tg-menu {
+  font-variant-emoji: text;
+  font-variant-numeric: normal;
+  font-feature-settings: normal;
+}
+
+/* tabular-nums can force a fallback face that lacks FaNum glyphs and
+   lands on color-emoji digits on mobile — keep lining/proportional. */
+.messenger-shell .tabular-nums,
+.tg-confirm-root .tabular-nums,
+.tg-menu .tabular-nums {
+  font-variant-numeric: normal;
+  font-feature-settings: normal;
+  font-variant-emoji: text;
+}
+
+.messenger-emoji-picker,
+.stk-hold-root,
+.messenger-shell .msg-body-text--big-emoji,
+.messenger-shell .conv-preview-emoji,
+.messenger-shell .composer-sticker-suggest__emoji {
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+  font-variant-emoji: emoji;
+}
+
+.messenger-shell .msg-body-text:not(.msg-body-text--big-emoji),
+.messenger-shell .msg-media-caption,
+.messenger-shell .reply-quote,
+.messenger-shell .msg-fwd,
+.messenger-shell .conv-preview-text,
+.messenger-shell [data-msg-font="message"] {
+  font-family: var(--msg-font-message);
+  /* normal: real emoji still fall back to the OS emoji face; digits stay in the
+     user font. `emoji` makes Chromium paint ASCII 0-9 as keycaps. */
+  font-variant-emoji: normal;
+}
+.messenger-shell .msg-meta,
+.messenger-shell .msg-meta-text,
+.messenger-shell .msg-meta-icon,
+.messenger-shell [data-msg-font="meta"] {
+  font-family: var(--msg-font-meta);
+}
+
+/* Keep digits in the chosen UI font (never color-emoji / tabular fallback). */
+.messenger-shell .msg-meta-text,
+.messenger-shell .media-size-badge,
+.messenger-shell .media-duration-badge,
+.messenger-shell .doc-name,
+.messenger-shell .doc-basename,
+.messenger-shell .doc-sub,
+.messenger-shell .tabular-nums,
+.messenger-shell .msg-plain-nums,
+.messenger-shell .tg-info-value,
+.messenger-shell [data-msg-font="date"] {
+  font-variant-numeric: normal;
+  font-feature-settings: normal;
+  font-variant-emoji: text;
+  unicode-bidi: isolate;
+}
+.messenger-shell .msg-plain-nums,
+.messenger-shell .tg-info-value[dir="ltr"] {
+  font-family: 'MsgUiDigits', 'YekanBakh', Tahoma, Arial, sans-serif !important;
+  font-variant-emoji: text !important;
+}
+.messenger-shell .msg-meta-text,
+.messenger-shell .media-size-badge,
+.messenger-shell .media-duration-badge {
+  font-family: var(--msg-font-meta);
+}
+.messenger-shell .doc-name,
+.messenger-shell .doc-basename,
+.messenger-shell .doc-sub {
+  font-family: var(--msg-font-message);
+}
+.messenger-shell .composer-input,
+.messenger-shell [data-msg-font="composer"] {
+  font-family: var(--msg-font-composer);
+  font-variant-emoji: normal;
+}
+.messenger-shell .profile-panel,
+.messenger-shell .group-info-panel,
+.messenger-shell [data-msg-font="profile"] {
+  font-family: var(--msg-font-profile);
+}
+.messenger-shell .messenger-settings-panel,
+.messenger-shell .messenger-settings-panel .menu-settings-row,
+.messenger-shell .messenger-settings-panel .menu-row,
+.messenger-shell [data-msg-font="settings"] {
+  font-family: var(--msg-font-settings);
+}
+.messenger-shell [data-msg-font="sidebar"] {
+  font-family: var(--msg-font-sidebar);
+}
+.messenger-shell .messenger-search-input,
+.messenger-shell [data-msg-font="search"] {
+  font-family: var(--msg-font-search);
+}
+.messenger-shell [data-msg-font="header"] {
+  font-family: var(--msg-font-header);
+}
+.messenger-shell [data-msg-font="date"] {
+  font-family: var(--msg-font-date);
+}
+/* Context menus (Cut/Copy/Paste, message actions) */
+.tg-menu,
+.tg-menu--context,
+.messenger-shell [data-msg-font="menu"] {
+  font-family: var(--msg-font-menu);
+}
+
+/* Shared message-row cluster spacing (used by MessageBubble + MediaAlbumBubble). */
+.messenger-shell .msg-row--tight {
+  margin-top: 3px;
+}
+.messenger-shell .msg-row--loose {
+  margin-top: 0.5rem;
+}
+
+/* =====================================================================
+   Confirmation dialogs — Telegram Web A fidelity
+   ===================================================================== */
+.tg-confirm-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2000000500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tg-space-6);
+  pointer-events: auto;
+}
+.tg-confirm-root--sheet {
+  align-items: center;
+  padding: var(--tg-space-6);
+}
+.tg-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.tg-confirm-root--armoring .tg-confirm-backdrop {
+  pointer-events: none;
+}
+.dark .tg-confirm-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+.tg-confirm-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 22.5rem);
+  border-radius: var(--tg-radius-xl);
+  background: var(--tg-confirm-bg);
+  box-shadow: var(--tg-shadow-dialog);
+  border: 1px solid var(--tg-menu-border);
+  -webkit-backdrop-filter: var(--tg-glass-blur, blur(40px) saturate(1.85));
+  backdrop-filter: var(--tg-glass-blur, blur(40px) saturate(1.85));
+  outline: none;
+  animation: tg-confirm-pop var(--tg-dur-med) var(--tg-ease-out) both;
+  font-family: var(--msg-font-ui);
+}
+.tg-confirm-root--sheet .tg-confirm-panel {
+  width: min(100%, 22.5rem);
+  max-width: 22.5rem;
+  border-radius: var(--tg-radius-xl);
+  animation: tg-confirm-pop var(--tg-dur-med) var(--tg-ease-out) both;
+  padding-bottom: 0;
+}
+@keyframes tg-confirm-pop {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes tg-confirm-sheet-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tg-confirm-fade-enter-active,
+.tg-confirm-fade-leave-active {
+  transition: opacity var(--tg-dur-fast) ease;
+}
+.tg-confirm-fade-enter-active .tg-confirm-panel,
+.tg-confirm-fade-leave-active .tg-confirm-panel {
+  transition: opacity var(--tg-dur-fast) ease, transform var(--tg-dur-med) var(--tg-ease-out);
+}
+.tg-confirm-fade-enter-from,
+.tg-confirm-fade-leave-to {
+  opacity: 0;
+}
+.tg-confirm-fade-enter-from .tg-confirm-panel,
+.tg-confirm-fade-leave-to .tg-confirm-panel {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.tg-confirm-root--sheet.tg-confirm-fade-enter-from .tg-confirm-panel,
+.tg-confirm-root--sheet.tg-confirm-fade-leave-to .tg-confirm-panel {
+  transform: scale(0.96);
+}
+
+.tg-confirm {
+  padding: var(--tg-space-6) var(--tg-space-6) var(--tg-space-4);
+  text-align: start;
+}
+.tg-confirm__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 550;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--tg-text);
+}
+.tg-confirm__hint {
+  margin: 0.3rem 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--tg-text-secondary);
+}
+.tg-confirm__check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: var(--tg-space-5);
+  padding: 2px 0;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tg-confirm__box {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1.5px solid var(--tg-confirm-check-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    background-color var(--tg-dur-fast) ease,
+    border-color var(--tg-dur-fast) ease,
+    transform var(--tg-dur-instant) ease;
+}
+.tg-confirm__box.on {
+  background: var(--tg-blue);
+  border-color: var(--tg-blue);
+  color: #fff;
+}
+.tg-confirm__tick {
+  width: 12px;
+  height: 12px;
+}
+.tg-confirm__check-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--tg-text);
+}
+
+/* Desktop text actions (Cancel / Pin / Delete) — Telegram Web: side-by-side, end-aligned */
+.tg-confirm__actions.tg-confirm__actions--text {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--tg-space-6);
+  margin-inline-end: -8px;
+  margin-bottom: -4px;
+}
+.tg-confirm__actions--wrap {
+  flex-wrap: wrap;
+}
+
+/* Shared messenger bottom sheets (attach, etc.) — Telegram glass surface */
+.messenger-sheet-panel {
+  background: var(--tg-sheet-bg, rgba(255, 255, 255, 0.58)) !important;
+  border-top: 1px solid var(--tg-sheet-border, rgba(255, 255, 255, 0.42));
+  border-radius: 1.15rem 1.15rem 0 0;
+  box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.18), 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  -webkit-backdrop-filter: var(--tg-glass-blur, blur(40px) saturate(1.85));
+  backdrop-filter: var(--tg-glass-blur, blur(40px) saturate(1.85));
+  /* Override BottomSheetDrawer sm:p-1 inset which breaks the glass edge */
+  padding: 0 !important;
+  font-size: 13px;
+  color: var(--tg-text);
+}
+.dark .messenger-sheet-panel {
+  background: var(--tg-sheet-bg, rgba(28, 36, 47, 0.56)) !important;
+  border-top-color: var(--tg-sheet-border, rgba(255, 255, 255, 0.1));
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+/* Slightly tighter type inside sheets (overrides common Tailwind sizes) */
+.messenger-sheet-panel .text-base,
+.messenger-sheet-panel h2,
+.messenger-sheet-panel h3 {
+  font-size: 14px !important;
+  line-height: 1.3;
+}
+.messenger-sheet-panel .text-sm {
+  font-size: 12.5px !important;
+}
+.messenger-sheet-panel .text-\[15px\],
+.messenger-sheet-panel .text-\[14px\] {
+  font-size: 13px !important;
+}
+.messenger-sheet-panel .text-\[13px\] {
+  font-size: 12px !important;
+}
+@media (min-width: 768px) {
+  .messenger-sheet-panel {
+    /* left+right+auto margins centers even when drawer also sets w-full */
+    border-radius: 1.15rem !important;
+    width: min(26rem, calc(100% - 1.5rem)) !important;
+    max-width: calc(100% - 1.5rem) !important;
+    margin-inline: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0.75rem !important;
+  }
+}
+.messenger-sheet-backdrop {
+  background: rgba(0, 0, 0, 0.28) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+}
+.dark .messenger-sheet-backdrop {
+  background: rgba(0, 0, 0, 0.42) !important;
+}
+.tg-confirm__text-btn {
+  min-width: 58px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--tg-radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--tg-blue);
+  background: transparent;
+  transition: background-color var(--tg-dur-fast) ease, color var(--tg-dur-fast) ease;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+.tg-confirm__text-btn:hover {
+  background: rgba(51, 144, 236, 0.1);
+}
+.tg-confirm__text-btn:active {
+  background: rgba(51, 144, 236, 0.16);
+}
+.tg-confirm__text-btn.is-danger {
+  color: var(--tg-red);
+}
+.tg-confirm__text-btn.is-danger:hover {
+  background: rgba(223, 63, 64, 0.1);
+}
+.tg-confirm__text-btn.is-danger:active {
+  background: rgba(223, 63, 64, 0.16);
+}
+
+/* Mobile / stacked filled actions */
+.tg-confirm__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: var(--tg-space-5);
+}
+.tg-confirm__actions--row {
+  flex-direction: row;
+  gap: 10px;
+}
+.tg-confirm__btn {
+  width: 100%;
+  height: 44px;
+  border-radius: var(--tg-radius-lg);
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color var(--tg-dur-fast) ease, transform var(--tg-dur-instant) ease;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+.tg-confirm__actions--row .tg-confirm__btn {
+  width: auto;
+  flex: 1;
+}
+.tg-confirm__btn:active {
+  transform: scale(0.985);
+}
+.tg-confirm__btn--primary {
+  color: #fff;
+  background: var(--tg-blue);
+}
+.tg-confirm__btn--primary:hover {
+  background: var(--tg-blue-hover);
+}
+.tg-confirm__btn--danger {
+  color: var(--tg-red);
+  background: rgba(223, 63, 64, 0.1);
+}
+.tg-confirm__btn--danger:hover {
+  background: rgba(223, 63, 64, 0.16);
+}
+.tg-confirm__btn--danger-fill {
+  color: #fff;
+  background: var(--tg-red);
+}
+.tg-confirm__btn--danger-fill:hover {
+  background: #e85152;
+}
+.tg-confirm__btn--soft {
+  color: var(--tg-text);
+  background: rgba(120, 120, 128, 0.12);
+}
+.dark .tg-confirm__btn--soft {
+  background: rgba(255, 255, 255, 0.08);
+}
+.tg-confirm__btn--muted {
+  color: var(--tg-text);
+  background: rgba(120, 120, 128, 0.12);
+  font-weight: 560;
+}
+.dark .tg-confirm__btn--muted {
+  background: rgba(255, 255, 255, 0.08);
+}
+.tg-confirm__btn--ghost {
+  color: var(--tg-text-secondary);
+  background: transparent;
+  font-weight: 500;
+  height: 40px;
+  font-size: 14px;
+}
+.tg-confirm__btn--ghost:hover {
+  background: rgba(120, 120, 128, 0.08);
+}
+.dark .tg-confirm__btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Pinned messages in-chat view */
+.tg-pinned-view {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--tg-bg-chat);
+}
+.tg-pinned-view__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 12px;
+  flex-shrink: 0;
+  background: var(--tg-bg);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.dark .tg-pinned-view__header {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+.tg-pinned-view__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tg-text);
+}
+.tg-pinned-view__footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0));
+  background: transparent;
+}
+.tg-pinned-view__unpin-all {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tg-blue);
+  padding: 10px 16px;
+  border-radius: var(--tg-radius-md);
+  transition: background-color var(--tg-dur-fast) ease;
+  cursor: pointer;
+}
+.tg-pinned-view__unpin-all:hover {
+  background: rgba(51, 144, 236, 0.1);
+}
+.tg-pinned-view__unpin-all:active {
+  background: rgba(51, 144, 236, 0.16);
+}
+
+/* Panel slide (profile ↔ emoji sidebar) */
+.tg-panel-slide-enter-active,
+.tg-panel-slide-leave-active {
+  transition: transform var(--tg-dur-sheet) var(--tg-ease-emphasized), opacity var(--tg-dur-med) ease;
+}
+.tg-panel-slide-enter-from {
+  transform: translateX(12%);
+  opacity: 0;
+}
+.tg-panel-slide-leave-to {
+  transform: translateX(-8%);
+  opacity: 0;
+}
+[dir='rtl'] .tg-panel-slide-enter-from {
+  transform: translateX(-12%);
+}
+[dir='rtl'] .tg-panel-slide-leave-to {
+  transform: translateX(8%);
+}

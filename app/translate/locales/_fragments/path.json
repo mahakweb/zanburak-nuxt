@@ -1,0 +1,232 @@
+{
+	"path.common.learn": {
+		"fa": "آموزش {title}",
+		"en": "{title} tutorial"
+	},
+	"path.common.roadmap_of": {
+		"fa": "نقشه راه {title}",
+		"en": "{title} roadmap"
+	},
+	"path.common.path_alt": {
+		"fa": "مسیر {title}",
+		"en": "{title} path"
+	},
+	"path.common.path_guide": {
+		"fa": "راهنمای انتخاب مسیر",
+		"en": "Path selection guide"
+	},
+	"path.common.includes_courses": {
+		"fa": "شامل {count} دوره",
+		"en": "Includes {count} courses"
+	},
+	"path.common.roadmap": {
+		"fa": "نقشه راه",
+		"en": "Roadmap"
+	},
+	"path.common.learning_path": {
+		"fa": "مسیر یادگیری",
+		"en": "Learning path"
+	},
+	"path.common.programming_education": {
+		"fa": "آموزش برنامه‌نویسی",
+		"en": "Programming education"
+	},
+	"path.common.educational_paths": {
+		"fa": "مسیرهای آموزشی",
+		"en": "Educational paths"
+	},
+
+	"path.list.hero_title": {
+		"fa": "کارت تو چه حوزه‌ای گیره و میخوای توش متخصص بشی؟",
+		"en": "Which field are you stuck in and want to become an expert in?"
+	},
+	"path.list.hero_description": {
+		"fa": "داشتن یک نقشه راه و مسیر یادگیری برنامه‌ نویسی می‌تواند کمک کند تا شما بتوانید راحت‌تر در حوزه برنامه‌ نویسی مورد نظر خود وارد شوید. زنبورک این نقشه راه را در اخیتار شما قرار میدهد",
+		"en": "Having a roadmap and a programming learning path can help you enter your desired programming field more easily. zanburak provides this roadmap for you."
+	},
+	"path.list.start_journey": {
+		"fa": "شروع مسیر یادگیری",
+		"en": "Start the learning path"
+	},
+	"path.list.faq_title": {
+		"fa": "پاسخ به سه سوال برای آغاز یادگیری",
+		"en": "Answers to three questions to start learning"
+	},
+	"path.list.faq_subtitle": {
+		"fa": "با پاسخ دادن به این سه سوال اساسی، می‌توانید از صحت نقشه راه خود مطمئن شوید، تمام مراحل یادگیری را بررسی کنید و مسیر خود را همیشه به‌روز نگه دارید.",
+		"en": "By answering these three essential questions, you can make sure your roadmap is correct, review all the learning steps, and always keep your path up to date."
+	},
+	"path.list.q1": {
+		"fa": "آیا نقشه‌ راه زنبورک کامل است ؟",
+		"en": "Is the zanburak roadmap complete?"
+	},
+	"path.list.a1": {
+		"fa": "تا آنجایی که امکانش وجود داشت ما در زنبورک سعی کرده‌ایم نقشه‌ راه کامل و مشخصی برای شروع و تکمیل یک مهارت برنامه‌نویسی را برایتان مشخص کنیم از این رو می‌توانید مطمئن باشید با طی کردن هر کدام از مسیر‌های یادگیری، می‌توانید مهارت مورد نظر خود را فرا بگیرید.",
+		"en": "As much as possible, at zanburak we have tried to define a complete and clear roadmap for starting and completing a programming skill, so you can be sure that by going through each of the learning paths you can master the skill you want."
+	},
+	"path.list.q2": {
+		"fa": "تمام قدم‌های مسیر یادگیری را مشاهده کنیم؟ !",
+		"en": "Should we go through all the steps of the learning path?"
+	},
+	"path.list.a2": {
+		"fa": "اگر قصد دارید یک مهارت برنامه‌نویسی را به درستی فرا بگیرید و از آن برای پیاده سازی پروژه‌های خود استفاده کنید، بله باید تمام قدم‌های که در نقشه راه یک مهارت آورده شده را قدم به قدم طی کنید و تمرین‌های موجود در هر قدم را انجام دهید. تا سرا انجام بتوانید آن مهارت را فرا بگیرید.",
+		"en": "If you intend to properly learn a programming skill and use it to implement your own projects, then yes, you must go through all the steps in a skill's roadmap step by step and do the exercises in each step, so that you can ultimately master that skill."
+	},
+	"path.list.q3": {
+		"fa": "آیا قدم‌های نقشه راه به روز می‌شوند؟",
+		"en": "Are the roadmap steps kept up to date?"
+	},
+	"path.list.a3": {
+		"fa": "جواب این سوال بله است، ما در زنبورک سعی داریم همیشه مطالب به روز و کاربردی را در اختیار کاربرانمان قرار دهیم از این رو می‌توانید از به روز بودن محتوا و کاربردی بودن آن‌ها اطمینان حاصل کنید.",
+		"en": "The answer to this question is yes. At zanburak we always try to provide up-to-date and practical content to our users, so you can be confident that the content is up to date and useful."
+	},
+	"path.list.seo.title": {
+		"fa": "مسیر آموزشی و نقشه راه برنامه نویسی",
+		"en": "Programming learning path and roadmap"
+	},
+	"path.list.seo.description": {
+		"fa": "نقشه راه کامل یادگیری برنامه‌نویسی - مسیرهای آموزشی تخصصی برای تبدیل شدن به یک برنامه‌نویس حرفه‌ای",
+		"en": "A complete roadmap for learning programming - specialized learning paths to become a professional programmer"
+	},
+	"path.list.seo.keywords": {
+		"fa": "نقشه راه برنامه‌نویسی|مسیر یادگیری|آموزش برنامه‌نویسی|roadmap|نقشه راه Laravel|نقشه راه Vue|نقشه راه React|نقشه راه Frontend|نقشه راه Backend|مسیر یادگیری برنامه‌نویسی|راهنمای یادگیری برنامه‌نویسی",
+		"en": "programming roadmap|learning path|programming education|roadmap|Laravel roadmap|Vue roadmap|React roadmap|Frontend roadmap|Backend roadmap|programming learning path|programming learning guide"
+	},
+
+	"path.show.roadmap_label": {
+		"fa": "نقشه راه:",
+		"en": "Roadmap:"
+	},
+	"path.show.prerequisites_steps_label": {
+		"fa": "قدم‌های پیش‌نیاز:",
+		"en": "Prerequisite steps:"
+	},
+	"path.show.main_steps_label": {
+		"fa": "قدم‌های اصلی:",
+		"en": "Main steps:"
+	},
+	"path.show.next_steps_label": {
+		"fa": "قدم‌های بعدی:",
+		"en": "Next steps:"
+	},
+	"path.show.what_is_learning_path": {
+		"fa": "مسیر یادگیری چیه؟",
+		"en": "What is a learning path?"
+	},
+	"path.show.learning_path_desc": {
+		"fa": "بخش «مسیر یادگیری» در تلاش است تا از پیچیدگی فرایند آموزشی کاسته و مسیر روشنی را برای طی کردن دوره‌های آموزشی در اختیار شما قرار دهد. هر کدام از مسیرهای یادگیری، از نقطه صفر شروع شده و شما را تا پیشرفته شدن همراهی می‌کند. پیش رفتن با هر قدم از این مسیر می‌تواند دید بسیار خوبی به شما از فرایند آموزشی و میزان پیشرفت خودتان را ارائه دهد.",
+		"en": "The “Learning path” section tries to reduce the complexity of the educational process and give you a clear path to take the courses. Each learning path starts from zero and accompanies you all the way to an advanced level. Moving forward with each step of this path can give you a very good view of the educational process and your own progress."
+	},
+	"path.show.learning_title": {
+		"fa": "یادگیری {title}",
+		"en": "Learning {title}"
+	},
+	"path.show.view_steps": {
+		"fa": "مشاهده قدم ها",
+		"en": "View steps"
+	},
+	"path.show.trailer_title": {
+		"fa": "{title} - تریلر",
+		"en": "{title} - Trailer"
+	},
+	"path.show.prerequisites_title": {
+		"fa": "پیش‌نیازها",
+		"en": "Prerequisites"
+	},
+	"path.show.main_steps_title": {
+		"fa": "قدم‌های اصلی",
+		"en": "Main steps"
+	},
+	"path.show.purchasable_courses": {
+		"fa": "سرفصل‌های قابل خریداری",
+		"en": "Purchasable courses"
+	},
+	"path.show.already_purchased": {
+		"fa": "قبلا خرید شده (قیمت لحاظ نمیشه)",
+		"en": "Already purchased (price not included)"
+	},
+	"path.show.in_cart": {
+		"fa": "موجود در سبد (قیمت لحاظ نمیشه)",
+		"en": "In cart (price not included)"
+	},
+	"path.show.payable_amount": {
+		"fa": "مبلغ قابل پرداخت:",
+		"en": "Payable amount:"
+	},
+	"path.show.nothing_to_buy": {
+		"fa": "موردی جهت خرید نیست!",
+		"en": "Nothing to buy!"
+	},
+	"path.show.no_purchasable_courses": {
+		"fa": "متاسفانه دوره قابل خریدی برای این مسیر موجود نیست!",
+		"en": "Unfortunately, there are no purchasable courses for this path!"
+	},
+	"path.show.start_path": {
+		"fa": "شروع مسیر {title}",
+		"en": "Start the {title} path"
+	},
+	"path.show.bundle_benefits": {
+		"fa": "با خرید یک‌جای دوره‌های مسیر {title} از مزایای زیر برخورداری شوید.",
+		"en": "By buying all the {title} path courses at once, you get the following benefits."
+	},
+	"path.show.discount_percent": {
+		"fa": "تخفیف {percent} درصدی",
+		"en": "{percent}% discount"
+	},
+	"path.show.money_back_guarantee": {
+		"fa": "گارانتی بازگشت وجه",
+		"en": "Money-back guarantee"
+	},
+	"path.show.permanent_access": {
+		"fa": "دسترسی دائمی",
+		"en": "Permanent access"
+	},
+	"path.show.always_support": {
+		"fa": "پشتیبانی همیشگی",
+		"en": "Ongoing support"
+	},
+	"path.show.buy_path_courses": {
+		"fa": "خرید دوره‌های مسیر یادگیری",
+		"en": "Buy the learning path courses"
+	},
+	"path.show.finalize_purchase": {
+		"fa": "نهایی سازی خرید",
+		"en": "Finalize purchase"
+	},
+	"path.show.login_to_buy": {
+		"fa": "برای خرید مسیر وارد شوید",
+		"en": "Sign in to buy the path"
+	},
+	"path.show.next_steps_title": {
+		"fa": "قدم‌های بعدی",
+		"en": "Next steps"
+	},
+	"path.show.path_description_title": {
+		"fa": "توضیحات مسیر یادگیری",
+		"en": "Learning path description"
+	},
+	"path.show.view_more": {
+		"fa": "مشاهده بیشتر",
+		"en": "View more"
+	},
+	"path.show.breadcrumb_home": {
+		"fa": "خانه",
+		"en": "Home"
+	},
+	"path.show.seo.title": {
+		"fa": "آموزش {title} - نقشه راه {title}",
+		"en": "{title} tutorial - {title} roadmap"
+	},
+	"path.show.seo.description": {
+		"fa": "نقشه راه کامل یادگیری {title} - مسیر آموزشی تخصصی",
+		"en": "A complete roadmap for learning {title} - a specialized learning path"
+	},
+	"path.show.seo.twitter_label_courses": {
+		"fa": "تعداد دوره‌ها",
+		"en": "Number of courses"
+	},
+	"path.show.seo.image_alt": {
+		"fa": "نقشه راه {title}",
+		"en": "{title} roadmap"
+	}
+}

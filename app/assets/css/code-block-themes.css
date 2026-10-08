@@ -1,0 +1,250 @@
+/* Per-block code themes (scoped to .zan-code-block-wrap) */
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] pre code.hljs,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] pre code.hljs .hljs-ln {
+    color: #abb2bf !important;
+    background: #282c34 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-comment,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-quote {
+    color: #5c6370 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-doctag,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-formula,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-keyword {
+    color: #c678dd !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-deletion,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-name,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-section,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-selector-tag,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-subst {
+    color: #e06c75 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-literal {
+    color: #56b6c2 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-addition,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-attribute,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-meta .hljs-string,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-regexp,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-string {
+    color: #98c379 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-attr,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-number,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-selector-attr,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-selector-class,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-selector-pseudo,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-template-variable,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-type,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-variable {
+    color: #d19a66 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-bullet,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-link,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-meta,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-selector-id,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-symbol,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-title {
+    color: #61aeee !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-built_in,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-class .hljs-title,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='atom-one'] .hljs-title.class_ {
+    color: #e6c07b !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] pre code.hljs,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] pre code.hljs .hljs-ln {
+    color: #383a42 !important;
+    background: #fafafa !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-comment,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-quote {
+    color: #a0a1a7 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-doctag,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-formula,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-keyword {
+    color: #a626a4 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-deletion,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-name,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-section,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-selector-tag,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-subst {
+    color: #e45649 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-literal {
+    color: #0184bb !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-addition,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-attribute,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-meta .hljs-string,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-regexp,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-string {
+    color: #50a14f !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-attr,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-number,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-selector-attr,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-selector-class,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-selector-pseudo,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-template-variable,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-type,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-variable {
+    color: #986801 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-bullet,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-link,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-meta,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-selector-id,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-symbol,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-title {
+    color: #4078f2 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-built_in,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-class .hljs-title,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='atom-one'] .hljs-title.class_ {
+    color: #c18401 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] pre code.hljs,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] pre code.hljs .hljs-ln {
+    color: #c9d1d9 !important;
+    background: #0d1117 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-doctag,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-keyword,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-meta .hljs-keyword,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-template-tag,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-type {
+    color: #ff7b72 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-title,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-title.class_,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-title.function_ {
+    color: #d2a8ff !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-attr,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-attribute,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-literal,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-number,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-variable {
+    color: #79c0ff !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-regexp,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-string,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-meta .hljs-string {
+    color: #a5d6ff !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-built_in,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-symbol {
+    color: #ffa657 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-comment,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-code,
+.zan-code-block-wrap[data-code-theme='dark'][data-code-theme-set='github'] .hljs-formula {
+    color: #8b949e !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] pre code.hljs,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] pre code.hljs .hljs-ln {
+    color: #24292f !important;
+    background: #ffffff !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-doctag,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-keyword,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-meta .hljs-keyword,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-template-tag,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-type {
+    color: #cf222e !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-title,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-title.class_,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-title.function_ {
+    color: #8250df !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-attr,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-attribute,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-literal,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-number,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-variable {
+    color: #0550ae !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-regexp,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-string {
+    color: #0a3069 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-built_in,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-symbol {
+    color: #953800 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-comment,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-code,
+.zan-code-block-wrap[data-code-theme='light'][data-code-theme-set='github'] .hljs-formula {
+    color: #6e7781 !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'] .hljs-ln-numbers {
+    color: rgba(255, 255, 255, 0.38) !important;
+    border-right-color: rgba(255, 255, 255, 0.14) !important;
+    background: rgba(0, 0, 0, 0.15) !important;
+}
+
+.zan-code-block-wrap[data-code-theme='light'] .hljs-ln-numbers {
+    color: rgba(0, 0, 0, 0.38) !important;
+    border-right-color: rgba(0, 0, 0, 0.1) !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+
+.zan-code-block-wrap[data-code-theme='dark'] .zan-code-theme-btn,
+.zan-code-block-wrap[data-code-theme='dark'] .zan-code-copy-btn {
+    color: #d7dae0;
+    background: rgba(33, 37, 43, 0.82);
+}
+
+.zan-code-block-wrap[data-code-theme='dark'] .zan-code-theme-btn:hover,
+.zan-code-block-wrap[data-code-theme='dark'] .zan-code-copy-btn:hover {
+    background: rgba(45, 50, 58, 0.92);
+}
+
+.zan-code-block-wrap[data-code-theme='light'] .zan-code-theme-btn,
+.zan-code-block-wrap[data-code-theme='light'] .zan-code-copy-btn {
+    color: #383a42;
+    background: rgba(255, 255, 255, 0.88);
+}
+
+.zan-code-block-wrap[data-code-theme='light'] .zan-code-theme-btn:hover,
+.zan-code-block-wrap[data-code-theme='light'] .zan-code-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.96);
+}

@@ -1,0 +1,668 @@
+{
+  "admin-index": {
+    "title": "داشبورد مدیریت",
+    "subtitle": "نمای کلی سامانه و آمارهای کلیدی",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" }
+    ]
+  },
+  "admin-users-list": {
+    "title": "فهرست کاربران",
+    "subtitle": "مشاهده و مدیریت کاربران سامانه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت کاربران" },
+      { "label": "فهرست کاربران" }
+    ]
+  },
+  "admin-create-user": {
+    "title": "ثبت کاربر جدید",
+    "subtitle": "ایجاد حساب کاربری جدید در سامانه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت کاربران" },
+      { "label": "فهرست کاربران", "route": "admin-users-list" },
+      { "label": "ثبت کاربر جدید" }
+    ]
+  },
+  "admin-user-details": {
+    "title": "جزئیات کاربر",
+    "subtitle": "مشاهده و ویرایش اطلاعات کاربر",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت کاربران" },
+      { "label": "فهرست کاربران", "route": "admin-users-list" },
+      { "label": "جزئیات کاربر" }
+    ]
+  },
+  "admin-permissions-list": {
+    "title": "مدیریت دسترسی‌ها",
+    "subtitle": "تعریف و ویرایش پرمیشن‌های سامانه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت کاربران" },
+      { "label": "مدیریت دسترسی‌ها" }
+    ]
+  },
+  "admin-roles-list": {
+    "title": "مدیریت نقش‌ها",
+    "subtitle": "تعریف نقش‌ها و تخصیص دسترسی‌ها",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت کاربران" },
+      { "label": "مدیریت نقش‌ها" }
+    ]
+  },
+  "admin-courses-list": {
+    "title": "فهرست دوره‌ها",
+    "subtitle": "مشاهده و مدیریت دوره‌های آموزشی",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "فهرست دوره‌ها" }
+    ]
+  },
+  "admin-course-create": {
+    "title": "ایجاد دوره جدید",
+    "subtitle": "ثبت دوره آموزشی جدید در سامانه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "فهرست دوره‌ها", "route": "admin-courses-list" },
+      { "label": "ایجاد دوره جدید" }
+    ]
+  },
+  "admin-course-edit": {
+    "title": "ویرایش دوره",
+    "subtitle": "ویرایش اطلاعات و تنظیمات دوره",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "فهرست دوره‌ها", "route": "admin-courses-list" },
+      { "label": "ویرایش دوره" }
+    ]
+  },
+  "admin-course-details": {
+    "title": "جزئیات دوره",
+    "subtitle": "مدیریت محتوا، اپیزودها و آمار دوره",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "فهرست دوره‌ها", "route": "admin-courses-list" },
+      { "label": "جزئیات دوره" }
+    ]
+  },
+  "admin-episode-create": {
+    "title": "ایجاد اپیزود",
+    "subtitle": "افزودن اپیزود جدید به دوره",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "فهرست دوره‌ها", "route": "admin-courses-list" },
+      { "label": "جزئیات دوره", "route": "admin-course-details", "useRouteParams": true },
+      { "label": "ایجاد اپیزود" }
+    ]
+  },
+  "admin-episode-edit": {
+    "title": "ویرایش اپیزود",
+    "subtitle": "ویرایش اطلاعات اپیزود",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "فهرست دوره‌ها", "route": "admin-courses-list" },
+      { "label": "جزئیات دوره", "route": "admin-course-details", "useRouteParams": true },
+      { "label": "ویرایش اپیزود" }
+    ]
+  },
+  "admin-episode-details": {
+    "title": "جزئیات اپیزود",
+    "subtitle": "مشاهده آمار و محتوای اپیزود",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "فهرست دوره‌ها", "route": "admin-courses-list" },
+      { "label": "جزئیات دوره", "route": "admin-course-details", "useRouteParams": true },
+      { "label": "جزئیات اپیزود" }
+    ]
+  },
+  "admin-paths-list": {
+    "title": "فهرست مسیرها",
+    "subtitle": "مدیریت مسیرهای یادگیری",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مسیرهای یادگیری" },
+      { "label": "فهرست مسیرها" }
+    ]
+  },
+  "admin-path-create": {
+    "title": "ایجاد مسیر یادگیری",
+    "subtitle": "تعریف مسیر یادگیری جدید",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مسیرهای یادگیری" },
+      { "label": "فهرست مسیرها", "route": "admin-paths-list" },
+      { "label": "ایجاد مسیر یادگیری" }
+    ]
+  },
+  "admin-path-edit": {
+    "title": "ویرایش مسیر یادگیری",
+    "subtitle": "ویرایش اطلاعات مسیر یادگیری",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مسیرهای یادگیری" },
+      { "label": "فهرست مسیرها", "route": "admin-paths-list" },
+      { "label": "ویرایش مسیر یادگیری" }
+    ]
+  },
+  "admin-categories-list": {
+    "title": "دسته‌بندی دوره‌ها",
+    "subtitle": "مدیریت دسته‌بندی‌های دوره‌های آموزشی",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات داده‌های پایه" },
+      { "label": "دسته‌بندی دوره‌ها" }
+    ]
+  },
+  "admin-category-create": {
+    "title": "ایجاد دسته‌بندی دوره",
+    "subtitle": "ثبت دسته‌بندی جدید برای دوره‌ها",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات داده‌های پایه" },
+      { "label": "دسته‌بندی دوره‌ها", "route": "admin-categories-list" },
+      { "label": "ایجاد دسته‌بندی دوره" }
+    ]
+  },
+  "admin-category-edit": {
+    "title": "ویرایش دسته‌بندی",
+    "subtitle": "ویرایش اطلاعات دسته‌بندی دوره",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات داده‌های پایه" },
+      { "label": "دسته‌بندی دوره‌ها", "route": "admin-categories-list" },
+      { "label": "ویرایش دسته‌بندی" }
+    ]
+  },
+  "admin-levels-list": {
+    "title": "سطح‌های آموزشی",
+    "subtitle": "مدیریت سطح‌بندی دوره‌های آموزشی",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات داده‌های پایه" },
+      { "label": "سطح‌های آموزشی" }
+    ]
+  },
+  "admin-missions-list": {
+    "title": "مدیریت ماموریت‌ها",
+    "subtitle": "کنترل ماموریت‌های دستاورد، دسته‌بندی‌ها و امتیازات",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات داده‌های پایه" },
+      { "label": "مدیریت ماموریت‌ها" }
+    ]
+  },
+  "admin-statuses-list": {
+    "title": "وضعیت‌های انتشار دوره",
+    "subtitle": "مدیریت وضعیت‌های انتشار محتوای دوره‌ها",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات داده‌های پایه" },
+      { "label": "وضعیت‌های انتشار دوره" }
+    ]
+  },
+  "admin-certificates": {
+    "title": "مدیریت گواهینامه‌ها",
+    "subtitle": "صدور و پیگیری گواهینامه‌های دوره‌ها",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت گواهینامه‌ها" }
+    ]
+  },
+  "admin-certificate-templates": {
+    "title": "قالب‌های گواهینامه",
+    "subtitle": "طراحی و مدیریت قالب‌های گواهینامه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت گواهینامه‌ها", "route": "admin-certificates" },
+      { "label": "قالب‌های گواهینامه" }
+    ]
+  },
+  "admin-certificate-template-create": {
+    "title": "قالب جدید",
+    "subtitle": "ایجاد قالب گواهینامه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "قالب‌های گواهینامه", "route": "admin-certificate-templates" },
+      { "label": "قالب جدید" }
+    ]
+  },
+  "admin-certificate-template-edit": {
+    "title": "ویرایش قالب",
+    "subtitle": "ویرایش قالب گواهینامه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "قالب‌های گواهینامه", "route": "admin-certificate-templates" },
+      { "label": "ویرایش قالب" }
+    ]
+  },
+  "admin-bank-accounts": {
+    "title": "حساب‌های بانکی",
+    "subtitle": "شبا، کارت و حساب خودتان برای تسویه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت پرداخت‌ها" },
+      { "label": "حساب‌های بانکی" }
+    ]
+  },
+  "admin-settlement-settings": {
+    "title": "تنظیمات سهم تسویه",
+    "subtitle": "تعیین درصد سهم سایت و مدرس از مبلغ تسویه — فقط مدیرکل",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات سامانه" },
+      { "label": "تنظیمات سهم تسویه" }
+    ]
+  },
+  "admin-payments-list": {
+    "title": "فهرست تراکنش‌ها",
+    "subtitle": "مشاهده و مدیریت پرداخت‌های کاربران",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت پرداخت‌ها" },
+      { "label": "فهرست تراکنش‌ها" }
+    ]
+  },
+  "admin-payments-create": {
+    "title": "ثبت پرداخت دستی",
+    "subtitle": "ثبت تراکنش پرداخت به‌صورت دستی",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت پرداخت‌ها" },
+      { "label": "فهرست تراکنش‌ها", "route": "admin-payments-list" },
+      { "label": "ثبت پرداخت دستی" }
+    ]
+  },
+  "admin-payments-edit": {
+    "title": "ویرایش پرداخت",
+    "subtitle": "ویرایش تراکنش پرداخت در انتظار",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت پرداخت‌ها" },
+      { "label": "فهرست تراکنش‌ها", "route": "admin-payments-list" },
+      { "label": "ویرایش پرداخت" }
+    ]
+  },
+  "admin-payments-edit": {
+    "title": "ویرایش پرداخت",
+    "subtitle": "ویرایش تراکنش پرداخت در انتظار",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت پرداخت‌ها" },
+      { "label": "فهرست تراکنش‌ها", "route": "admin-payments-list" },
+      { "label": "ویرایش پرداخت" }
+    ]
+  },
+  "admin-projects": {
+    "title": "درخواست‌های پروژه",
+    "subtitle": "بررسی و پیگیری درخواست‌های پروژه کاربران",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "درخواست‌های پروژه" }
+    ]
+  },
+  "admin-cooperations": {
+    "title": "درخواست‌های همکاری",
+    "subtitle": "بررسی و پیگیری درخواست‌های همکاری",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "درخواست‌های همکاری" }
+    ]
+  },
+  "admin-inbox": {
+    "title": "صندوق ایمیل",
+    "subtitle": "مدیریت مستقیم ایمیل‌ها از سرور (دریافتی، ارسالی، پیش‌نویس، حذف‌شده، هرزنامه)",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "پشتیبانی و ارتباط با کاربران" },
+      { "label": "صندوق ایمیل" }
+    ]
+  },
+  "admin-plans-list": {
+    "title": "فهرست پلن‌ها",
+    "subtitle": "مدیریت پلن‌های اشتراک و خرید",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت پلن‌ها" },
+      { "label": "فهرست پلن‌ها" }
+    ]
+  },
+  "admin-plan-create": {
+    "title": "ایجاد پلن جدید",
+    "subtitle": "تعریف پلن اشتراک جدید",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت پلن‌ها" },
+      { "label": "فهرست پلن‌ها", "route": "admin-plans-list" },
+      { "label": "ایجاد پلن جدید" }
+    ]
+  },
+  "admin-plan-edit": {
+    "title": "ویرایش پلن",
+    "subtitle": "ویرایش اطلاعات پلن اشتراک",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت پلن‌ها" },
+      { "label": "فهرست پلن‌ها", "route": "admin-plans-list" },
+      { "label": "ویرایش پلن" }
+    ]
+  },
+  "admin-discounts-list": {
+    "title": "فهرست کدهای تخفیف",
+    "subtitle": "مدیریت کدهای تخفیف و کمپین‌ها",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت کدهای تخفیف" },
+      { "label": "فهرست کدهای تخفیف" }
+    ]
+  },
+  "admin-discount-create": {
+    "title": "ایجاد کد تخفیف",
+    "subtitle": "تعریف کد تخفیف جدید",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت کدهای تخفیف" },
+      { "label": "فهرست کدهای تخفیف", "route": "admin-discounts-list" },
+      { "label": "ایجاد کد تخفیف" }
+    ]
+  },
+  "admin-discount-edit": {
+    "title": "ویرایش کد تخفیف",
+    "subtitle": "ویرایش تنظیمات کد تخفیف",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت کدهای تخفیف" },
+      { "label": "فهرست کدهای تخفیف", "route": "admin-discounts-list" },
+      { "label": "ویرایش کد تخفیف" }
+    ]
+  },
+  "admin-sales-report": {
+    "title": "گزارش فروش و درآمد",
+    "subtitle": "تحلیل فروش و درآمد سامانه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "گزارش‌ها و آمار" },
+      { "label": "گزارش فروش و درآمد" }
+    ]
+  },
+  "admin-user-activity-report": {
+    "title": "گزارش فعالیت کاربران",
+    "subtitle": "تحلیل رفتار و فعالیت کاربران",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "گزارش‌ها و آمار" },
+      { "label": "گزارش فعالیت کاربران" }
+    ]
+  },
+  "admin-views": {
+    "title": "آمار بازدید محتوا",
+    "subtitle": "تحلیل بازدید دوره‌ها، قسمت‌ها و پرسش‌ها",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "گزارش‌ها و آمار" },
+      { "label": "آمار بازدید محتوا" }
+    ]
+  },
+  "admin-engagement": {
+    "title": "آمار لایک و بوکمارک",
+    "subtitle": "تحلیل تعامل کاربران با دوره‌ها، قسمت‌ها، پرسش‌ها و نظرات",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "گزارش‌ها و آمار" },
+      { "label": "آمار لایک و بوکمارک" }
+    ]
+  },
+  "admin-comments": {
+    "title": "مدیریت نظرات دوره‌ها",
+    "subtitle": "بررسی و تأیید نظرات کاربران",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "پشتیبانی و ارتباط با کاربران" },
+      { "label": "مدیریت نظرات دوره‌ها" }
+    ]
+  },
+  "admin-reports": {
+    "title": "گزارش‌های ارسالی کاربران",
+    "subtitle": "بررسی گزارش‌های تخلف و مشکل",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "پشتیبانی و ارتباط با کاربران" },
+      { "label": "گزارش‌های ارسالی کاربران" }
+    ]
+  },
+  "admin-faqs": {
+    "title": "پرسش‌های متداول (FAQ)",
+    "subtitle": "مدیریت سوالات متداول سامانه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "پشتیبانی و ارتباط با کاربران" },
+      { "label": "پرسش‌های متداول (FAQ)" }
+    ]
+  },
+  "admin-questions": {
+    "title": "انجمن پرسش و پاسخ",
+    "subtitle": "مدیریت پرسش‌ها و پاسخ‌های کاربران",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "پشتیبانی و ارتباط با کاربران" },
+      { "label": "انجمن پرسش و پاسخ" }
+    ]
+  },
+  "admin-question-details": {
+    "title": "جزئیات پرسش",
+    "subtitle": "مشاهده و مدیریت پرسش و پاسخ‌ها",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "پشتیبانی و ارتباط با کاربران" },
+      { "label": "انجمن پرسش و پاسخ", "route": "admin-questions" },
+      { "label": "جزئیات پرسش" }
+    ]
+  },
+  "admin-question-categories": {
+    "title": "دسته‌بندی‌های پرسش و پاسخ",
+    "subtitle": "مدیریت دسته‌بندی انجمن پرسش و پاسخ",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "پشتیبانی و ارتباط با کاربران" },
+      { "label": "دسته‌بندی‌های پرسش و پاسخ" }
+    ]
+  },
+  "admin-event-groups": {
+    "title": "گروه‌های رویداد اطلاع‌رسانی",
+    "subtitle": "مدیریت گروه‌های رویداد برای اطلاع‌رسانی",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت اطلاع‌رسانی" },
+      { "label": "گروه‌های رویداد اطلاع‌رسانی" }
+    ]
+  },
+  "admin-events": {
+    "title": "رویدادهای اطلاع‌رسانی",
+    "subtitle": "مدیریت رویدادها و قالب‌های اطلاع‌رسانی",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت اطلاع‌رسانی" },
+      { "label": "رویدادهای اطلاع‌رسانی" }
+    ]
+  },
+  "admin-api-routes": {
+    "title": "کنترل دسترسی API",
+    "subtitle": "تعریف و ویرایش پرمیشن‌های هر روت API",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات سامانه" },
+      { "label": "کنترل دسترسی API" }
+    ]
+  },
+  "admin-system-resources": {
+    "title": "منابع سیستم",
+    "subtitle": "مشخصات سرور، مصرف منابع و وضعیت سرویس‌های بک‌اند",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات سامانه" },
+      { "label": "منابع سیستم" }
+    ]
+  },
+  "admin-messenger-settings": {
+    "title": "تنظیمات پیام‌رسان",
+    "subtitle": "فعال‌سازی، سقف آپلود، دسترسی کاربران و محدودیت‌های پیام‌رسان",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات سامانه" },
+      { "label": "تنظیمات پیام‌رسان" }
+    ]
+  },
+  "admin-laravel-logs": {
+    "title": "لاگ Laravel",
+    "subtitle": "خواندن، تحلیل و مانیتورینگ لاگ‌های اپلیکیشن با نمودار و آمار",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "تنظیمات سامانه" },
+      { "label": "لاگ Laravel" }
+    ]
+  },
+  "admin-forbidden": {
+    "title": "دسترسی غیرمجاز",
+    "subtitle": "شما به این بخش دسترسی ندارید",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "دسترسی غیرمجاز" }
+    ]
+  },
+  "admin-quizzes-list": {
+    "title": "فهرست آزمون‌ها",
+    "subtitle": "مدیریت آزمون‌های دوره، فصل و درس",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت آزمون‌ها" },
+      { "label": "فهرست آزمون‌ها" }
+    ]
+  },
+  "admin-quiz-create": {
+    "title": "ایجاد آزمون",
+    "subtitle": "تعریف آزمون جدید",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت آزمون‌ها" },
+      { "label": "فهرست آزمون‌ها", "route": "admin-quizzes-list" },
+      { "label": "ایجاد آزمون" }
+    ]
+  },
+  "admin-quiz-edit": {
+    "title": "ویرایش آزمون",
+    "subtitle": "ویرایش تنظیمات و سوالات آزمون",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت آزمون‌ها" },
+      { "label": "فهرست آزمون‌ها", "route": "admin-quizzes-list" },
+      { "label": "ویرایش آزمون" }
+    ]
+  },
+  "admin-quiz-reports": {
+    "title": "گزارش آزمون",
+    "subtitle": "آمار عملکرد، قبولی و مردودی",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت آزمون‌ها" },
+      { "label": "فهرست آزمون‌ها", "route": "admin-quizzes-list" },
+      { "label": "گزارش آزمون" }
+    ]
+  },
+  "admin-quiz-questions": {
+    "title": "بانک سوال",
+    "subtitle": "مدیریت سوالات آزمون",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت آزمون‌ها" },
+      { "label": "بانک سوال" }
+    ]
+  },
+  "admin-quiz-question-create": {
+    "title": "ایجاد سوال",
+    "subtitle": "افزودن سوال به بانک",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "بانک سوال", "route": "admin-quiz-questions" },
+      { "label": "ایجاد سوال" }
+    ]
+  },
+  "admin-quiz-question-edit": {
+    "title": "ویرایش سوال",
+    "subtitle": "ویرایش سوال بانک",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "بانک سوال", "route": "admin-quiz-questions" },
+      { "label": "ویرایش سوال" }
+    ]
+  },
+  "admin-articles": {
+    "title": "مدیریت مقالات",
+    "subtitle": "مشاهده، ویرایش و انتشار مقالات",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مقالات" }
+    ]
+  },
+  "admin-article-create": {
+    "title": "ایجاد مقاله",
+    "subtitle": "نوشتن و انتشار مقاله جدید",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مقالات", "route": "admin-articles" },
+      { "label": "ایجاد مقاله" }
+    ]
+  },
+  "admin-article-edit": {
+    "title": "ویرایش مقاله",
+    "subtitle": "ویرایش محتوا و تنظیمات مقاله",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مقالات", "route": "admin-articles" },
+      { "label": "ویرایش مقاله" }
+    ]
+  },
+  "admin-article-details": {
+    "title": "جزئیات مقاله",
+    "subtitle": "مشاهده و مدیریت مقاله",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مقالات", "route": "admin-articles" },
+      { "label": "جزئیات مقاله" }
+    ]
+  },
+  "admin-article-categories": {
+    "title": "دسته‌بندی مقالات",
+    "subtitle": "مدیریت دسته‌بندی‌های مقالات",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مقالات", "route": "admin-articles" },
+      { "label": "دسته‌بندی مقالات" }
+    ]
+  },
+  "admin-tags": {
+    "title": "مدیریت تگ‌ها",
+    "subtitle": "مشاهده و مدیریت تگ‌های محتوا",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت تگ‌ها" }
+    ]
+  },
+  "admin-tag-details": {
+    "title": "جزئیات تگ",
+    "subtitle": "مشاهده آمار و محتوای مرتبط با تگ",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت تگ‌ها", "route": "admin-tags" },
+      { "label": "جزئیات تگ" }
+    ]
+  }
+}

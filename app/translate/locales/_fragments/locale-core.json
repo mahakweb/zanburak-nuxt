@@ -1,0 +1,318 @@
+{
+  "lang.choose": {
+    "ar": "اختر لغتك المفضلة",
+    "tr": "Tercih ettiğiniz dili seçin"
+  },
+  "lang.persian": {
+    "ar": "الفارسية",
+    "tr": "Farsça"
+  },
+  "lang.english": {
+    "ar": "الإنجليزية",
+    "tr": "İngilizce"
+  },
+  "lang.arabic": {
+    "fa": "عربی",
+    "en": "Arabic",
+    "ar": "العربية",
+    "tr": "Arapça"
+  },
+  "lang.turkish": {
+    "fa": "ترکی",
+    "en": "Turkish",
+    "ar": "التركية",
+    "tr": "Türkçe"
+  },
+  "lang.select": {
+    "ar": "اختيار اللغة",
+    "tr": "Dil seçimi"
+  },
+
+  "theme.choose": {
+    "ar": "اختر المظهر المفضل لديك",
+    "tr": "Tercih ettiğiniz temayı seçin"
+  },
+  "theme.dark": {
+    "ar": "الوضع الداكن",
+    "tr": "Karanlık mod"
+  },
+  "theme.darkShort": {
+    "ar": "داكن",
+    "tr": "Karanlık"
+  },
+  "theme.light": {
+    "ar": "الوضع الفاتح",
+    "tr": "Aydınlık mod"
+  },
+  "theme.lightShort": {
+    "ar": "فاتح",
+    "tr": "Aydınlık"
+  },
+  "theme.select": {
+    "ar": "اختيار المظهر",
+    "tr": "Tema seçimi"
+  },
+  "theme.system": {
+    "ar": "الوضع الداكن حسب نظامك",
+    "tr": "Sisteminize göre karanlık mod"
+  },
+  "theme.systemShort": {
+    "ar": "النظام",
+    "tr": "Sistem"
+  },
+
+  "common.closeMenu": {
+    "ar": "إغلاق القائمة",
+    "tr": "Menüyü kapat"
+  },
+  "common.online": {
+    "ar": "متصل",
+    "tr": "Çevrimiçi"
+  },
+  "common.pleaseWait": {
+    "ar": "يرجى الانتظار...",
+    "tr": "Lütfen bekleyin..."
+  },
+  "common.noItemsToDisplay": {
+    "ar": "لا يوجد شيء للعرض!",
+    "tr": "Gösterilecek öğe yok!"
+  },
+  "common.zanburak": {
+    "ar": "زنبورك",
+    "tr": "Zanburak"
+  },
+
+  "nav.educationalPaths": {
+    "ar": "المسارات التعليمية",
+    "tr": "Eğitim yolları"
+  },
+  "nav.article": {
+    "ar": "مقال",
+    "tr": "Makale"
+  },
+  "nav.articles": {
+    "ar": "المقالات",
+    "tr": "Makaleler"
+  },
+  "nav.podcast": {
+    "ar": "بودكاست",
+    "tr": "Podcast"
+  },
+  "nav.subscription": {
+    "ar": "الاشتراك",
+    "tr": "Abonelik"
+  },
+  "nav.browseCourses": {
+    "ar": "تصفح الدورات",
+    "tr": "Kurslara göz at"
+  },
+
+  "user.walletBalance": {
+    "ar": "رصيد المحفظة",
+    "tr": "Cüzdan bakiyesi"
+  },
+  "user.points": {
+    "ar": "النقاط",
+    "tr": "Puanlar"
+  },
+  "user.userPanel": {
+    "ar": "لوحة المستخدم",
+    "tr": "Kullanıcı paneli"
+  },
+  "user.accountInfo": {
+    "ar": "معلومات الحساب",
+    "tr": "Hesap bilgileri"
+  },
+  "user.logoutAccount": {
+    "ar": "تسجيل الخروج من الحساب",
+    "tr": "Hesaptan çıkış yap"
+  },
+  "user.backToMainSite": {
+    "ar": "العودة إلى الصفحة الرئيسية",
+    "tr": "Ana siteye dön"
+  },
+  "user.adminPanel": {
+    "ar": "لوحة الإدارة",
+    "tr": "Yönetim paneli"
+  },
+  "user.adminPanelHint": {
+    "ar": "الدخول إلى مساحة الإدارة الخاصة بك",
+    "tr": "Yönetim alanınıza giriş yapın"
+  },
+
+  "cart.empty": {
+    "ar": "لم تضف أي شيء إلى السلة بعد!",
+    "tr": "Sepetinize henüz bir şey eklemediniz!"
+  },
+  "cart.payable": {
+    "ar": "المبلغ المستحق:",
+    "tr": "Ödenecek:"
+  },
+  "cart.continueCheckout": {
+    "ar": "متابعة عملية الشراء",
+    "tr": "Ödemeye devam et"
+  },
+
+  "panel.home": {
+    "ar": "الصفحة الرئيسية للوحة",
+    "tr": "Panel ana sayfa"
+  },
+  "panel.courses": {
+    "ar": "الدورات",
+    "tr": "Kurslar"
+  },
+  "panel.questions": {
+    "ar": "الأسئلة",
+    "tr": "Sorular"
+  },
+  "panel.financial": {
+    "ar": "المالية",
+    "tr": "Finans"
+  },
+  "panel.financialTransactions": {
+    "ar": "المعاملات المالية",
+    "tr": "Finansal işlemler"
+  },
+  "panel.vipSubscription": {
+    "ar": "اشتراك VIP",
+    "tr": "VIP abonelik"
+  },
+  "panel.followed": {
+    "ar": "المتابَعون",
+    "tr": "Takip edilenler"
+  },
+  "panel.yourComments": {
+    "ar": "تعليقاتك",
+    "tr": "Yorumlarınız"
+  },
+  "panel.notifications": {
+    "ar": "الإشعارات",
+    "tr": "Bildirimler"
+  },
+  "panel.missions": {
+    "ar": "المهام",
+    "tr": "Görevler"
+  },
+  "panel.profileInfo": {
+    "ar": "معلومات الملف الشخصي",
+    "tr": "Profil bilgileri"
+  },
+  "panel.menuActivity": {
+    "ar": "الأنشطة",
+    "tr": "Aktiviteler"
+  },
+  "panel.menuAccount": {
+    "ar": "الحساب",
+    "tr": "Hesap"
+  },
+  "panel.language": {
+    "ar": "اللغة",
+    "tr": "Dil"
+  },
+
+  "auth.signIn": {
+    "ar": "تسجيل الدخول",
+    "tr": "Giriş yap"
+  },
+  "auth.signOut": {
+    "ar": "تسجيل الخروج",
+    "tr": "Çıkış yap"
+  },
+  "auth.signUp": {
+    "ar": "إنشاء حساب",
+    "tr": "Kayıt ol"
+  },
+  "auth.signInSubtitle": {
+    "ar": "أدخل بريدك الإلكتروني وكلمة المرور لتسجيل الدخول",
+    "tr": "Giriş yapmak için e-posta ve şifrenizi girin"
+  },
+  "auth.signUpSubtitle": {
+    "ar": "املأ النموذج أدناه للتسجيل",
+    "tr": "Kayıt olmak için aşağıdaki formu doldurun"
+  },
+  "auth.signedOut": {
+    "ar": "تم تسجيل الخروج بنجاح",
+    "tr": "Başarıyla çıkış yapıldı"
+  },
+  "auth.login.pageTitle": {
+    "ar": "تسجيل الدخول إلى زنبورك",
+    "tr": "Zanburak'a giriş yap"
+  },
+  "auth.login.success": {
+    "ar": "تم تسجيل الدخول بنجاح. أهلاً بك!",
+    "tr": "Giriş başarılı. Hoş geldiniz!"
+  },
+  "auth.register.pageTitle": {
+    "ar": "التسجيل في زنبورك",
+    "tr": "Zanburak'a kayıt ol"
+  },
+  "auth.register.success": {
+    "ar": "تم التسجيل بنجاح. أهلاً بك!",
+    "tr": "Kayıt başarılı. Hoş geldiniz!"
+  },
+
+  "search.minChars": {
+    "ar": "أدخل 3 أحرف على الأقل للبحث",
+    "tr": "Aramak için en az 3 karakter girin"
+  },
+  "search.noResults": {
+    "ar": "لم يتم العثور على نتائج",
+    "tr": "Sonuç bulunamadı"
+  },
+  "search.filters.all": {
+    "ar": "الكل",
+    "tr": "Tümü"
+  },
+  "search.loadingMore": {
+    "ar": "جارٍ التحميل...",
+    "tr": "Daha fazla yükleniyor..."
+  },
+
+  "comments.title": {
+    "ar": "التعليقات والأسئلة",
+    "tr": "Yorumlar ve sorular"
+  },
+  "comments.loginOrRegister": {
+    "ar": "تسجيل الدخول أو إنشاء حساب",
+    "tr": "Giriş yap veya kayıt ol"
+  },
+  "comments.empty": {
+    "ar": "لا توجد تعليقات بعد",
+    "tr": "Henüz yorum yok"
+  },
+  "comments.showAllReplies": {
+    "ar": "عرض كل الردود ({count})",
+    "tr": "Tüm yanıtları göster ({count})"
+  },
+
+  "index.latestCourses": {
+    "ar": "أحدث الدورات",
+    "tr": "En yeni kurslar"
+  },
+  "index.viewAllCourses": {
+    "ar": "عرض جميع الدورات",
+    "tr": "Tüm kursları görüntüle"
+  },
+  "index.freeCourses": {
+    "ar": "دورات مجانية",
+    "tr": "Ücretsiz kurslar"
+  },
+  "index.whyZanburak": {
+    "ar": "لماذا زنبورك؟",
+    "tr": "Neden Zanburak?"
+  },
+
+  "noInternet.connecting": {
+    "ar": "جارٍ الاتصال بالشبكة",
+    "tr": "Ağa bağlanılıyor"
+  },
+
+  "profile.public.details": {
+    "ar": "تفاصيل الملف الشخصي",
+    "tr": "Profil detayları"
+  },
+  "profile.public.socials": {
+    "ar": "الشبكات الاجتماعية",
+    "tr": "Sosyal ağlar"
+  }
+}

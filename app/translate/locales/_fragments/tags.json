@@ -1,0 +1,62 @@
+{
+  "tags.listTitle": {
+    "fa": "تگ‌ها",
+    "en": "Tags",
+    "ar": "الوسوم",
+    "tr": "Etiketler"
+  },
+  "tags.follow": {
+    "fa": "دنبال کردن",
+    "en": "Follow",
+    "ar": "متابعة",
+    "tr": "Takip et"
+  },
+  "tags.unfollow": {
+    "fa": "لغو دنبال کردن",
+    "en": "Unfollow",
+    "ar": "إلغاء المتابعة",
+    "tr": "Takipten çık"
+  },
+  "tags.seo.title": {
+    "fa": "تگ‌های آموزشی برنامه‌نویسی",
+    "en": "Programming Learning Tags",
+    "ar": "وسوم تعليم البرمجة",
+    "tr": "Programlama Öğrenme Etiketleri"
+  },
+  "tags.seo.description": {
+    "fa": "مرور تگ‌های برنامه‌نویسی، دوره‌ها و مقالات مرتبط — پیدا کردن سریع موضوعات Vue، Laravel، فرانت‌اند و بک‌اند",
+    "en": "Browse programming tags, related courses and articles — quickly find Vue, Laravel, frontend and backend topics",
+    "ar": "تصفح وسوم البرمجة والدورات والمقالات المرتبطة — اعثر بسرعة على مواضيع Vue وLaravel والواجهة والخادم",
+    "tr": "Programlama etiketlerini, ilgili kurs ve makaleleri keşfedin — Vue, Laravel, frontend ve backend konularını hızlı bulun"
+  },
+  "tags.seo.keywords": {
+    "fa": "تگ برنامه‌نویسی|موضوعات آموزشی|Vue|Laravel|تگ زنبورک",
+    "en": "programming tags|learning topics|Vue|Laravel|Zanburak tags",
+    "ar": "وسوم برمجة|مواضيع تعليمية|Vue|Laravel|زنبورك",
+    "tr": "programlama etiketleri|öğrenme konuları|Vue|Laravel|Zanburak"
+  },
+  "tags.seo.showTitle": {
+    "fa": "#{name} — آموزش و منابع برنامه‌نویسی",
+    "en": "#{name} — programming resources",
+    "ar": "#{name} — موارد تعليم البرمجة",
+    "tr": "#{name} — programlama kaynakları"
+  },
+  "tags.seo.showDescription": {
+    "fa": "همه دوره‌ها، مقالات و سوالات مرتبط با تگ {name} در زنبورک",
+    "en": "Courses, articles and questions related to the {name} tag on Zanburak",
+    "ar": "جميع الدورات والمقالات والأسئلة المرتبطة بوسم {name} في زنبورك",
+    "tr": "Zanburak’ta {name} etiketiyle ilişkili kurslar, makaleler ve sorular"
+  },
+  "tags.seo.intro": {
+    "fa": "در این صفحه منابع آموزشی مرتبط با «{name}» را یکجا ببینید: دوره‌ها، مقالات و پرسش‌های برنامه‌نویسی. از اینجا می‌توانید مسیر یادگیری خود را شروع کنید یا عمیق‌تر شوید.",
+    "en": "Explore learning resources related to “{name}” in one place: courses, articles, and programming Q&A. Start your path or go deeper from here.",
+    "ar": "استكشف موارد التعلم المرتبطة بـ «{name}» في مكان واحد: الدورات والمقالات وأسئلة البرمجة. ابدأ مسارك أو تعمّق من هنا.",
+    "tr": "“{name}” ile ilgili öğrenme kaynaklarını tek yerde keşfedin: kurslar, makaleler ve programlama soruları. Yolculuğunuza buradan başlayın veya derinleşin."
+  },
+  "panel.followed.filterTag": {
+    "fa": "تگ",
+    "en": "Tag",
+    "ar": "وسم",
+    "tr": "Etiket"
+  }
+}

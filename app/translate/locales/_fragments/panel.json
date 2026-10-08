@@ -1,0 +1,974 @@
+{
+	"panel.certifications.courseDuration": {
+		"fa": "زمان دوره:",
+		"en": "Course duration:"
+	},
+	"panel.certifications.documentTitle": {
+		"fa": "گواهینامه‌ها",
+		"en": "Certifications"
+	},
+	"panel.certifications.download": {
+		"fa": "دانلود",
+		"en": "Download"
+	},
+	"panel.certifications.filterOnline": {
+		"fa": "گواهی های مشاهده آنلاین",
+		"en": "Online view certificates"
+	},
+	"panel.certifications.filterTech": {
+		"fa": "تاییدیه های فنی",
+		"en": "Technical confirmations"
+	},
+	"panel.certifications.issueDate": {
+		"fa": "تاریخ اعطا:",
+		"en": "Issue date:"
+	},
+	"panel.certifications.verified": {
+		"fa": "تایید شده",
+		"en": "Verified"
+	},
+	"panel.certifications.view": {
+		"fa": "مشاهده",
+		"en": "View"
+	},
+	"panel.certifications.downloading": {
+		"fa": "در حال دانلود...",
+		"en": "Downloading..."
+	},
+	"panel.comments.documentTitle": {
+		"fa": "دیدگاه‌های من",
+		"en": "My comments"
+	},
+	"panel.comments.filterArticle": {
+		"fa": "مقاله",
+		"en": "Article"
+	},
+	"panel.comments.filterCourse": {
+		"fa": "دوره",
+		"en": "Course"
+	},
+	"panel.comments.filterEpisode": {
+		"fa": "قسمت",
+		"en": "Episode"
+	},
+	"panel.comments.filterPath": {
+		"fa": "مسیر",
+		"en": "Path"
+	},
+	"panel.common.cancel": {
+		"fa": "انصراف",
+		"en": "Cancel"
+	},
+	"panel.common.confirm": {
+		"fa": "تایید",
+		"en": "Confirm"
+	},
+	"panel.common.days": {
+		"fa": "روز",
+		"en": "Days"
+	},
+	"panel.common.empty": {
+		"fa": "موردی برای نمایش وجود ندارد!",
+		"en": "There is nothing to display!"
+	},
+	"panel.common.error": {
+		"fa": "خطا",
+		"en": "Error"
+	},
+	"panel.common.hours": {
+		"fa": "ساعت",
+		"en": "Hours"
+	},
+	"panel.common.loading": {
+		"fa": "در حال بارگذاری...",
+		"en": "Loading..."
+	},
+	"panel.common.minutes": {
+		"fa": "دقیقه",
+		"en": "Minutes"
+	},
+	"panel.common.scoreUnit": {
+		"fa": "امتیاز",
+		"en": "points"
+	},
+	"panel.common.search": {
+		"fa": "جستجو",
+		"en": "Search"
+	},
+	"panel.common.seconds": {
+		"fa": "ثانیه",
+		"en": "Seconds"
+	},
+	"panel.common.show": {
+		"fa": "نمایش:",
+		"en": "Show:"
+	},
+	"panel.common.showingRange": {
+		"fa": "نمایش {from} تا {to} از {total}",
+		"en": "Showing {from} to {to} of {total}"
+	},
+	"panel.common.sortNewest": {
+		"fa": "جدیدترین",
+		"en": "Newest"
+	},
+	"panel.common.sortOldest": {
+		"fa": "قدیمی‌ترین",
+		"en": "Oldest"
+	},
+	"panel.common.statusAll": {
+		"fa": "همه",
+		"en": "All"
+	},
+	"panel.common.statusPublished": {
+		"fa": "منتشر شده",
+		"en": "Published"
+	},
+	"panel.common.statusUnpublished": {
+		"fa": "منتشر نشده",
+		"en": "Unpublished"
+	},
+	"panel.common.toman": {
+		"fa": "تومان",
+		"en": "Toman"
+	},
+	"panel.common.understood": {
+		"fa": "متوجه شدم",
+		"en": "Got it"
+	},
+	"panel.common.viewAll": {
+		"fa": "مشاهده همه",
+		"en": "View all"
+	},
+	"panel.courses.documentTitle": {
+		"fa": "دوره‌های من",
+		"en": "My courses"
+	},
+	"panel.courses.filterCompleted": {
+		"fa": "تکمیل شده",
+		"en": "Completed"
+	},
+	"panel.courses.filterCurrent": {
+		"fa": "جاری",
+		"en": "Current"
+	},
+	"panel.courses.filterInactive": {
+		"fa": "غیرفعال",
+		"en": "Inactive"
+	},
+	"panel.courses.filterPurchased": {
+		"fa": "خریداری شده",
+		"en": "Purchased"
+	},
+	"panel.courses.percentSuffix": {
+		"fa": "درصد",
+		"en": "percent"
+	},
+	"panel.courses.watchPercent": {
+		"fa": "درصد مشاهده",
+		"en": "Watch percentage"
+	},
+	"panel.financial.atHour": {
+		"fa": "ساعت",
+		"en": "at"
+	},
+	"panel.financial.attemptFailed": {
+		"fa": "ناموفق",
+		"en": "Failed"
+	},
+	"panel.financial.attemptPending": {
+		"fa": "در انتظار پرداخت",
+		"en": "Awaiting payment"
+	},
+	"panel.financial.attemptRef": {
+		"fa": "ش.پ:",
+		"en": "Ref:"
+	},
+	"panel.financial.attemptSuccess": {
+		"fa": "موفق",
+		"en": "Successful"
+	},
+	"panel.financial.attemptsHistory": {
+		"fa": "تاریخچه تلاش:",
+		"en": "Attempt history:"
+	},
+	"panel.financial.close": {
+		"fa": "بستن",
+		"en": "Close"
+	},
+	"panel.financial.colActions": {
+		"fa": "عملیات",
+		"en": "Actions"
+	},
+	"panel.financial.colAmount": {
+		"fa": "مبلغ",
+		"en": "Amount"
+	},
+	"panel.financial.colCreatedAt": {
+		"fa": "تاریخ ایجاد",
+		"en": "Created date"
+	},
+	"panel.financial.colMethod": {
+		"fa": "روش پرداخت",
+		"en": "Payment method"
+	},
+	"panel.financial.colPaymentId": {
+		"fa": "شناسه پرداخت",
+		"en": "Payment ID"
+	},
+	"panel.financial.colTracking": {
+		"fa": "شماره پیگیری",
+		"en": "Tracking number"
+	},
+	"panel.financial.confirmReceipt": {
+		"fa": "تأیید و دریافت رسید",
+		"en": "Confirm and get receipt"
+	},
+	"panel.financial.dateLabel": {
+		"fa": "تاریخ:",
+		"en": "Date:"
+	},
+	"panel.financial.dateTime": {
+		"fa": "تاریخ و ساعت:",
+		"en": "Date and time:"
+	},
+	"panel.financial.discount": {
+		"fa": "تخفیف:",
+		"en": "Discount:"
+	},
+	"panel.financial.documentTitle": {
+		"fa": "لیست تراکنشات مالی",
+		"en": "Financial transactions"
+	},
+	"panel.financial.filterDeposit": {
+		"fa": "تراکنش های موفق",
+		"en": "Successful transactions"
+	},
+	"panel.financial.filterFailed": {
+		"fa": "تراکنش های ناموفق",
+		"en": "Failed transactions"
+	},
+	"panel.financial.finalAmount": {
+		"fa": "مبلغ نهایی:",
+		"en": "Final amount:"
+	},
+	"panel.financial.itemCourse": {
+		"fa": "دوره",
+		"en": "Course"
+	},
+	"panel.financial.itemPath": {
+		"fa": "مسیر",
+		"en": "Path"
+	},
+	"panel.financial.itemPlan": {
+		"fa": "اشتراک",
+		"en": "Subscription"
+	},
+	"panel.financial.online": {
+		"fa": "آنلاین",
+		"en": "Online"
+	},
+	"panel.financial.onlineGateway": {
+		"fa": "درگاه آنلاین",
+		"en": "Online gateway"
+	},
+	"panel.financial.paymentMethodLabel": {
+		"fa": "روش پرداخت:",
+		"en": "Payment method:"
+	},
+	"panel.financial.pleaseWait": {
+		"fa": "لطفا منتظر بمانید...",
+		"en": "Please wait..."
+	},
+	"panel.financial.retryConnect": {
+		"fa": "پرداخت مجدد و اتصال به درگاه",
+		"en": "Retry and connect to gateway"
+	},
+	"panel.financial.retryError": {
+		"fa": "خطا در پرداخت مجدد",
+		"en": "Error retrying payment"
+	},
+	"panel.financial.retryPayment": {
+		"fa": "پرداخت مجدد",
+		"en": "Retry payment"
+	},
+	"panel.financial.selectGateway": {
+		"fa": "انتخاب درگاه:",
+		"en": "Select gateway:"
+	},
+	"panel.financial.statusExpired": {
+		"fa": "مهلت پرداخت این فاکتور به پایان رسیده است.",
+		"en": "The payment deadline for this invoice has expired."
+	},
+	"panel.financial.statusLabel": {
+		"fa": "وضعیت:",
+		"en": "Status:"
+	},
+	"panel.financial.statusPaid": {
+		"fa": "این فاکتور قبلاً پرداخت شده است.",
+		"en": "This invoice has already been paid."
+	},
+	"panel.financial.statusUnpaid": {
+		"fa": "این فاکتور هنوز پرداخت نشده است.",
+		"en": "This invoice has not been paid yet."
+	},
+	"panel.financial.subtotal": {
+		"fa": "جمع کل:",
+		"en": "Subtotal:"
+	},
+	"panel.financial.timeLabel": {
+		"fa": "ساعت:",
+		"en": "Time:"
+	},
+	"panel.financial.typeAll": {
+		"fa": "همه تراکنشات",
+		"en": "All transactions"
+	},
+	"panel.financial.typeCourse": {
+		"fa": "خرید دوره",
+		"en": "Course purchase"
+	},
+	"panel.financial.typePath": {
+		"fa": "خرید مسیر",
+		"en": "Path purchase"
+	},
+	"panel.financial.typeVip": {
+		"fa": "عضویت ویژه",
+		"en": "VIP membership"
+	},
+	"panel.financial.validUntilPrefix": {
+		"fa": "این فاکتور تا تاریخ",
+		"en": "This invoice is valid until"
+	},
+	"panel.financial.validUntilSuffix": {
+		"fa": "معتبر است. پس از پایان این زمان امکان پرداخت مجدد وجود نخواهد داشت.",
+		"en": ". After this time, retrying the payment will not be possible."
+	},
+	"panel.financial.viewInvoice": {
+		"fa": "مشاهده فاکتور",
+		"en": "View invoice"
+	},
+	"panel.financial.wallet": {
+		"fa": "کیف پول",
+		"en": "Wallet"
+	},
+	"panel.financial.walletAndGateway": {
+		"fa": "کیف پول + درگاه",
+		"en": "Wallet + gateway"
+	},
+	"panel.financial.walletPart": {
+		"fa": "سهم کیف پول:",
+		"en": "Wallet share:"
+	},
+	"panel.financial.gatewayPart": {
+		"fa": "سهم درگاه:",
+		"en": "Gateway share:"
+	},
+	"panel.financial.walletLedger": {
+		"fa": "تراکنش‌های کیف پول",
+		"en": "Wallet transactions"
+	},
+	"panel.financial.onlineLedger": {
+		"fa": "تراکنش‌های آنلاین",
+		"en": "Online transactions"
+	},
+	"panel.financial.afterBalance": {
+		"fa": "موجودی بعد از تراکنش",
+		"en": "Balance after"
+	},
+	"panel.financial.walletEmpty": {
+		"fa": "تراکنش کیف پولی وجود ندارد",
+		"en": "No wallet transactions"
+	},
+	"panel.financial.yourWalletBalance": {
+		"fa": "موجودی کیف پول شما:",
+		"en": "Your wallet balance:"
+	},
+	"panel.followed.documentTitle": {
+		"fa": "دنبال‌شده‌ها",
+		"en": "Followed"
+	},
+	"panel.followed.filterCourse": {
+		"fa": "دوره",
+		"en": "Course"
+	},
+	"panel.followed.filterQuestion": {
+		"fa": "پرسش",
+		"en": "Question"
+	},
+	"panel.followed.filterArticle": {
+		"fa": "مقاله",
+		"en": "Article"
+	},
+	"panel.followed.filterUser": {
+		"fa": "کاربر",
+		"en": "User"
+	},
+	"panel.index.aboutVip": {
+		"fa": "درباره عضویت ویژه",
+		"en": "About VIP membership"
+	},
+	"panel.index.buySubscription": {
+		"fa": "خرید اشتراک",
+		"en": "Buy subscription"
+	},
+	"panel.index.completed": {
+		"fa": "تکمیل شده",
+		"en": "Completed"
+	},
+	"panel.index.connecting": {
+		"fa": "در حال اتصال...",
+		"en": "Connecting..."
+	},
+	"panel.index.course": {
+		"fa": "دوره",
+		"en": "Course"
+	},
+	"panel.index.courseList": {
+		"fa": "لیست دوره ها",
+		"en": "Course list"
+	},
+	"panel.index.coursesCount": {
+		"fa": "تعداد دوره",
+		"en": "Course count"
+	},
+	"panel.index.currentCourses": {
+		"fa": "دوره‌های جاری",
+		"en": "Current courses"
+	},
+	"panel.index.documentTitle": {
+		"fa": "داشبورد کاربری زنبورک",
+		"en": "Zanburak user dashboard"
+	},
+	"panel.index.duration": {
+		"fa": "مدت زمان",
+		"en": "Duration"
+	},
+	"panel.index.emptyCoursesDesc": {
+		"fa": "اطمینان از کیفیت از طرف ما، تلاش و پشتکار از طرف شما، آخ نتیجه اش دیدنیه !",
+		"en": "Quality is on us, effort and perseverance are on you, and the result will be remarkable!"
+	},
+	"panel.index.emptyCoursesTitle": {
+		"fa": "برای تبدیل شدن به یک برنامه‌نویس اولین دوره آموزشی‌ات از زنبورک رو شروع کن",
+		"en": "To become a programmer, start your first course at Zanburak"
+	},
+	"panel.index.emptyQuestionsDesc": {
+		"fa": "سایر کاربران به پرسش‌های شما پاسخ میدن و می‌تونید جواب سوالات خودتون رو زودتر پیدا کنید. !",
+		"en": "Other users answer your questions so you can find your answers faster!"
+	},
+	"panel.index.emptyQuestionsTitle": {
+		"fa": "با ارسال اولین پرسش 100 تجربه کاربری دریافت کن",
+		"en": "Earn 100 experience points by sending your first question"
+	},
+	"panel.index.enterAmount": {
+		"fa": "مبلغ مورد نظر خود را وارد کنید",
+		"en": "Enter your desired amount"
+	},
+	"panel.index.increaseAmountLabel": {
+		"fa": "مبلغ افزایش (تومان)",
+		"en": "Increase amount (Toman)"
+	},
+	"panel.index.increaseBalance": {
+		"fa": "افزایش موجودی",
+		"en": "Increase balance"
+	},
+	"panel.index.learning": {
+		"fa": "درحال یادگیری",
+		"en": "Learning"
+	},
+	"panel.index.myConversations": {
+		"fa": "گفتگوهای من",
+		"en": "My conversations"
+	},
+	"panel.index.myQuestions": {
+		"fa": "پرسش‌های من",
+		"en": "My questions"
+	},
+	"panel.index.noActivePlan": {
+		"fa": "شما اشتراک فعالی ندارید",
+		"en": "You have no active subscription"
+	},
+	"panel.index.purchasedCoursesChart": {
+		"fa": "تعداد دور‌های خریداری شده طی یک هفته گذشته",
+		"en": "Number of courses purchased in the past week"
+	},
+	"panel.index.question": {
+		"fa": "پرسش",
+		"en": "Question"
+	},
+	"panel.index.remainingSubscription": {
+		"fa": "با قیمانده اشتراک فعلی:",
+		"en": "Remaining on current subscription:"
+	},
+	"panel.index.score": {
+		"fa": "امتیاز",
+		"en": "Points"
+	},
+	"panel.index.scores": {
+		"fa": "امتیازات",
+		"en": "Points"
+	},
+	"panel.index.scores.canAddPrefix": {
+		"fa": "داری که می‌شه با اون مبلغ",
+		"en": "which can add"
+	},
+	"panel.index.scores.canAddSuffix": {
+		"fa": "به کیف‌پول خودت اضافه کنی",
+		"en": "to your wallet"
+	},
+	"panel.index.scores.conversionCount": {
+		"fa": "تعداد تبدیل",
+		"en": "Conversion count"
+	},
+	"panel.index.scores.conversionRate": {
+		"fa": "نرخ تبدیل",
+		"en": "Conversion rate"
+	},
+	"panel.index.scores.convertAmountLabel": {
+		"fa": "مقدار امتیاز برای تبدیل",
+		"en": "Amount of points to convert"
+	},
+	"panel.index.scores.convertButton": {
+		"fa": "تبدیل امتیاز",
+		"en": "Convert points"
+	},
+	"panel.index.scores.convertError": {
+		"fa": "خطا در تبدیل امتیاز",
+		"en": "Error converting points"
+	},
+	"panel.index.scores.convertTab": {
+		"fa": "تبدیل",
+		"en": "Convert"
+	},
+	"panel.index.scores.converting": {
+		"fa": "در حال تبدیل...",
+		"en": "Converting..."
+	},
+	"panel.index.scores.currentScore": {
+		"fa": "امتیاز فعلی",
+		"en": "Current points"
+	},
+	"panel.index.scores.currentlyHave": {
+		"fa": "در حال حاضر",
+		"en": "Currently you have"
+	},
+	"panel.index.scores.formulaLabel": {
+		"fa": "فرمول تبدیل:",
+		"en": "Conversion formula:"
+	},
+	"panel.index.scores.formulaText": {
+		"fa": "× مقدار امتیاز = مبلغ دریافتی (تومان)",
+		"en": "× points = received amount (Toman)"
+	},
+	"panel.index.scores.historyTab": {
+		"fa": "تاریخچه",
+		"en": "History"
+	},
+	"panel.index.scores.maxConvertible": {
+		"fa": "حداکثر {count} امتیاز قابل تبدیل است",
+		"en": "A maximum of {count} points can be converted"
+	},
+	"panel.index.scores.minConvertLabel": {
+		"fa": "حداقل تبدیل:",
+		"en": "Minimum conversion:"
+	},
+	"panel.index.scores.minRequired": {
+		"fa": "حداقل {count} امتیاز لازم است",
+		"en": "A minimum of {count} points is required"
+	},
+	"panel.index.scores.noRecords": {
+		"fa": "هیچ رکوردی یافت نشد",
+		"en": "No records found"
+	},
+	"panel.index.scores.receivedAmount": {
+		"fa": "مبلغ دریافتی:",
+		"en": "Received amount:"
+	},
+	"panel.index.scores.searchPlaceholder": {
+		"fa": "جستجو...",
+		"en": "Search..."
+	},
+	"panel.index.scores.sortLabel": {
+		"fa": "مرتب‌سازی",
+		"en": "Sort"
+	},
+	"panel.index.scores.sortLeast": {
+		"fa": "کمترین",
+		"en": "Least"
+	},
+	"panel.index.scores.sortMost": {
+		"fa": "بیشترین",
+		"en": "Most"
+	},
+	"panel.index.scores.sortNewest": {
+		"fa": "جدیدترین",
+		"en": "Newest"
+	},
+	"panel.index.scores.sortOldest": {
+		"fa": "قدیمی‌ترین",
+		"en": "Oldest"
+	},
+	"panel.index.scores.tipsTitle": {
+		"fa": "نکات تبدیل امتیاز",
+		"en": "Point conversion tips"
+	},
+	"panel.index.scores.totalConverted": {
+		"fa": "کل تبدیل",
+		"en": "Total converted"
+	},
+	"panel.index.scores.totalEarned": {
+		"fa": "کل دریافت",
+		"en": "Total earned"
+	},
+	"panel.index.scores.typeAll": {
+		"fa": "همه",
+		"en": "All"
+	},
+	"panel.index.scores.typeLabel": {
+		"fa": "نوع",
+		"en": "Type"
+	},
+	"panel.index.scores.typeNegative": {
+		"fa": "منفی",
+		"en": "Negative"
+	},
+	"panel.index.scores.typePositive": {
+		"fa": "مثبت",
+		"en": "Positive"
+	},
+	"panel.index.scoresLabel": {
+		"fa": "امتیازات",
+		"en": "Points"
+	},
+	"panel.index.selectGateway": {
+		"fa": "انتخاب درگاه پرداخت",
+		"en": "Select payment gateway"
+	},
+	"panel.index.sendFirstQuestion": {
+		"fa": "ارسال اولین پرسش",
+		"en": "Send your first question"
+	},
+	"panel.index.startLearning": {
+		"fa": "شروع یادگیری برنامه نویسی",
+		"en": "Start learning programming"
+	},
+	"panel.index.thisWeek": {
+		"fa": "این هفته",
+		"en": "This week"
+	},
+	"panel.index.transferToGateway": {
+		"fa": "انتقال به درگاه پرداخت",
+		"en": "Transfer to payment gateway"
+	},
+	"panel.index.viewAll": {
+		"fa": "مشاهده همه",
+		"en": "View all"
+	},
+	"panel.index.vipPromo": {
+		"fa": "با داشتن اشتراک ویژه میتوانید به تمامی خدمات و امکانات زنبورک دسترسی پیدا کنید.",
+		"en": "With a VIP subscription you can access all of Zanburak's services and features."
+	},
+	"panel.index.vipSubscription": {
+		"fa": "اشتراک ویژه",
+		"en": "VIP subscription"
+	},
+	"panel.index.walletBalance": {
+		"fa": "موجودی کیف پول",
+		"en": "Wallet balance"
+	},
+	"panel.index.watched": {
+		"fa": "مشاهده شده",
+		"en": "Watched"
+	},
+	"panel.index.watchedVideoChart": {
+		"fa": "مقدار ویدیو مشاهده‌شده طی یک هفته گذشته",
+		"en": "Amount of video watched in the past week"
+	},
+	"panel.missions.completed": {
+		"fa": "تکمیل شده",
+		"en": "Completed"
+	},
+	"panel.missions.currentLevel": {
+		"fa": "مرحله فعلی:",
+		"en": "Current level:"
+	},
+	"panel.missions.descriptionLabel": {
+		"fa": "توضیحات:",
+		"en": "Description:"
+	},
+	"panel.missions.documentTitle": {
+		"fa": "ماموریت‌ها",
+		"en": "Missions"
+	},
+	"panel.missions.fromMission": {
+		"fa": "از ماموریت",
+		"en": "from mission"
+	},
+	"panel.missions.goal": {
+		"fa": "هدف",
+		"en": "Goal"
+	},
+	"panel.missions.level": {
+		"fa": "سطح",
+		"en": "Level"
+	},
+	"panel.missions.levelsTable": {
+		"fa": "جدول مراحل:",
+		"en": "Levels table:"
+	},
+	"panel.missions.points": {
+		"fa": "امتیاز",
+		"en": "Points"
+	},
+	"panel.missions.prerequisite": {
+		"fa": "پیش‌نیاز",
+		"en": "Prerequisite"
+	},
+	"panel.missions.selectCategory": {
+		"fa": "انتخاب دسته بندی",
+		"en": "Select category"
+	},
+	"panel.missions.selectCategoryHint": {
+		"fa": "دسته بندی مورد نظر خود را انتخاب کنید",
+		"en": "Choose your desired category"
+	},
+	"panel.missions.status": {
+		"fa": "وضعیت",
+		"en": "Status"
+	},
+	"panel.missions.titleLabel": {
+		"fa": "عنوان:",
+		"en": "Title:"
+	},
+	"panel.missions.totalLevels": {
+		"fa": "تعداد کل مراحل :",
+		"en": "Total levels:"
+	},
+	"panel.notifications.actionsSettings": {
+		"fa": "عملیات و تنظیمات",
+		"en": "Actions and settings"
+	},
+	"panel.notifications.createdDate": {
+		"fa": "تاریخ ایجاد:",
+		"en": "Created date:"
+	},
+	"panel.notifications.date": {
+		"fa": "تاریخ",
+		"en": "Date"
+	},
+	"panel.notifications.delete": {
+		"fa": "حذف",
+		"en": "Delete"
+	},
+	"panel.notifications.deleteAll": {
+		"fa": "حذف همه",
+		"en": "Delete all"
+	},
+	"panel.notifications.deleteAllConfirm": {
+		"fa": "آیا از حذف همه اعلانات اطمینان دارید؟ این عمل غیرقابل بازگشت است.",
+		"en": "Are you sure you want to delete all notifications? This action is irreversible."
+	},
+	"panel.notifications.deleteAllTitle": {
+		"fa": "حذف همه اعلانات",
+		"en": "Delete all notifications"
+	},
+	"panel.notifications.deleteConfirm": {
+		"fa": "آیا از حذف {count} اعلان انتخاب شده اطمینان دارید؟",
+		"en": "Are you sure you want to delete {count} selected notifications?"
+	},
+	"panel.notifications.deleteError": {
+		"fa": "خطا در حذف اعلانات",
+		"en": "Error deleting notifications"
+	},
+	"panel.notifications.deleteTitle": {
+		"fa": "حذف اعلانات",
+		"en": "Delete notifications"
+	},
+	"panel.notifications.detailsTitle": {
+		"fa": "جزئیات اعلان:",
+		"en": "Notification details:"
+	},
+	"panel.notifications.displayMode": {
+		"fa": "حالت نمایش:",
+		"en": "Display mode:"
+	},
+	"panel.notifications.documentTitle": {
+		"fa": "لیست اعلانات",
+		"en": "Notifications"
+	},
+	"panel.notifications.filterAll": {
+		"fa": "همه اعلانات",
+		"en": "All notifications"
+	},
+	"panel.notifications.filterAndSort": {
+		"fa": "فیلتر و مرتب‌سازی",
+		"en": "Filter and sort"
+	},
+	"panel.notifications.filterRead": {
+		"fa": "خوانده شده",
+		"en": "Read"
+	},
+	"panel.notifications.filterUnread": {
+		"fa": "خوانده نشده",
+		"en": "Unread"
+	},
+	"panel.notifications.filters": {
+		"fa": "فیلترها",
+		"en": "Filters"
+	},
+	"panel.notifications.firstViewDate": {
+		"fa": "تاریخ اولین مشاهده:",
+		"en": "First view date:"
+	},
+	"panel.notifications.markAllRead": {
+		"fa": "خواندن همه",
+		"en": "Mark all as read"
+	},
+	"panel.notifications.markAllUnread": {
+		"fa": "عدم خواندن همه",
+		"en": "Mark all as unread"
+	},
+	"panel.notifications.markError": {
+		"fa": "خطا در علامت‌گذاری اعلانات",
+		"en": "Error marking notifications"
+	},
+	"panel.notifications.markRead": {
+		"fa": "خواندن",
+		"en": "Mark as read"
+	},
+	"panel.notifications.markUnread": {
+		"fa": "عدم خواندن",
+		"en": "Mark as unread"
+	},
+	"panel.notifications.message": {
+		"fa": "پیام",
+		"en": "Message"
+	},
+	"panel.notifications.operations": {
+		"fa": "عملیات",
+		"en": "Operations"
+	},
+	"panel.notifications.perPage": {
+		"fa": "تعداد در صفحه:",
+		"en": "Per page:"
+	},
+	"panel.notifications.selectAll": {
+		"fa": "انتخاب همه",
+		"en": "Select all"
+	},
+	"panel.notifications.selectNotifications": {
+		"fa": "انتخاب اعلانات",
+		"en": "Select notifications"
+	},
+	"panel.notifications.sort": {
+		"fa": "مرتب‌سازی",
+		"en": "Sort"
+	},
+	"panel.notifications.yesDelete": {
+		"fa": "بله، حذف کن",
+		"en": "Yes, delete"
+	},
+	"panel.profile.documentTitle": {
+		"fa": "اطلاعات حساب",
+		"en": "Account information"
+	},
+	"panel.questions.documentTitle": {
+		"fa": "پرسش‌های من",
+		"en": "My questions"
+	},
+	"panel.questions.filterCurrent": {
+		"fa": "جاری",
+		"en": "Current"
+	},
+	"panel.questions.filterLocked": {
+		"fa": "قفل شده",
+		"en": "Locked"
+	},
+	"panel.questions.filterReplies": {
+		"fa": "پاسخ‌ها",
+		"en": "Replies"
+	},
+	"panel.vip.aboutVip": {
+		"fa": "درباره عضویت ویژه",
+		"en": "About VIP membership"
+	},
+	"panel.vip.activePlanDesc": {
+		"fa": "از تمامی محتوای ویژه زنبورک بهره‌مند شوید.",
+		"en": "Enjoy all of Zanburak's premium content."
+	},
+	"panel.vip.buyPlan": {
+		"fa": "خرید اشتراک",
+		"en": "Buy subscription"
+	},
+	"panel.vip.colAmount": {
+		"fa": "مبلغ خرید",
+		"en": "Purchase amount"
+	},
+	"panel.vip.colEndDate": {
+		"fa": "تاریخ پایان",
+		"en": "End date"
+	},
+	"panel.vip.colMethod": {
+		"fa": "روش خرید",
+		"en": "Purchase method"
+	},
+	"panel.vip.colStartDate": {
+		"fa": "تاریخ شروع",
+		"en": "Start date"
+	},
+	"panel.vip.colType": {
+		"fa": "نوع اشتراک",
+		"en": "Subscription type"
+	},
+	"panel.vip.currentPlan": {
+		"fa": "اشتراک فعلی!",
+		"en": "Current subscription!"
+	},
+	"panel.vip.days": {
+		"fa": "روز",
+		"en": "Days"
+	},
+	"panel.vip.documentTitle": {
+		"fa": "عضویت ویژه",
+		"en": "VIP membership"
+	},
+	"panel.vip.expiredPlansList": {
+		"fa": "لیست اشتراک های منقضی شده",
+		"en": "Expired subscriptions list"
+	},
+	"panel.vip.hours": {
+		"fa": "ساعت",
+		"en": "Hours"
+	},
+	"panel.vip.minutes": {
+		"fa": "دقیقه",
+		"en": "Minutes"
+	},
+	"panel.vip.noActivePlan": {
+		"fa": "اشتراک فعالی نداری",
+		"en": "You have no active subscription"
+	},
+	"panel.vip.noActivePlanDesc": {
+		"fa": "برای دسترسی به محتوای ویژه، اشتراک تهیه کنید.",
+		"en": "Purchase a subscription to access premium content."
+	},
+	"panel.vip.online": {
+		"fa": "آنلاین",
+		"en": "Online"
+	},
+	"panel.vip.seconds": {
+		"fa": "ثانیه",
+		"en": "Seconds"
+	},
+	"panel.vip.timeRemaining": {
+		"fa": "زمان باقی‌مانده اشتراک فعلی:",
+		"en": "Time remaining on current subscription:"
+	},
+	"panel.vip.vipContent": {
+		"fa": "محتوای ویژه",
+		"en": "Premium content"
+	},
+	"panel.vip.wallet": {
+		"fa": "کیف پول",
+		"en": "Wallet"
+	}
+}

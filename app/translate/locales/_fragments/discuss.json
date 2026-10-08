@@ -1,0 +1,558 @@
+{
+  "discuss.common.answers": {
+    "fa": "پاسخ",
+    "en": "answers"
+  },
+  "discuss.common.cancel": {
+    "fa": "انصراف",
+    "en": "Cancel"
+  },
+  "discuss.common.close": {
+    "fa": "بستن",
+    "en": "Close"
+  },
+  "discuss.common.sendReport": {
+    "fa": "ارسال گزارش",
+    "en": "Send report"
+  },
+  "discuss.common.yesDelete": {
+    "fa": "بله، حذف کن",
+    "en": "Yes, delete"
+  },
+  "discuss.common.keepIt": {
+    "fa": "دست نگه دار",
+    "en": "Keep it"
+  },
+  "discuss.common.updatedBy": {
+    "fa": "{time} توسط {name} آپدیت شد",
+    "en": "Updated by {name} {time}"
+  },
+  "discuss.common.postedBy": {
+    "fa": "{time} توسط {name} مطرح شد",
+    "en": "Posted by {name} {time}"
+  },
+  "discuss.common.updatedAgo": {
+    "fa": "{time} آپدیت شد",
+    "en": "Updated {time}"
+  },
+  "discuss.common.postedAgo": {
+    "fa": "{time} مطرح شد",
+    "en": "Posted {time}"
+  },
+  "discuss.common.reportTitle": {
+    "fa": "لطفاً دلیل خود را برای گزارش این مطلب به عنوان تخلف انتخاب کنید:",
+    "en": "Please select a reason for reporting this content:"
+  },
+  "discuss.common.reportSpamBefore": {
+    "fa": "این مطلب شامل",
+    "en": "This content contains"
+  },
+  "discuss.common.reportSpamHighlight": {
+    "fa": "محتوای نامربوط، تبلیغاتی یا ارسال مکرر",
+    "en": "irrelevant, promotional, or repeatedly posted content"
+  },
+  "discuss.common.reportSpamAfter": {
+    "fa": "است که هیچ ارتباطی با موضوع اصلی ندارد",
+    "en": "that has no connection to the main topic"
+  },
+  "discuss.common.reportOffensiveBefore": {
+    "fa": "این مطلب حاوی",
+    "en": "This content contains"
+  },
+  "discuss.common.reportOffensiveHighlight": {
+    "fa": "نوشته‌های توهین‌آمیز، نژادپرستانه",
+    "en": "offensive or racist language"
+  },
+  "discuss.common.reportOffensiveAfter": {
+    "fa": "یا هر گونه محتوای نامناسب است که باعث آسیب رساندن به افراد یا گروه‌های مختلف می‌شود",
+    "en": "or other inappropriate content that harms individuals or groups"
+  },
+  "discuss.common.reportRulesBefore": {
+    "fa": "این مطلب",
+    "en": "This content"
+  },
+  "discuss.common.reportRulesHighlight": {
+    "fa": "قوانین و مقررات سایت زنبورک را نقض",
+    "en": "violates zanburak's terms and rules"
+  },
+  "discuss.common.reportRulesAfter": {
+    "fa": "کرده و باید مورد بازبینی قرار گیرد",
+    "en": "and should be reviewed"
+  },
+  "discuss.common.reportOther": {
+    "fa": "اگر مورد دیگری به نظرتان می‌رسد که شامل هیچ‌یک از دسته‌بندی‌های بالا نمی‌شود، این گزینه را انتخاب کنید",
+    "en": "If none of the above categories apply, choose this option"
+  },
+  "discuss.common.reportSuccess": {
+    "fa": "با تشکر، گزارش تخلف شما در اولین فرصت بررسی خواهد شد",
+    "en": "Thank you. Your report will be reviewed as soon as possible."
+  },
+  "discuss.common.errorRetry": {
+    "fa": "خطا!، لطفا دوباره تلاش کنید.",
+    "en": "Error! Please try again."
+  },
+  "discuss.common.loginToLike": {
+    "fa": "برای لایک این مطلب ابتدا وارد شوید.",
+    "en": "Please sign in to like this post."
+  },
+  "discuss.common.cannotLikeOwn": {
+    "fa": "شما نمیتوانید مطلب خودتان را لایک یا دیس لایک کنید.",
+    "en": "You cannot like or dislike your own post."
+  },
+  "discuss.common.minScoreToLike": {
+    "fa": "حداقل تجربه کاربری برای لایک یا دیس لایک {score} تجربه میباشد.",
+    "en": "Minimum experience to like or dislike is {score} points."
+  },
+  "discuss.list.title": {
+    "fa": "بخش پرسش و پاسخ‌های زنبورک",
+    "en": "zanburak Q&A"
+  },
+  "discuss.list.description": {
+    "fa": "به دنبال جواب سوالاتت هستی؟ اینجا می‌تونی سوالاتت رو مطرح کنی و با کمک دیگران به بهترین پاسخ‌ها برسی. همچنین می‌تونی در میان سوالات قبلی جستجو کنی و جواب‌های مفیدی پیدا کنی. از پرسش‌های ساده تا موضوعات تخصصی، همین حالا سوال خودت رو بپرس یا به دیگران کمک کن!!",
+    "en": "Looking for answers? Ask your questions here and get help from the community. Search existing threads or post anything from quick questions to advanced topics."
+  },
+  "discuss.list.browseQuestions": {
+    "fa": "بزن بریم سروقت سوالات",
+    "en": "Browse questions"
+  },
+  "discuss.list.newQuestion": {
+    "fa": "پرسش جدید",
+    "en": "New question"
+  },
+  "discuss.list.filters": {
+    "fa": "فیلتر و دسته بندی ها",
+    "en": "Filters & categories"
+  },
+  "discuss.list.searchPlaceholder": {
+    "fa": "جستجوی گفتگو...",
+    "en": "Search discussions..."
+  },
+  "discuss.list.searchFor": {
+    "fa": "جستجو برای:",
+    "en": "Search for:"
+  },
+  "discuss.list.empty": {
+    "fa": "موردی برای نمایش وجود ندارد!",
+    "en": "Nothing to show!"
+  },
+  "discuss.list.seoTitle": {
+    "fa": "پرسش و پاسخ",
+    "en": "Q&A"
+  },
+  "discuss.list.seoDescription": {
+    "fa": "بخش پرسش و پاسخ زنبورک - سوالات و جواب‌های برنامه‌نویسی و توسعه وب",
+    "en": "zanburak Q&A — programming and web development questions and answers"
+  },
+  "discuss.list.seoKeyword.programmingQuestions": {
+    "fa": "سوالات برنامه‌نویسی",
+    "en": "programming questions"
+  },
+  "discuss.list.seoKeyword.programmingForum": {
+    "fa": "انجمن برنامه‌نویسی",
+    "en": "programming forum"
+  },
+  "discuss.list.seoKeyword.debugging": {
+    "fa": "حل ارورهای برنامه‌نویسی",
+    "en": "debugging errors"
+  },
+  "discuss.list.seoKeyword.laravelErrors": {
+    "fa": "ارورهای لاراول",
+    "en": "Laravel errors"
+  },
+  "discuss.list.seoKeyword.vueErrors": {
+    "fa": "ارورهای Vue",
+    "en": "Vue errors"
+  },
+  "discuss.list.seoKeyword.reactErrors": {
+    "fa": "ارورهای React",
+    "en": "React errors"
+  },
+  "discuss.list.seoKeyword.phpQuestions": {
+    "fa": "سوالات PHP",
+    "en": "PHP questions"
+  },
+  "discuss.list.seoKeyword.jsQuestions": {
+    "fa": "سوالات JavaScript",
+    "en": "JavaScript questions"
+  },
+  "discuss.list.seoKeyword.pythonQuestions": {
+    "fa": "سوالات Python",
+    "en": "Python questions"
+  },
+  "discuss.list.seoKeyword.programmingHelp": {
+    "fa": "کمک برنامه‌نویسی",
+    "en": "programming help"
+  },
+  "discuss.list.seoKeyword.codingGuidance": {
+    "fa": "راهنمایی کدنویسی",
+    "en": "coding guidance"
+  },
+  "discuss.sidebar.filterQuestions": {
+    "fa": "گزینش سوالات",
+    "en": "Filter questions"
+  },
+  "discuss.sidebar.allQuestions": {
+    "fa": "همه سوالات",
+    "en": "All questions"
+  },
+  "discuss.sidebar.myDiscussions": {
+    "fa": "گفتگو‌های من",
+    "en": "My discussions"
+  },
+  "discuss.sidebar.privateDiscussions": {
+    "fa": "گفتگو‌های خصوصی",
+    "en": "Private discussions"
+  },
+  "discuss.sidebar.followedDiscussions": {
+    "fa": "گفتگو‌های دنبال شده",
+    "en": "Followed discussions"
+  },
+  "discuss.sidebar.myContributions": {
+    "fa": "مشارکت من",
+    "en": "My contributions"
+  },
+  "discuss.sidebar.solved": {
+    "fa": "حل شده",
+    "en": "Solved"
+  },
+  "discuss.sidebar.unsolved": {
+    "fa": "حل نشده",
+    "en": "Unsolved"
+  },
+  "discuss.sidebar.noAnswers": {
+    "fa": "بدون پاسخ",
+    "en": "No answers"
+  },
+  "discuss.sidebar.categories": {
+    "fa": "دسته بندی سوالات",
+    "en": "Question categories"
+  },
+  "discuss.sidebar.popularTags": {
+    "fa": "تگ های محبوب",
+    "en": "Popular tags"
+  },
+  "discuss.sidebar.myTags": {
+    "fa": "تگ های من",
+    "en": "My tags"
+  },
+  "discuss.sidebar.noTags": {
+    "fa": "تگی موجود نیست",
+    "en": "No tags yet"
+  },
+  "discuss.sidebar.addTag": {
+    "fa": "افزودن تگ",
+    "en": "Add tag"
+  },
+  "discuss.sidebar.topUsers": {
+    "fa": "افراد برتر 30 روز گذشته",
+    "en": "Top users (last 30 days)"
+  },
+  "discuss.question.hasBestAnswer": {
+    "fa": "دارای بهترین پاسخ",
+    "en": "Has best answer"
+  },
+  "discuss.question.edit": {
+    "fa": "ویرایش پرسش",
+    "en": "Edit question"
+  },
+  "discuss.question.editShort": {
+    "fa": "ویرایش",
+    "en": "Edit"
+  },
+  "discuss.question.delete": {
+    "fa": "حذف",
+    "en": "Delete"
+  },
+  "discuss.question.sendAnswer": {
+    "fa": "ارسال پاسخ",
+    "en": "Post answer"
+  },
+  "discuss.question.submitAnswer": {
+    "fa": "ثبت پاسخ",
+    "en": "Submit answer"
+  },
+  "discuss.question.createNew": {
+    "fa": "ایجاد پرسش جدید",
+    "en": "Create new question"
+  },
+  "discuss.question.loadingAnswers": {
+    "fa": "در حال دریافت پاسخ ها از سرور، لطفا منتظر بمانید...",
+    "en": "Loading answers, please wait..."
+  },
+  "discuss.question.firstAnswerTitle": {
+    "fa": "ثبت اولین پاسخ و دریافت امتیاز ویژه",
+    "en": "Be the first to answer and earn bonus points"
+  },
+  "discuss.question.firstAnswerDescription": {
+    "fa": "به {name} کمک کن تا مشکل خودش رو حل بکنه و با این کمکت 1000 امتیاز بگیر.",
+    "en": "Help {name} solve their problem and earn 1,000 points."
+  },
+  "discuss.question.loginToAnswer": {
+    "fa": "اگر میخوای به این پرسش پاسخ بدی وارد شو یا ثبت نام کن",
+    "en": "Sign in or register to answer this question"
+  },
+  "discuss.question.loginOrRegister": {
+    "fa": "ورود یا ثبت‌نام",
+    "en": "Sign in or register"
+  },
+  "discuss.question.deleteConfirm": {
+    "fa": "از حذف این پرسش اطمینان کامل دارید؟",
+    "en": "Are you sure you want to delete this question?"
+  },
+  "discuss.question.deleteSuccess": {
+    "fa": "پرسش مربوطه با موفقیت حذف شد.",
+    "en": "Question deleted successfully."
+  },
+  "discuss.question.answerSuccess": {
+    "fa": "با تشکر، پاسخ شما با موفقیت ثبت شد",
+    "en": "Thank you! Your answer was posted successfully."
+  },
+  "discuss.question.seoTitle": {
+    "fa": "پرسش و پاسخ",
+    "en": "Q&A"
+  },
+  "discuss.question.breadcrumbHome": {
+    "fa": "خانه",
+    "en": "Home"
+  },
+  "discuss.question.breadcrumbDiscuss": {
+    "fa": "پرسش و پاسخ",
+    "en": "Q&A"
+  },
+  "discuss.question.seoSection": {
+    "fa": "پرسش و پاسخ",
+    "en": "Q&A"
+  },
+  "discuss.question.seoDescriptionFallback": {
+    "fa": "سوال {subject} - پرسش و پاسخ برنامه‌نویسی",
+    "en": "Question: {subject} — programming Q&A"
+  },
+  "discuss.question.seoProgrammingQuestion": {
+    "fa": "سوال برنامه‌نویسی",
+    "en": "programming question"
+  },
+  "discuss.answer.viewFull": {
+    "fa": "مشاهده کامل پاسخ",
+    "en": "View full answer"
+  },
+  "discuss.answer.relatedTo": {
+    "fa": "پاسخ مربوط به پرسش:",
+    "en": "Answer to question:"
+  },
+  "discuss.answer.viewText": {
+    "fa": "مشاهده متن پاسخ",
+    "en": "View answer text"
+  },
+  "discuss.answer.cancelClose": {
+    "fa": "انصراف و بستن",
+    "en": "Cancel and close"
+  },
+  "discuss.answer.submittedAt": {
+    "fa": "این پاسخ {time} ثبت شده است.",
+    "en": "This answer was posted {time}."
+  },
+  "discuss.answer.editTitle": {
+    "fa": "ویرایش پاسخ",
+    "en": "Edit answer"
+  },
+  "discuss.answer.saveEdit": {
+    "fa": "ثبت ویرایش",
+    "en": "Save changes"
+  },
+  "discuss.answer.questionLabel": {
+    "fa": "پرسش:",
+    "en": "Question:"
+  },
+  "discuss.answer.relatedToQuestion": {
+    "fa": "مربوط به پرسش:",
+    "en": "Related to question:"
+  },
+  "discuss.answer.pinned": {
+    "fa": "پین شده",
+    "en": "Pinned"
+  },
+  "discuss.answer.bestAnswer": {
+    "fa": "بهترین پاسخ",
+    "en": "Best answer"
+  },
+  "discuss.answer.deleteConfirm": {
+    "fa": "از حذف این پاسخ اطمینان کامل دارید؟",
+    "en": "Are you sure you want to delete this answer?"
+  },
+  "discuss.answer.bestConfirm": {
+    "fa": "از ثبت این پاسخ به عنوان بهترین پاسخ اطمینان دارید؟",
+    "en": "Mark this as the best answer?"
+  },
+  "discuss.answer.bestNoteTitle": {
+    "fa": "نکته مهم:",
+    "en": "Important:"
+  },
+  "discuss.answer.bestNoteBody": {
+    "fa": "لطفاً قبل از تایید، از تصمیم خود اطمینان حاصل کنید پس از ثبت این پاسخ به عنوان بهترین، امکان تغییر یا انتخاب دوباره وجود نخواهد داشت.",
+    "en": "Once marked as best, this cannot be changed. Please confirm before proceeding."
+  },
+  "discuss.answer.bestNotSure": {
+    "fa": "نه، مطمئن نیستم",
+    "en": "No, I'm not sure"
+  },
+  "discuss.answer.bestSure": {
+    "fa": "بله، مطمئنم",
+    "en": "Yes, I'm sure"
+  },
+  "discuss.answer.editSuccess": {
+    "fa": "پاسخ شما با موفقیت ویرایش شد.",
+    "en": "Your answer was updated successfully."
+  },
+  "discuss.answer.deleteSuccess": {
+    "fa": "پاسخ مربوطه با موفقیت حذف شد.",
+    "en": "Answer deleted successfully."
+  },
+  "discuss.answer.bestSuccess": {
+    "fa": "پاسخ مربوطه با موفقیت به عنوان بهترین انتخاب شد.",
+    "en": "Answer marked as best successfully."
+  },
+  "discuss.form.beforeSubmit": {
+    "fa": "قبل از ارسال پرسش دقت کنید",
+    "en": "Before you submit"
+  },
+  "discuss.form.beforeSubmitDescription": {
+    "fa": "با تشکر از اینکه تصمیم گرفته‌اید که سوال مورد نظر خودتان را در بخش پرسش و پاسخ زنبورک  مطرح کنید. قبل از اینکه پرسش خود را ارسال کنید، لطفا به نکات زیر توجه فرمایید.",
+    "en": "Thanks for posting in zanburak Q&A. Please read the notes below before submitting."
+  },
+  "discuss.form.beforeSubmitDescriptionAlt": {
+    "fa": "با تشکر از اینکه تصمیم گرفته‌اید که سوال مورد نظر خودتان را در بخش پرسش و پاسخ زنبورک مطرح کنید. قبل از اینکه پرسش خود را ارسال کنید، لطفا به نکات زیر توجه فرمایید.",
+    "en": "Thanks for posting in zanburak Q&A. Please read the notes below before submitting."
+  },
+  "discuss.form.tipNoDuplicate": {
+    "fa": "۱.از ارسال پرسش تکراری خودداری کنید",
+    "en": "1. Avoid posting duplicate questions"
+  },
+  "discuss.form.tipPreview": {
+    "fa": "۲.قبل از ارسال پرسش بر روی پیش‌نمایش کلیک کنید تا از درست بودن فرمت متن مطمئن شوید",
+    "en": "2. Use preview to check formatting before submitting"
+  },
+  "discuss.form.subjectLabel": {
+    "fa": "عنوان گفتگو",
+    "en": "Discussion title"
+  },
+  "discuss.form.subjectHelper": {
+    "fa": "برای مشاهده پرسش های مشابه عنوان را وارد کنید.",
+    "en": "Enter a title to see similar questions."
+  },
+  "discuss.form.similarQuestions": {
+    "fa": "پرسش های مشابه:",
+    "en": "Similar questions:"
+  },
+  "discuss.form.viewQuestion": {
+    "fa": "مشاهده پرسش",
+    "en": "View question"
+  },
+  "discuss.form.categoryLabel": {
+    "fa": "دسته بندی گفتگو",
+    "en": "Discussion category"
+  },
+  "discuss.form.tagsLabel": {
+    "fa": "تگ‌های گفتگو - حداکثر ۳ تگ‌",
+    "en": "Discussion tags (max 3)"
+  },
+  "discuss.form.tagsPlaceholder": {
+    "fa": "تگ ها را وارد کنید و با زدن کلید اینتر یا فاصله آن هارا از هم جدا کنید",
+    "en": "Type tags and press Enter or Space to separate them"
+  },
+  "discuss.form.tagError": {
+    "fa": "تگ {message}",
+    "en": "Tag {message}"
+  },
+  "discuss.form.keywordsLabel": {
+    "fa": "کلمات کلیدی",
+    "en": "Keywords"
+  },
+  "discuss.form.keywordsLimit": {
+    "fa": "(حداقل 3 و حداکثر 10 کلمه)",
+    "en": "(3 to 10 words)"
+  },
+  "discuss.form.keywordsHelper": {
+    "fa": "کلمات کلیدی را با کاما (,) جدا کنید. این کلمات برای SEO استفاده می‌شوند.",
+    "en": "Separate keywords with commas (,). Used for SEO."
+  },
+  "discuss.form.keywordsCount": {
+    "fa": "تعداد کلمات: {count} / 3-10",
+    "en": "Word count: {count} / 3-10"
+  },
+  "discuss.form.typeLabel": {
+    "fa": "نوع گفتگو",
+    "en": "Discussion type"
+  },
+  "discuss.form.public": {
+    "fa": "عمومی",
+    "en": "Public"
+  },
+  "discuss.form.private": {
+    "fa": "خصوصی",
+    "en": "Private"
+  },
+  "discuss.form.privateTip1": {
+    "fa": "۱.گفتگو‌ خصوصی، حالت ویژه‌ای از گفتگو‌هاست که تنها کاربرانی که آن‌ها را تگ کرده‌اید، قابلیت مشاهده آن‌ها را خواهند داشت.",
+    "en": "1. Private discussions are only visible to users you tag."
+  },
+  "discuss.form.privateTip2": {
+    "fa": "۲.در صورت عدم تگ کردن کاربری، گفتگو تنها برای شما قابل مشاهده خواهد بود.",
+    "en": "2. If you tag no one, only you can see the discussion."
+  },
+  "discuss.form.mentionPlaceholder": {
+    "fa": "نام کاربری کاربران مورد نظر را وارد کنید",
+    "en": "Enter usernames to mention"
+  },
+  "discuss.form.userError": {
+    "fa": "کاربر {message}",
+    "en": "User {message}"
+  },
+  "discuss.form.mentionHint": {
+    "fa": "با استفاده از username بدون تایپ {'@'} میتوانید به کاربر مورد نظر اشاره کنید تا از پیام شما مطلع شود",
+    "en": "Mention users with username (without {'@'}) to notify them"
+  },
+  "discuss.form.editorHint": {
+    "fa": "برای ارسال بهتر گفتگو بر روی آیکون راهنما در ویرایشگر بالا کلیک کنید",
+    "en": "Click the help icon in the editor for formatting tips"
+  },
+  "discuss.form.submitDiscussion": {
+    "fa": "ثبت گفتگو",
+    "en": "Submit discussion"
+  },
+  "discuss.form.editQuestion": {
+    "fa": "ویرایش پرسش",
+    "en": "Edit question"
+  },
+  "discuss.form.contactDefaultBody": {
+    "fa": "متن سوال یا پیشنهاد یا انتقاد شما",
+    "en": "Your question, suggestion, or feedback"
+  },
+  "discuss.form.createSuccess": {
+    "fa": "با تشکر! پرسش شما با موفقیت ثبت شد.",
+    "en": "Thank you! Your question was submitted successfully."
+  },
+  "discuss.form.editSuccess": {
+    "fa": "با تشکر! پرسش شما با موفقیت ویرایش شد.",
+    "en": "Thank you! Your question was updated successfully."
+  },
+  "discuss.form.createSeoTitle": {
+    "fa": "ایجاد پرسش جدید",
+    "en": "Create new question"
+  },
+  "discuss.form.createSeoDescription": {
+    "fa": "ایجاد پرسش جدید در بخش پرسش و پاسخ زنبورک - مطرح کردن سوالات برنامه‌نویسی و دریافت پاسخ از برنامه‌نویسان",
+    "en": "Create a new programming question on zanburak Q&A"
+  },
+  "discuss.form.editSeoTitle": {
+    "fa": "ویرایش پرسش",
+    "en": "Edit question"
+  },
+  "discuss.form.createSeoKwCreate": {
+    "fa": "ایجاد سوال",
+    "en": "create question"
+  },
+  "discuss.form.createSeoKwForum": {
+    "fa": "انجمن",
+    "en": "forum"
+  }
+}

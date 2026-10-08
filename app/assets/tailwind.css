@@ -1,0 +1,382 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+/* YekanBakh Font */
+
+@font-face {
+    font-family: 'YekanBakh';
+    font-display: swap;
+    font-weight: 100;
+    src: url('./fonts/YekanBakh/Yekan-Bakh-FaNum-01-Hairline.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'YekanBakh';
+    font-display: swap;
+    font-weight: 200;
+    src: url('./fonts/YekanBakh/Yekan-Bakh-FaNum-02-Thin.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'YekanBakh';
+    font-display: swap;
+    font-weight: 300;
+    src: url('./fonts/YekanBakh/Yekan-Bakh-FaNum-03-Light.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'YekanBakh';
+    font-display: swap;
+    font-weight: 400;
+    src: url('./fonts/YekanBakh/Yekan-Bakh-FaNum-04-Regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'YekanBakh';
+    font-display: swap;
+    font-weight: 500;
+    src: url('./fonts/YekanBakh/Yekan-Bakh-FaNum-05-Medium.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'YekanBakh';
+    font-display: swap;
+    font-weight: 600;
+    src: url('./fonts/YekanBakh/Yekan-Bakh-FaNum-06-Bold.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'YekanBakh';
+    font-display: swap;
+    font-weight: 700;
+    src: url('./fonts/YekanBakh/Yekan-Bakh-FaNum-07-Heavy.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'YekanBakh';
+    font-display: swap;
+    font-weight: 800;
+    src: url('./fonts/YekanBakh/Yekan-Bakh-FaNum-08-Fat.woff') format('woff');
+}
+
+
+
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 100;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-01-Thin.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 200;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-02-ExtraLight.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 300;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-03-Light.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 400;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-04-Regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 500;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-05-Medium.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 600;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-06-SemiBold.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 700;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-07-Bold.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 800;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-08-ExtraBold.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Anjoman';
+    font-display: swap;
+    font-weight: 900;
+    src: url('./fonts/Anjoman/Anjoman-FaNum-09-Black.woff') format('woff');
+}
+
+
+/* Times New Roman Font */
+
+/* @font-face {
+    font-family: 'TimesNewRoman';
+    font-weight: 100;
+    src: url('./fonts/TimesNewRoman/Times-New-Roman.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'TimesNewRoman';
+    font-weight: 200;
+    src: url('./fonts/TimesNewRoman/Times-New-Roman.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'TimesNewRoman';
+    font-weight: 300;
+    src: url('./fonts/TimesNewRoman/Times-New-Roman.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'TimesNewRoman';
+    font-weight: 400;
+    src: url('./fonts/TimesNewRoman/Times-New-Roman.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'TimesNewRoman';
+    font-weight: 500;
+    src: url('./fonts/TimesNewRoman/Times-New-Roman.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'TimesNewRoman';
+    font-weight: 600;
+    src: url('./fonts/TimesNewRoman/Times-New-Roman.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'TimesNewRoman';
+    font-weight: 700;
+    src: url('./fonts/TimesNewRoman/Times-New-Roman.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'TimesNewRoman';
+    font-weight: 800;
+    src: url('./fonts/TimesNewRoman/Times-New-Roman.woff') format('woff');
+} */
+
+
+
+:root {
+    --scrollbar-primary: #F1F1F1;
+    --scrollbar-secondary: #C1C1C1;
+    --scrollbar-secondary-hover: #b7b5b5;
+    --scrollbar-secondary-active: #d2d1d1;
+}
+
+.dark {
+    --scrollbar-primary: #424242;
+    --scrollbar-secondary: #686868;
+    --scrollbar-secondary-hover: #777676;
+    --scrollbar-secondary-active: #868585;
+}
+
+@media (min-width: 768px) {
+    html {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-secondary) transparent;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    ::-webkit-scrollbar-corner,
+    ::-webkit-scrollbar-track {
+        background-color: transparent;
+        border-radius: 7px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar-secondary);
+        background-clip: padding-box;
+        border: 2px solid transparent;
+        border-radius: 7px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--scrollbar-secondary-hover);
+        border: 0.8px solid transparent;
+        border-radius: 7px;
+    }
+    
+    ::-webkit-scrollbar-thumb:active {
+        background-color: var(--scrollbar-secondary-active);
+    }
+    
+    ::-webkit-scrollbar-button,
+    ::-webkit-scrollbar-button:single-button {
+        display: none;
+        width: 0;
+        height: 0;
+        background: transparent;
+    }
+}
+
+
+
+
+/* --- Custom Scrollbar --- */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-secondary) transparent;
+  -ms-overflow-style: auto;
+}
+
+@media (max-width: 767px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+}
+
+/* Admin bulk selection checkboxes — all breakpoints */
+.admin-bulk-checkbox {
+    @apply appearance-none shrink-0 w-5 h-5 min-w-[1.25rem] min-h-[1.25rem] rounded-lg;
+    @apply bg-gray-200 dark:bg-gray-700 border-0 cursor-pointer;
+    @apply focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-1;
+    @apply ring-offset-white dark:ring-offset-gray-900 transition-colors;
+    position: relative;
+    display: inline-grid;
+    place-content: center;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.admin-bulk-checkbox.is-checked,
+.admin-bulk-checkbox.is-indeterminate {
+    @apply bg-yellow-400;
+}
+
+.admin-bulk-checkbox:disabled {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+.admin-bulk-checkbox::after {
+    content: "";
+    grid-area: 1 / 1;
+    display: none;
+    width: 11px;
+    height: 11px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.admin-bulk-checkbox.is-checked::after {
+    display: block;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5' stroke='%231f2937' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.admin-bulk-checkbox.is-indeterminate::after {
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8H12.5' stroke='%231f2937' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* Legacy alias — keep existing pages working */
+.custom-checkbox {
+    @apply appearance-none shrink-0 w-5 h-5 min-w-[1.25rem] min-h-[1.25rem] rounded-lg;
+    @apply bg-gray-200 dark:bg-gray-700 border-0 cursor-pointer;
+    @apply focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-1;
+    @apply ring-offset-white dark:ring-offset-gray-900 transition-colors;
+    position: relative;
+    display: inline-grid;
+    place-content: center;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.custom-checkbox.is-checked,
+.custom-checkbox.is-indeterminate {
+    @apply bg-yellow-400;
+}
+
+.custom-checkbox::after {
+    content: "";
+    grid-area: 1 / 1;
+    display: none;
+    width: 11px;
+    height: 11px;
+    margin: 0;
+    font-size: 0;
+    line-height: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.custom-checkbox.is-checked::after {
+    display: block;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5' stroke='%231f2937' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.custom-checkbox.is-indeterminate::after {
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8H12.5' stroke='%231f2937' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+@media (min-width: 768px) {
+  .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-corner,
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background-color: transparent;
+        border-radius: 7px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar-secondary);
+        background-clip: padding-box;
+        border: 2px solid transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: var(--scrollbar-secondary-hover);
+        border: 0.8px solid transparent;
+        border-radius: 7px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:active {
+        background-color: var(--scrollbar-secondary-active);
+    }
+
+    /* Buttons */
+    .custom-scrollbar::-webkit-scrollbar-button:single-button {
+        background-color: transparent;
+        display: none;
+        background-size: 7px;
+        background-repeat: no-repeat;
+    }
+}
