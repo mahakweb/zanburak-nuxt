@@ -1,24 +1,13 @@
+import { useRequestHeaders } from '#app'
+
 /**
  * Auth token persistence for Nuxt SSR + client.
- * Cookie `zb_token` is the SSR source of truth; localStorage mirrors it on the client.
- *
- * IMPORTANT: Do not call Nuxt composables (useCookie / useRequestEvent) from axios
- * interceptors or other module-eval code — that triggers NUXT_E1001.
+ * Cookie `zb_token` is the source of truth; localStorage is only a client-side
+ * migration fallback for sessions created before cookie-based persistence.
  */
 
 export const AUTH_TOKEN_COOKIE = 'zb_token'
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30 // 30 days
-
-/** Per-request token set by the auth-session plugin on the server. */
-let serverRequestToken = null
-
-export function setServerRequestToken(token) {
-  serverRequestToken = token || null
-}
-
-export function clearServerRequestToken() {
-  serverRequestToken = null
-}
 
 function parseStoredToken(raw) {
   if (!raw) return null
@@ -59,25 +48,32 @@ function writeClientCookie(token) {
 }
 
 /**
- * Safe token read for axios interceptors / services (no Nuxt composables).
- * Client: localStorage → document.cookie
- * Server: token injected by auth-session plugin for this request
+ * Safe token read for axios interceptors / services.
+ * Server request headers are request-scoped; no module-level token is retained.
  */
 export function getAuthTokenSync() {
   if (import.meta.client) {
     try {
+      const fromCookie = readTokenFromCookieString(document.cookie)
+      if (fromCookie) return fromCookie
+    } catch {
+      /* cookie unavailable */
+    }
+    try {
       const fromLs = parseStoredToken(localStorage.getItem('token'))
       if (fromLs) return fromLs
     } catch {
-      /* ignore */
+      /* localStorage unavailable */
     }
-    try {
-      return readTokenFromCookieString(document.cookie)
-    } catch {
-      return null
-    }
+    return null
   }
-  return serverRequestToken
+
+  try {
+    const headers = useRequestHeaders(['cookie'])
+    return readTokenFromCookieString(headers.cookie || '')
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -111,7 +107,6 @@ export function persistAuthToken(token) {
   }
 
   const value = String(token)
-  setServerRequestToken(value)
 
   try {
     const cookie = useAuthTokenCookie()
@@ -131,8 +126,6 @@ export function persistAuthToken(token) {
 }
 
 export function clearAuthToken() {
-  clearServerRequestToken()
-
   try {
     const cookie = useAuthTokenCookie()
     cookie.value = null

@@ -51,7 +51,7 @@ export function hasAnyRole(user, requiredRoles) {
  * @returns {boolean}
  * 
  * @example
- * const user = store.state.auth.status.userInfo;
+ * const user = authStore.status.userInfo;
  * if (hasPermission(user, 'users.create')) {
  *   // کاربر دسترسی دارد
  * }
@@ -72,7 +72,7 @@ export function hasPermission(user, permission) {
  * @returns {boolean}
  * 
  * @example
- * const user = store.state.auth.status.userInfo;
+ * const user = authStore.status.userInfo;
  * if (hasRole(user, 'admin')) {
  *   // کاربر نقش admin دارد
  * }

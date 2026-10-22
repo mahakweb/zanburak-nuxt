@@ -2,6 +2,7 @@
 definePageMeta({
   name: "admin-tag-details",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 

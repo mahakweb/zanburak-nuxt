@@ -1,10 +1,6 @@
-export default function authHeader() {
-    // let user = JSON.parse(localStorage.getItem('user'));
-    let token = JSON.parse(localStorage.getItem('token'));
+import { getAuthTokenSync } from '@/utils/authToken'
 
-    if (token) {
-        return { Authorization: 'Bearer ' + token };
-    } else {
-        return {};
-    }
+export default function authHeader() {
+  const token = getAuthTokenSync()
+  return token ? { Authorization: `Bearer ${token}` } : {}
 }

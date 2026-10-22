@@ -296,7 +296,8 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import MessengerAvatar from './MessengerAvatar.vue';
 import MessengerToggle from './MessengerToggle.vue';
 import SharedMediaSection from './SharedMediaSection.vue';
@@ -347,7 +348,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['conversations', 'overlayConversation']),
+    ...mapState(useMessengerStore, ['conversations', 'overlayConversation']),
     conversation() {
       const id = Number(this.conversationId);
       if (!Number.isFinite(id)) return null;

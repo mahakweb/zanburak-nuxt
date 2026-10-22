@@ -241,12 +241,14 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/discuss/layouts/MasterPage.vue";
 import TagCard from "@/views/components/tag/TagCard.vue";
 import { tagService } from "@/services/tag.service";
 import { useSEO, generateBreadcrumbSchema } from "@/composables/useSEO";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     inject: {
         ssrTagsBootstrap: { from: 'ssrTagsBootstrap', default: null },
     },
@@ -278,7 +280,7 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         sortOptions() {
             return [

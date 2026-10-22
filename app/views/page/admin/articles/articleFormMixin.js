@@ -64,7 +64,7 @@ export const articleFormHelpers = {
             return this.$can("articles.update.any");
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         suggestedReadingTime() {
             return calculateArticleReadingTime(this.form.content);

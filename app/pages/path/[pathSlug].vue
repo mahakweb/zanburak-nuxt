@@ -7,10 +7,13 @@ definePageMeta({
 
 const route = useRoute()
 await useAsyncData(
-  () => `path-show-${route.params.pathSlug}`,
+  () => `path-show-${route.params.pathSlug || 'unknown'}`,
   async () => {
+    const slug = route.params.pathSlug
+    if (!slug) return null
+
     try {
-      const { data } = await axiosInstance.get(`/path/${route.params.pathSlug}`)
+      const { data } = await axiosInstance.get(`/path/${slug}`)
       return data
     } catch {
       return null
@@ -857,10 +860,10 @@ await useAsyncData(
                     <h3 class="lg:xl sm:text-2xl text-lg font-bold px-3 text-gray-700 dark:bg-dark-890 dark:text-white">
                         {{ $t('path.show.path_description_title') }}</h3>
                 </div>
-                <p :class="expandDescription ? 'h-max' : 'max-h-72'"
+                <div :class="expandDescription ? 'h-max' : 'max-h-72'"
                     class="mb-5 overflow-hidden transition-all duration-300 text-gray-500 dark:text-gray-400 font-medium leading-8">
                     <MarkdownRenderer class="" startClass="desc" :source="path.description" />
-                </p>
+                </div>
                 <div class="absolute bottom-0 -mb-7 flex items-center h-12">
                     <div class="px-5 mx-auto bg-gray-100 dark:bg-gray-800">
                         <button @click.prevent="expandDescription = !expandDescription"
@@ -922,7 +925,7 @@ await useAsyncData(
             </div>
             <div id="comments-list"
                 class="md:ms-20 lg:ms-32 border-2 border-white dark:border-gray-900 rounded-xl md:p-5 p-3 mb-8">
-                <CommentsList v-if="path && path.id" :type="'path'" :id="path.id"></CommentsList>
+                <CommentsList v-if="path && path.id" :type="'path'" :id="path.id" :per-page="10"></CommentsList>
             </div>
         </section>
     </MasterPage>
@@ -938,6 +941,8 @@ import CommentsList from "@/views/components/home/CommentsList.vue";
 import VideoPlayer from "@/views/components/player/VideoPlayer.vue";
 import InstallmentPurchaseBanner from "@/views/components/payment/InstallmentPurchaseBanner.vue";
 import axiosInstance from "@/store/axiosInstance";
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import { useSEO, generatePathSchema, generateBreadcrumbSchema } from "@/composables/useSEO";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 
@@ -966,11 +971,11 @@ export default {
     },
     computed: {
         loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return useAuthStore().status?.loggedIn ?? false;
         },
 
         isPathInCart() {
-            return this.$store.getters["cart/isItemInCart"]("path", this.path.id);
+            return useCartStore().isItemInCart("path", this.path.id);
         },
     },
     watch: {
@@ -984,7 +989,7 @@ export default {
         async addToCart(type, itemId) {
             this.addToCartLoading = true;
             try {
-                await this.$store.dispatch("cart/addToCart", { type, itemId });
+                await useCartStore().addToCart({ type, itemId });
             } catch (error) {
                 console.error("Error adding to cart:", error);
             } finally {
@@ -992,112 +997,116 @@ export default {
             }
         },
         async getPathDetails() {
-            this.loading = true;
-            await axiosInstance
-                .get(`/path/${this.pathSlug}`)
-                .then(
-                    (response) => {
-                        this.path = response.data.path;
-                        
-                        // Setup SEO
-                        const pathImage = this.path.poster 
-                            ? (this.path.poster.startsWith('http') ? this.path.poster : `${process.env.VUE_APP_SITE_URL || 'https://zanburak.ir'}${this.path.poster}`)
-                            : null;
-                        
-                        const pathSchema = generatePathSchema(this.path);
-                        // Build ItemList of courses (cap to 12 items)
-                        const coursesList = (() => {
-                            const elements = []
-                            const base = (process.env.VUE_APP_SITE_URL || 'https://zanburak.ir')
-                            if (Array.isArray(this.path.courses)) {
-                                this.path.courses.slice(0, 12).forEach((c, idx) => {
-                                    if (!c?.slug) return
-                                    elements.push({
-                                        '@type': 'ListItem',
-                                        position: idx + 1,
-                                        url: `${base}/course/${c.slug}`,
-                                        ...(c?.title ? { name: c.title } : {})
-                                    })
-                                })
-                            }
-                            return elements.length > 0 ? {
-                                '@context': 'https://schema.org',
-                                '@type': 'ItemList',
-                                itemListOrder: 'https://schema.org/ItemListOrderAscending',
-                                numberOfItems: elements.length,
-                                itemListElement: elements
-                            } : null
-                        })();
-                        const breadcrumbSchema = generateBreadcrumbSchema([
-                            { name: this.$t('path.show.breadcrumb_home'), url: '/' },
-                            { name: this.$t('path.common.educational_paths'), url: '/paths' },
-                            { name: this.path.title, url: `/path/${this.path.slug}` }
-                        ]);
-                        
-                        // Combine static and dynamic keywords
-                        const staticKeywords = [
-                            this.path.title,
-                            this.$t('path.common.roadmap'),
-                            this.$t('path.common.learning_path'),
-                            this.$t('path.common.programming_education'),
-                            'roadmap'
-                        ];
-                        const dynamicKeywords = this.path.meta_keywords 
-                            ? this.path.meta_keywords.split(',').map(k => k.trim()).filter(k => k)
-                            : [];
-                        const allKeywords = [...staticKeywords, ...dynamicKeywords];
+            const slug = this.pathSlug || this.$route?.params?.pathSlug
+            if (!slug) {
+                this.loading = false
+                return
+            }
 
-                        useSEO({
-                            title: this.$t('path.show.seo.title', { title: this.path.title }),
-                            description: this.path.short_description || this.path.description || this.$t('path.show.seo.description', { title: this.path.title }),
-                            image: pathImage || undefined,
-                            url: `/path/${this.path.slug}`,
-                            type: 'article',
-                            keywords: allKeywords,
-                            articleSection: this.$t('path.common.educational_paths'),
-                            articleTags: [
-                                this.path.title,
-                                this.$t('path.common.roadmap'),
-                                this.$t('path.common.learning_path'),
-                                this.$t('path.common.programming_education')
-                            ],
-                            publishedTime: this.path.created_at,
-                            modifiedTime: this.path.updated_at,
-                            seeAlso: (() => {
-                                const base = (process.env.VUE_APP_SITE_URL || 'https://zanburak.ir');
-                                if (Array.isArray(this.path.courses)) {
-                                    return this.path.courses
-                                        .filter(c => c?.slug)
-                                        .map(c => `${base}/course/${c.slug}`)
-                                        .slice(0, 12);
-                                }
-                                return [];
-                            })(),
-                            twitterLabel1: this.$t('path.show.seo.twitter_label_courses'),
-                            twitterData1: Array.isArray(this.path.courses) ? `${this.path.courses.length}` : '',
-                            imageAlt: this.$t('path.show.seo.image_alt', { title: this.path.title }),
-                            schema: [pathSchema, breadcrumbSchema, coursesList].filter(Boolean)
-                        });
-                    },
-                    (error) => {
-                        console.error(error.response.status);
-                        if (error.response.status === 404) {
-                            this.$route.push({ name: "NotFound" });
-                        }
-                        console.error(error.response.statusText);
+            this.loading = true;
+            try {
+                const { data } = await axiosInstance.get(`/path/${slug}`)
+                this.path = data?.path || {};
+
+                if (!this.path?.id) {
+                    this.$router.push({ name: 'NotFound' })
+                    return
+                }
+
+                const pathImage = this.path.poster
+                    ? (this.path.poster.startsWith('http') ? this.path.poster : `${process.env.VUE_APP_SITE_URL || 'https://zanburak.ir'}${this.path.poster}`)
+                    : null;
+
+                const pathSchema = generatePathSchema(this.path);
+                const coursesList = (() => {
+                    const elements = []
+                    const base = (process.env.VUE_APP_SITE_URL || 'https://zanburak.ir')
+                    if (Array.isArray(this.path.courses)) {
+                        this.path.courses.slice(0, 12).forEach((c, idx) => {
+                            if (!c?.slug) return
+                            elements.push({
+                                '@type': 'ListItem',
+                                position: idx + 1,
+                                url: `${base}/course/${c.slug}`,
+                                ...(c?.title ? { name: c.title } : {})
+                            })
+                        })
                     }
-                )
-                .finally(() => {
-                    this.loading = false;
+                    return elements.length > 0 ? {
+                        '@context': 'https://schema.org',
+                        '@type': 'ItemList',
+                        itemListOrder: 'https://schema.org/ItemListOrderAscending',
+                        numberOfItems: elements.length,
+                        itemListElement: elements
+                    } : null
+                })();
+                const breadcrumbSchema = generateBreadcrumbSchema([
+                    { name: this.$t('path.show.breadcrumb_home'), url: '/' },
+                    { name: this.$t('path.common.educational_paths'), url: '/paths' },
+                    { name: this.path.title, url: `/path/${this.path.slug}` }
+                ]);
+
+                const staticKeywords = [
+                    this.path.title,
+                    this.$t('path.common.roadmap'),
+                    this.$t('path.common.learning_path'),
+                    this.$t('path.common.programming_education'),
+                    'roadmap'
+                ];
+                const dynamicKeywords = this.path.meta_keywords
+                    ? this.path.meta_keywords.split(',').map(k => k.trim()).filter(k => k)
+                    : [];
+                const allKeywords = [...staticKeywords, ...dynamicKeywords];
+
+                useSEO({
+                    title: this.$t('path.show.seo.title', { title: this.path.title }),
+                    description: this.path.short_description || this.path.description || this.$t('path.show.seo.description', { title: this.path.title }),
+                    image: pathImage || undefined,
+                    url: `/path/${this.path.slug}`,
+                    type: 'article',
+                    keywords: allKeywords,
+                    articleSection: this.$t('path.common.educational_paths'),
+                    articleTags: [
+                        this.path.title,
+                        this.$t('path.common.roadmap'),
+                        this.$t('path.common.learning_path'),
+                        this.$t('path.common.programming_education')
+                    ],
+                    publishedTime: this.path.created_at,
+                    modifiedTime: this.path.updated_at,
+                    seeAlso: (() => {
+                        const base = (process.env.VUE_APP_SITE_URL || 'https://zanburak.ir');
+                        if (Array.isArray(this.path.courses)) {
+                            return this.path.courses
+                                .filter(c => c?.slug)
+                                .map(c => `${base}/course/${c.slug}`)
+                                .slice(0, 12);
+                        }
+                        return [];
+                    })(),
+                    twitterLabel1: this.$t('path.show.seo.twitter_label_courses'),
+                    twitterData1: Array.isArray(this.path.courses) ? `${this.path.courses.length}` : '',
+                    imageAlt: this.$t('path.show.seo.image_alt', { title: this.path.title }),
+                    schema: [pathSchema, breadcrumbSchema, coursesList].filter(Boolean)
                 });
+            } catch (error) {
+                const status = error?.response?.status
+                console.error(error)
+                if (status === 404) {
+                    this.$router.push({ name: 'NotFound' })
+                }
+            } finally {
+                this.loading = false;
+            }
         },
     },
     mounted() {
-        document.title = this.pathSlug;
-        if (!this.path?.id) this.getPathDetails();
+        document.title = this.pathSlug || 'مسیر';
+        if (this.pathSlug && !this.path?.id) this.getPathDetails();
     },
     created() {
-        const payload = useNuxtData(`path-show-${this.$route.params.pathSlug}`).data.value;
+        const slug = this.$route?.params?.pathSlug
+        const payload = slug ? useNuxtData(`path-show-${slug}`).data.value : null;
         if (payload?.path) {
             this.path = payload.path;
             this.loading = false;

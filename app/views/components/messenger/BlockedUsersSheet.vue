@@ -47,13 +47,15 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import BottomSheetDrawer from '@/views/components/common/BottomSheetDrawer.vue';
 import MessengerSkeleton from './MessengerSkeleton.vue';
 import { MESSENGER_SHEET_PANEL, MESSENGER_SHEET_BACKDROP } from './sheetStyles';
 import { avatarInitials } from './avatarInitials';
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   components: { BottomSheetDrawer, MessengerSkeleton },
   props: { open: { type: Boolean, default: false } },
   emits: ['close'],
@@ -63,7 +65,7 @@ export default {
   computed: {
     sheetPanelClass() { return MESSENGER_SHEET_PANEL; },
     sheetBackdropClass() { return MESSENGER_SHEET_BACKDROP; },
-    ...mapState('messenger', ['blockedContacts']),
+    ...mapState(useMessengerStore, ['blockedContacts']),
   },
   watch: {
     open(val) {
@@ -74,7 +76,7 @@ export default {
     async load() {
       this.loading = true;
       try {
-        await this.$store.dispatch('messenger/fetchBlocked');
+        await this.messengerStore.fetchBlocked();
       } finally {
         this.loading = false;
       }
@@ -86,7 +88,7 @@ export default {
     async unblock(ct) {
       const uid = ct.contact_user?.id;
       if (!uid) return;
-      await this.$store.dispatch('messenger/unblockUserAction', uid);
+      await this.messengerStore.unblockUserAction(uid);
     },
   },
 };

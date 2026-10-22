@@ -267,7 +267,8 @@
 </template>
 
 <script>
-import { mapGetters } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import MessengerAvatar from './MessengerAvatar.vue';
 import PendingClockIcon from './PendingClockIcon.vue';
 import { peerDisplayName, conversationPartner as resolveConversationPartner } from '@/utils/messengerPeerName';
@@ -297,7 +298,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('messenger', ['typingByConversation', 'draftForConversation']),
+    ...mapState(useMessengerStore, ['typingByConversation', 'draftForConversation']),
     listConversations() {
       const raw = (this.conversations || []).filter((c) => c && c.id !== 'draft');
       const saved = raw.find((c) => c.type === 'saved');
@@ -456,7 +457,8 @@ export default {
           msg.is_encrypted
           && msg.body
           && msg.body !== '🔒 پیام رمزنگاری‌شده'
-          && /^[A-Za-z0-9+/=\s]{24,}$/.test(String(msg.body).trim())
+          && /^[A-Za-z0-9+/=]{32,}$/.test(String(msg.body).trim())
+          && !/\s/.test(String(msg.body).trim())
         );
         const cap = (!msg.is_encrypted || msg._e2e_decrypted) && !lockedCap
           ? stripFormatMarkers(msg.body || '').trim()
@@ -478,7 +480,7 @@ export default {
         || msg._decryptFailed
         || (msg.is_encrypted && !msg._e2e_decrypted)
         || msg.body === '🔒 پیام رمزنگاری‌شده'
-        || (msg.is_encrypted && msg.body && /^[A-Za-z0-9+/=\s]{24,}$/.test(String(msg.body).trim()))
+        || (msg.is_encrypted && msg.body && /^[A-Za-z0-9+/=]{32,}$/.test(String(msg.body).trim()) && !/\s/.test(String(msg.body)))
       );
       if (locked) return '…';
       const body = stripFormatMarkers(msg.body || '');

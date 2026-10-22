@@ -886,6 +886,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import AdminMasterPage from "@/views/page/admin/layouts/AdminMasterPage.vue";
 import AdminFormStepperNav from "@/views/components/admin/AdminFormStepperNav.vue";
 import { createStepperMixin, BTN_SECONDARY } from "@/views/components/admin/adminFormStepperMixin.js";
@@ -920,6 +921,7 @@ const FORM_STEPS = [
 const stepperMixin = createStepperMixin();
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     mixins: [stepperMixin],
     components: {
         AdminFormStepperNav,
@@ -1136,10 +1138,10 @@ export default {
             return this.price ? PN.convert(parseInt(this.price.replace(/,/g, ""))) : "";
         },
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         canStartTrailerProcessing() {
             if (!this.processEnabled) return true;

@@ -35,7 +35,7 @@
             </button>
             <div
               v-if="moreMenuOpen"
-              class="tg-menu absolute top-full mt-1 rtl:left-0 ltr:right-0 z-30"
+              class="tg-menu gi-more-menu absolute top-full mt-1 rtl:left-0 ltr:right-0 z-30"
               @click.stop
             >
               <button v-if="canEdit" type="button" class="tg-menu-item" @click="moreAction('manage')">
@@ -241,10 +241,10 @@
               <input v-model="local.title" type="text" maxlength="128" class="tg-field-inset mt-1" />
             </div>
 
-            <label class="tg-toggle-row">
+            <div class="tg-toggle-row">
               <span>{{ isChannel ? $t('messenger.publicChannel') : $t('messenger.publicGroup') }}</span>
-              <input type="checkbox" v-model="local.is_public" class="toggle toggle-sm toggle-info" @change="onPublicToggle" />
-            </label>
+              <MessengerToggle :model-value="!!local.is_public" @update:modelValue="setLocalPublic" />
+            </div>
 
             <div v-if="local.is_public">
               <label class="text-[12px] font-medium text-[#707579]">{{ $t('messenger.username') }} <span class="text-red-500">*</span></label>
@@ -302,26 +302,26 @@
 
       <!-- Settings -->
       <div v-if="tab === 'settings' && canEditInfo" class="tg-card mx-3 mb-3">
-        <label class="tg-toggle-row">
+        <div class="tg-toggle-row">
           <span>{{ isChannel ? $t('messenger.publicChannel') : $t('messenger.publicGroup') }}</span>
-          <input type="checkbox" :checked="conversation.is_public" @change="onSettingsPublicChange" class="toggle toggle-sm toggle-info" />
-        </label>
-        <label v-if="!isChannel" class="tg-toggle-row">
+          <MessengerToggle :model-value="!!conversation.is_public" @update:modelValue="onSettingsPublicChange" />
+        </div>
+        <div v-if="!isChannel" class="tg-toggle-row">
           <span>{{ $t('messenger.historyVisible') }}</span>
-          <input type="checkbox" :checked="conversation.history_visible" @change="patch({ history_visible: $event.target.checked })" class="toggle toggle-sm toggle-info" />
-        </label>
-        <label class="tg-toggle-row">
+          <MessengerToggle :model-value="!!conversation.history_visible" @update:modelValue="(v) => patch({ history_visible: v })" />
+        </div>
+        <div class="tg-toggle-row">
           <span>{{ $t('messenger.joinApproval') }}</span>
-          <input type="checkbox" :checked="conversation.join_approval_required" @change="patch({ join_approval_required: $event.target.checked })" class="toggle toggle-sm toggle-info" />
-        </label>
-        <label v-if="isChannel" class="tg-toggle-row">
+          <MessengerToggle :model-value="!!conversation.join_approval_required" @update:modelValue="(v) => patch({ join_approval_required: v })" />
+        </div>
+        <div v-if="isChannel" class="tg-toggle-row">
           <span>{{ $t('messenger.commentsEnabled') }}</span>
-          <input type="checkbox" :checked="!!conversation.comments_enabled" @change="patch({ comments_enabled: $event.target.checked })" class="toggle toggle-sm toggle-info" />
-        </label>
-        <label v-if="isChannel" class="tg-toggle-row">
+          <MessengerToggle :model-value="!!conversation.comments_enabled" @update:modelValue="(v) => patch({ comments_enabled: v })" />
+        </div>
+        <div v-if="isChannel" class="tg-toggle-row">
           <span>{{ $t('messenger.signaturesEnabled') }}</span>
-          <input type="checkbox" :checked="!!conversation.signatures_enabled" @change="patch({ signatures_enabled: $event.target.checked })" class="toggle toggle-sm toggle-info" />
-        </label>
+          <MessengerToggle :model-value="!!conversation.signatures_enabled" @update:modelValue="(v) => patch({ signatures_enabled: v })" />
+        </div>
 
         <div v-if="!isChannel" class="tg-select-block">
           <label class="tg-select-label">{{ $t('messenger.whoCanSend') }}</label>
@@ -387,10 +387,10 @@
           <button v-if="conversation.messages_locked_until" type="button" class="mt-1 text-[12px] text-red-500" @click="patch({ messages_locked_until: null })">{{ $t('messenger.clearLockUntil') }}</button>
         </div>
         <div class="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] space-y-2">
-          <label class="flex items-center justify-between text-[14px] text-gray-900 dark:text-gray-100 gap-3 py-1">
+          <div class="flex items-center justify-between text-[14px] text-gray-900 dark:text-gray-100 gap-3 py-1">
             <span>{{ $t('messenger.scheduleLock') }}</span>
-            <input type="checkbox" v-model="schedule.enabled" class="toggle toggle-sm toggle-info" @change="saveSchedule" />
-          </label>
+            <MessengerToggle :model-value="!!schedule.enabled" @update:modelValue="setScheduleEnabled" />
+          </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-[10px] text-[#a2acb4]">{{ $t('messenger.lockFrom') }}</label>
@@ -418,10 +418,10 @@
               <input v-model.number="inviteForm.expires_hours" type="number" min="0" :placeholder="$t('messenger.never')" class="tg-field-inset mt-0.5" />
             </div>
           </div>
-          <label class="flex items-center justify-between text-[14px] text-gray-900 dark:text-gray-100 gap-3 py-1">
+          <div class="flex items-center justify-between text-[14px] text-gray-900 dark:text-gray-100 gap-3 py-1">
             <span>{{ $t('messenger.inviteTemporary') }}</span>
-            <input type="checkbox" v-model="inviteForm.is_temporary" class="toggle toggle-sm toggle-info" />
-          </label>
+            <MessengerToggle :model-value="!!inviteForm.is_temporary" @update:modelValue="(v) => { inviteForm.is_temporary = v; }" />
+          </div>
           <button type="button" class="w-full py-2.5 rounded-2xl bg-[#3390ec] text-white text-[14px] font-semibold" @click="makeInvite">{{ $t('messenger.createInviteLink') }}</button>
         </div>
         <div class="tg-card overflow-hidden">
@@ -476,6 +476,7 @@
       <!-- Permissions -->
       <div v-if="tab === 'permissions' && canEditInfo" class="mx-3 mb-3 space-y-3">
         <p class="px-1 text-[12px] text-[#707579]">{{ $t('messenger.permissionsHint') }}</p>
+        <p class="px-1 text-[12px] text-[#a2acb4]">{{ $t('messenger.permOwnerLocked') }}</p>
         <div class="gi-shell">
           <div class="gi-tabs hide-scrollbar">
             <button v-for="role in editablePermRoles" :key="role" type="button"
@@ -486,10 +487,13 @@
         <div class="tg-card overflow-hidden">
           <div v-for="(perm, idx) in filteredPermissions" :key="perm"
             :class="['flex items-center justify-between gap-3 px-3.5 py-2.5', idx < filteredPermissions.length - 1 ? 'border-b border-black/[0.06] dark:border-white/[0.06]' : '']">
-            <div class="text-[14px] text-gray-900 dark:text-gray-100 truncate">{{ permLabel(perm) }}</div>
+            <div class="min-w-0 flex-1">
+              <div class="text-[14px] text-gray-900 dark:text-gray-100">{{ permLabel(perm) }}</div>
+              <div v-if="permHint(perm)" class="text-[12px] text-[#707579] leading-snug mt-0.5">{{ permHint(perm) }}</div>
+            </div>
             <MessengerToggle :model-value="roleHasPerm(perm)" :disabled="!!permSaving" @update:modelValue="(v) => togglePerm(perm, v)" />
           </div>
-          <p v-if="!filteredPermissions.length" class="text-[12px] text-[#a2acb4] text-center py-6">…</p>
+          <p v-if="!filteredPermissions.length" class="text-[12px] text-[#a2acb4] text-center py-6">{{ $t('messenger.permissionsHint') }}</p>
         </div>
       </div>
 
@@ -506,10 +510,16 @@
 
       <!-- Audit -->
       <div v-if="tab === 'audit' && canEdit" class="tg-card mx-3 mb-3 overflow-hidden">
+        <p v-if="auditLoading && !auditLogs.length" class="text-[12px] text-[#a2acb4] text-center py-8">{{ $t('messenger.searchingMembers') }}</p>
+        <p v-else-if="auditError" class="text-[12px] text-red-500 text-center py-8 px-4">{{ auditError }}</p>
+        <p v-else-if="!auditLogs.length" class="text-[12px] text-[#a2acb4] text-center py-8">{{ $t('messenger.noAuditLogs') }}</p>
         <div v-for="(log, idx) in auditLogs" :key="log.id" :class="['px-3.5 py-2.5 text-[12px]', idx < auditLogs.length - 1 ? 'border-b border-black/[0.06] dark:border-white/[0.06]' : '']">
-          <div class="font-semibold text-gray-900 dark:text-gray-100">{{ log.action }}</div>
-          <div class="text-[#a2acb4] mt-0.5">{{ log.actor?.username || log.actor_id }} · {{ formatTime(log.created_at) }}</div>
+          <div class="font-semibold text-gray-900 dark:text-gray-100 leading-snug">{{ auditTitle(log) }}</div>
+          <div class="text-[#a2acb4] mt-0.5">{{ auditActor(log) }} · {{ formatTime(log.created_at) }}</div>
         </div>
+        <button v-if="auditHasMore" type="button" class="w-full py-2.5 text-[12px] font-semibold text-[#3390ec] border-t border-black/[0.06] dark:border-white/[0.06]" :disabled="auditLoading" @click="loadMoreAudit">
+          {{ auditLoading ? '…' : $t('messenger.auditLoadMore') }}
+        </button>
       </div>
 
       <!-- Members -->
@@ -525,21 +535,14 @@
           </div>
 
           <div v-if="showAdd && canInvite" class="px-3 pb-3 pt-2 space-y-2 border-b border-black/[0.06] dark:border-white/[0.06]">
-            <input v-model="addQuery" v-no-autofill="'strong'" type="search" name="messenger-add-member" @input="onSearchAdd" class="tg-field-inset" :placeholder="$t('messenger.searchUsers')" />
-            <button v-for="u in addResults" :key="u.id" type="button"
-              class="w-full flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/5 text-start"
-              @click="togglePendingAdd(u)">
-              <MessengerAvatar :user="u" size="xs" />
-              <span class="flex-1 text-[13px] truncate">{{ displayName(u) }}</span>
-              <span v-if="pendingAddIds.includes(u.id)" class="w-5 h-5 rounded-full bg-[#3390ec] text-white text-xs flex items-center justify-center font-bold">✓</span>
-              <span v-else class="w-5 h-5 rounded-full border border-[#c4c9cc] dark:border-white/20"></span>
-            </button>
-            <div v-if="pendingAdd.length" class="flex flex-wrap gap-1.5 pt-1">
-              <span v-for="u in pendingAdd" :key="'p'+u.id" class="inline-flex items-center gap-1 rounded-full bg-[#3390ec]/10 text-[#3390ec] text-[12px] px-2 py-1">
-                {{ displayName(u) }}
-                <button type="button" @click="togglePendingAdd(u)">×</button>
-              </span>
-            </div>
+            <MemberPicker
+              :selected="pendingAdd"
+              :exclude-ids="existingMemberIds"
+              :self-id="meId"
+              :max="500"
+              :disabled="addingMembers"
+              @update:selected="pendingAdd = $event"
+            />
             <button v-if="pendingAdd.length" type="button"
               class="w-full py-2 rounded-2xl bg-[#3390ec] text-white text-[13px] font-semibold disabled:opacity-50"
               :disabled="addingMembers" @click="doAddSelected">
@@ -660,8 +663,10 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MessengerAvatar from './MessengerAvatar.vue';
 import MessengerToggle from './MessengerToggle.vue';
+import MemberPicker from './MemberPicker.vue';
 import AvatarCropEditor from './AvatarCropEditor.vue';
 import SharedMediaSection from './SharedMediaSection.vue';
 import MessengerSkeleton from './MessengerSkeleton.vue';
@@ -674,7 +679,7 @@ import { iconPaths as menuIconPaths } from './messengerIcons';
 import {
   getMembers, updateCommunityInfo, uploadCommunityImage, createInvite, getInvites, revokeInvite,
   getJoinRequests, approveJoinRequest, rejectJoinRequest, getAuditLogs,
-  searchUsers, addMembers, updateMember, kickMember, banMember, unbanMember, getBans,
+  addMembers, updateMember, kickMember, banMember, unbanMember, getBans,
   muteMember, unmuteMember, transferOwnership,
   checkCommunityUsername, getConversation, getPermissions, setPermission,
 } from '@/services/messenger';
@@ -688,8 +693,9 @@ function resolveUserId(raw) {
 }
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
   name: 'GroupInfoPanel',
-  components: { MessengerAvatar, MessengerToggle, AvatarCropEditor, SharedMediaSection, MessengerSkeleton, BottomSheetDrawer },
+  components: { MessengerAvatar, MessengerToggle, MemberPicker, AvatarCropEditor, SharedMediaSection, MessengerSkeleton, BottomSheetDrawer },
   props: {
     conversation: { type: Object, required: true },
   },
@@ -707,6 +713,10 @@ export default {
       bans: [],
       joinRequests: [],
       auditLogs: [],
+      auditPage: 1,
+      auditHasMore: false,
+      auditLoading: false,
+      auditError: '',
       inviteForm: { max_uses: null, expires_hours: null, is_temporary: false },
       permMatrix: {},
       permAvailable: [],
@@ -721,9 +731,6 @@ export default {
       error: '',
       local: { title: '', description: '', username: '', avatar: '', is_public: false },
       showAdd: false,
-      addQuery: '',
-      addResults: [],
-      addTimer: null,
       pendingAdd: [],
       addingMembers: false,
       memberMenu: null,
@@ -758,7 +765,7 @@ export default {
       return publicCommunityUrl(this.conversation?.username);
     },
     meId() {
-      return resolveUserId(this.$store.state.auth?.status?.userInfo);
+      return resolveUserId(this.authStore?.status?.userInfo);
     },
     myRole() {
       if (this.resolvedRole) return this.resolvedRole;
@@ -821,8 +828,8 @@ export default {
         ? this.$t('messenger.subscribersCount', { count })
         : this.$t('messenger.membersCount', { count });
     },
-    pendingAddIds() {
-      return this.pendingAdd.map((u) => u.id);
+    existingMemberIds() {
+      return this.members.map((m) => m.user?.id).filter((id) => id != null);
     },
     usernameBorderClass() {
       if (this.usernameStatus === 'available') return 'ring-1 ring-green-500/50';
@@ -924,7 +931,6 @@ export default {
   },
   beforeUnmount() {
     this.teardownMembersObserver();
-    clearTimeout(this.addTimer);
     clearTimeout(this.usernameTimer);
     if (this.lockClockTimerId) clearInterval(this.lockClockTimerId);
     if (this.copyTimerId) clearTimeout(this.copyTimerId);
@@ -1120,10 +1126,33 @@ export default {
         this.permSaving = null;
       }
     },
+    tx(key, fallback, params) {
+      const t = params ? this.$t(key, params) : this.$t(key);
+      return !t || t === key ? fallback : t;
+    },
     permLabel(perm) {
-      const key = `messenger.perm_${perm}`;
-      const t = this.$t(key);
-      return t === key ? perm.replace(/_/g, ' ') : t;
+      return this.tx(`messenger.perm_${perm}`, String(perm || '').replace(/_/g, ' '));
+    },
+    permHint(perm) {
+      const hint = this.tx(`messenger.perm_${perm}_hint`, '');
+      return hint || '';
+    },
+    personName(user) {
+      if (!user) return '';
+      const full = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      return full || user.username || '';
+    },
+    auditTitle(log) {
+      const action = String(log?.action || '');
+      const key = `messenger.audit_${action.replace(/\./g, '_')}`;
+      const target = log.target_user || log.targetUser;
+      const name = this.personName(target) || this.personName(log.actor) || '';
+      const permission = log.meta?.permission ? this.permLabel(log.meta.permission) : '';
+      const role = log.meta?.role ? this.roleLabel(log.meta.role) : '';
+      return this.tx(key, action, { name, permission, role });
+    },
+    auditActor(log) {
+      return this.personName(log.actor) || log.actor?.username || (log.actor_id ? `#${log.actor_id}` : '—');
     },
     async reload() {
       this.membersPage = 1;
@@ -1223,11 +1252,19 @@ export default {
       this.local.description = toSingleLine(e.target.value);
     },
     onHlineWheel: onHorizontalWheel,
+    setLocalPublic(value) {
+      this.local.is_public = !!value;
+      this.onPublicToggle();
+    },
     onPublicToggle() {
       this.usernameStatus = '';
       if (this.local.is_public && !this.local.username) {
         this.local.username = '';
       }
+    },
+    setScheduleEnabled(value) {
+      this.schedule.enabled = !!value;
+      this.saveSchedule();
     },
     onUsernameInput() {
       this.usernameStatus = '';
@@ -1298,11 +1335,12 @@ export default {
         this.error = e?.response?.data?.message || this.$t('messenger.saveError');
       }
     },
-    async onSettingsPublicChange(ev) {
-      const wantPublic = !!ev.target.checked;
+    async onSettingsPublicChange(value) {
+      const wantPublic = !!value;
       if (wantPublic && !this.conversation.username) {
-        ev.target.checked = false;
         this.local.is_public = true;
+        this.manageMode = true;
+        this.editing = true;
         this.error = this.$t('messenger.publicRequiresUsername');
         return;
       }
@@ -1505,28 +1543,28 @@ export default {
       await rejectJoinRequest(this.conversation.id, id);
       this.loadRequests();
     },
-    async loadAudit() {
-      const res = await getAuditLogs(this.conversation.id);
-      this.auditLogs = res.data || [];
+    async loadAudit(reset = true) {
+      if (reset) {
+        this.auditPage = 1;
+        this.auditLogs = [];
+      }
+      this.auditLoading = true;
+      this.auditError = '';
+      try {
+        const res = await getAuditLogs(this.conversation.id, this.auditPage);
+        const rows = res.data || [];
+        this.auditLogs = reset ? rows : [...this.auditLogs, ...rows];
+        this.auditHasMore = !!(res.meta && res.meta.has_more);
+      } catch (e) {
+        this.auditError = e?.response?.data?.message || this.$t('messenger.saveError');
+      } finally {
+        this.auditLoading = false;
+      }
     },
-    onSearchAdd() {
-      clearTimeout(this.addTimer);
-      this.addTimer = setTimeout(async () => {
-        const q = this.addQuery.trim();
-        if (q.length < 2) { this.addResults = []; return; }
-        try {
-          const res = await searchUsers(q, 10);
-          const existing = new Set(this.members.map((m) => m.user.id));
-          this.addResults = (res.data || res || []).filter((u) => !existing.has(u.id));
-        } catch (e) {
-          this.addResults = [];
-        }
-      }, 250);
-    },
-    togglePendingAdd(u) {
-      const i = this.pendingAdd.findIndex((x) => x.id === u.id);
-      if (i >= 0) this.pendingAdd.splice(i, 1);
-      else this.pendingAdd.push(u);
+    loadMoreAudit() {
+      if (!this.auditHasMore || this.auditLoading) return;
+      this.auditPage += 1;
+      this.loadAudit(false);
     },
     async doAddSelected() {
       if (!this.pendingAdd.length || this.addingMembers) return;
@@ -1535,12 +1573,13 @@ export default {
         const updated = await addMembers(this.conversation.id, this.pendingAdd.map((u) => u.id));
         this.$emit('updated', updated);
         this.pendingAdd = [];
-        this.addQuery = '';
-        this.addResults = [];
         this.showAdd = false;
         this.reload();
       } catch (e) {
-        this.error = e?.response?.data?.message || this.$t('messenger.saveError');
+        const msg = e?.response?.data?.message || '';
+        this.error = msg === 'One or more users cannot be added'
+          ? this.$t('messenger.cannotAddUsers')
+          : (msg || this.$t('messenger.saveError'));
       } finally {
         this.addingMembers = false;
       }
@@ -1754,6 +1793,10 @@ export default {
   background: #17212b;
 }
 
+.gi-more-menu {
+  min-width: 15.5rem;
+  max-width: min(20.5rem, calc(100vw - 1.25rem));
+}
 .gi-body {
   padding: 10px;
   background: #f4f4f5;

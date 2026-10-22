@@ -1,5 +1,5 @@
 import { watch } from 'vue';
-import { useStore } from '@/composables/useStore';
+import { useAuthStore } from '@/stores/auth';
 import { hasAnyPermission, hasAllPermissions } from '@/utils/acl';
 
 function resolveRequired(binding) {
@@ -16,8 +16,8 @@ function isAllowed(user, required, mode) {
         : hasAnyPermission(user, required);
 }
 
-function apply(el, binding, store) {
-    const user = store.state.auth.status.userInfo;
+function apply(el, binding, auth) {
+    const user = auth.status.userInfo;
     const { required, mode } = resolveRequired(binding);
     const allowed = isAllowed(user, required, mode);
 
@@ -42,16 +42,16 @@ export default {
         return {}
     },
     mounted(el, binding) {
-        const store = useStore();
-        apply(el, binding, store);
+        const auth = useAuthStore();
+        apply(el, binding, auth);
         el._vCanStop = watch(
-            () => store.state.auth.status.userInfo,
-            () => apply(el, binding, store),
+            () => auth.status.userInfo,
+            () => apply(el, binding, auth),
             { deep: true },
         );
     },
     updated(el, binding) {
-        apply(el, binding, useStore());
+        apply(el, binding, useAuthStore());
     },
     unmounted(el) {
         el._vCanStop?.();

@@ -152,12 +152,14 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import AdminMasterPage from "@/views/page/admin/layouts/AdminMasterPage.vue";
 import SettlementShareCard from "@/views/components/admin/SettlementShareCard.vue";
 import axiosInstance from "@/store/axiosInstance";
 import { isSuperUser } from "@/utils/acl";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
   name: "AdminSettlementSettings",
   components: { AdminMasterPage, SettlementShareCard },
   data() {
@@ -181,7 +183,7 @@ export default {
   },
   computed: {
     currentUser() {
-      return this.$store.state.auth.status.userInfo;
+      return this.authStore.status.userInfo;
     },
     canSave() {
       return isSuperUser(this.currentUser)

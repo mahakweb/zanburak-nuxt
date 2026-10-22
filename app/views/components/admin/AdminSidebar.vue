@@ -187,23 +187,25 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import SidebarMenu from "@/views/components/admin/SidebarMenu.vue";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         SidebarMenu,
     },
     methods: {
         logout() {
-            this.$store.dispatch("auth/logout");
+            this.authStore.logout();
             this.$router.push("/");
         },
     },
     computed: {
         loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
 };

@@ -311,7 +311,9 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from "@/composables/useStore";
+import { useAuthStore } from '@/stores/auth'
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState, mapActions } from 'pinia'
 import MessengerSidebar from '@/views/components/messenger/MessengerSidebar.vue';
 import ChatArea from '@/views/components/messenger/ChatArea.vue';
 import MediaMiniPlayer from '@/views/components/messenger/MediaMiniPlayer.vue';
@@ -372,6 +374,7 @@ function loadPanelWidths() {
 }
 
 export default {
+		setup() { return { authStore: useAuthStore(), messengerStore: useMessengerStore() } },
   components: {
     MessengerSidebar, ChatArea, MediaMiniPlayer, ProfilePanel, GroupInfoPanel,
     MessengerEmojiPicker, JoinPreviewSheet, ResizeHandle, ActionSheet, DeleteMessageSheet,
@@ -435,9 +438,9 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['conversations', 'activeConversationId', 'contacts', 'sending', 'loading', 'messagesLoading', 'connected', 'connectionState', 'connectionDisplayStatus', 'networkOnline', 'conversationsHasMore', 'conversationsLoadingMore', 'font', 'fontSlots', 'draftConversation', 'forwardPick', 'pendingForward', 'accessBlocked', 'accessBlockedMessage', 'e2eRecovery', 'wallpaper']),
-    ...mapState('auth', { userInfo: (s) => s.status.userInfo }),
-    ...mapGetters('messenger', ['activeConversation', 'activeMessages', 'typingInActive', 'sidebarConversations', 'effectiveWallpaper']),
+    ...mapState(useMessengerStore, ['conversations', 'activeConversationId', 'contacts', 'sending', 'loading', 'messagesLoading', 'connected', 'connectionState', 'connectionDisplayStatus', 'networkOnline', 'conversationsHasMore', 'conversationsLoadingMore', 'font', 'fontSlots', 'draftConversation', 'forwardPick', 'pendingForward', 'accessBlocked', 'accessBlockedMessage', 'e2eRecovery', 'wallpaper']),
+    ...mapState(useAuthStore, { userInfo: (s) => s.status.userInfo }),
+    ...mapState(useMessengerStore, ['activeConversation', 'activeMessages', 'typingInActive', 'sidebarConversations', 'effectiveWallpaper']),
     /** Hide hollow "— / ?" rows until boot + conversation fetch finish. */
     showListSkeleton() {
       return !this.bootReady || !this.meId || this.loading;
@@ -667,7 +670,7 @@ export default {
         this.handleJoinRoute();
         return;
       }
-      if (this.$route?.name === 'panel-messenger-chat' || this.$route?.name === 'panel-messenger') {
+      if (this.$route?.name === 'panel-messenger') {
         this.applyChatRoute();
       }
     },
@@ -701,18 +704,18 @@ export default {
     // Hold chat paint until auth + conversation list HTTP finish. Route sync
     // (deep-link select / join) must not block the sidebar first paint.
     this.bootReady = false;
-    this.$store.commit('messenger/SET_SESSION_READY', false);
+    this.messengerStore.setSessionReady(false);
     this.syncFontsToDirection();
 
     await this.waitForAuthReady();
     // One orchestrated boot: settings + stream + conversations (+ unread via meta).
     // The socket must not hold the first paint — the header already shows connecting.
-    await this.$store.dispatch('messenger/bootstrapSession');
+    await this.messengerStore.bootstrapSession();
     this.waitForStreamReady(2000);
 
     this.maybePeriodicContactSync();
     this.bootReady = true;
-    this.$store.commit('messenger/SET_SESSION_READY', true);
+    this.messengerStore.setSessionReady(true);
 
     // Deep-link / join after first paint — chat skeleton covers the interim.
     this.handleJoinRoute()
@@ -758,7 +761,7 @@ export default {
   },
   beforeUnmount() {
     this.bootReady = false;
-    this.$store.commit('messenger/SET_SESSION_READY', false);
+    this.messengerStore.setSessionReady(false);
     stopMediaPlayer();
     this.unbindDesktopLayoutMq();
     this.clearForwardToastTimers();
@@ -782,20 +785,20 @@ export default {
     document.documentElement.removeEventListener('onChangeLanguage', this.syncFontsToDirection);
     if (typeof this.unsubAppLock === 'function') this.unsubAppLock();
     this.restoreZoom();
-    this.$store.dispatch('messenger/stopStream');
+    this.messengerStore.stopStream();
   },
   methods: {
     syncFontsToDirection() {
       const dir = typeof document !== 'undefined' ? document.documentElement.dir : undefined;
-      this.$store.commit('messenger/APPLY_FONT_DIRECTION', dir);
+      this.messengerStore.applyFontDirection(dir);
     },
     maybePeriodicContactSync() {
       if (!shouldPeriodicSync()) return;
       const cached = contactsFromCache();
       if (cached.length) {
-        this.$store.dispatch('messenger/syncContactsAction', cached).catch(() => {});
+        this.messengerStore.syncContactsAction(cached).catch(() => {});
       } else {
-        this.$store.dispatch('messenger/refreshContactSyncAction').catch(() => {});
+        this.messengerStore.refreshContactSyncAction().catch(() => {});
       }
     },
     bindDesktopLayoutMq() {
@@ -821,7 +824,7 @@ export default {
       this._desktopLayoutMq = null;
       this._onDesktopLayoutMq = null;
     },
-    ...mapActions('messenger', [
+    ...mapActions(useMessengerStore, [
       'fetchConversations',
       'fetchContacts',
       'selectConversation',
@@ -854,11 +857,11 @@ export default {
       'applyConversationWallpaper',
     ]),
 
-    /** Resolve once auth has a real user id (router gate alone can race Vuex restore). */
+    /** Resolve once auth has a real user id (router gate alone can race session restore). */
     async waitForAuthReady(timeoutMs = 5000) {
       const started = Date.now();
       while (Date.now() - started < timeoutMs) {
-        const status = this.$store.state.auth?.status || {};
+        const status = this.authStore?.status || {};
         const loggedIn = !!status.loggedIn;
         const user = status.userInfo?.value || status.userInfo;
         const userId = user?.id ?? null;
@@ -867,7 +870,7 @@ export default {
         if (!loggedIn && Date.now() - started > 400) return false;
         await new Promise((r) => setTimeout(r, 30));
       }
-      const status = this.$store.state.auth?.status || {};
+      const status = this.authStore?.status || {};
       const user = status.userInfo?.value || status.userInfo;
       return !!(status.loggedIn && user?.id);
     },
@@ -892,7 +895,7 @@ export default {
       const partner = (c.type === 'private') ? this.activePartnerName : '';
       let initial = null;
       try {
-        initial = await this.$store.dispatch('messenger/fetchConversationWallpaper', c.id);
+        initial = await this.messengerStore.fetchConversationWallpaper(c.id);
       } catch (e) { /* fall back to global */ }
       // Do NOT mutate the global default — chat editing uses a local draft.
       this.wallpaperLiveDraft = null;
@@ -900,7 +903,7 @@ export default {
         open: true,
         conversationId: c.id,
         partnerName: partner || '',
-        initialConfig: initial || this.$store.state.messenger.wallpaper,
+        initialConfig: initial || this.messengerStore.wallpaper,
       };
     },
 
@@ -1000,7 +1003,7 @@ export default {
       // "Use my default" — staff clear shared wallpaper for everyone (badge); others only self.
       if (cleared || config == null) {
         const forBoth = !isPrivate && canShareCommunity;
-        this.$store.dispatch('messenger/clearConversationWallpaper', { conversationId: cid, forBoth })
+        this.messengerStore.clearConversationWallpaper({ conversationId: cid, forBoth })
           .catch(() => {})
           .finally(() => { this.closeWallpaperPanel(); });
         return;
@@ -1105,7 +1108,7 @@ export default {
       if (this.profileOpen) return false;
       if (this.emojiSidebarOpen) return false;
       if (this.activeConversationId) return false;
-      if (this.$store.state.messenger.selectionMode) return false;
+      if (this.messengerStore.selectionMode) return false;
       const chat = this.$refs.chatArea;
       if (chat && typeof chat.hasOverlay === 'function' && chat.hasOverlay()) return false;
       const sb = this.$refs.sidebar;
@@ -1180,8 +1183,8 @@ export default {
         },
         // 3) Multi-select mode.
         () => {
-          if (!this.$store.state.messenger.selectionMode) return false;
-          this.$store.commit('messenger/CLEAR_SELECTION');
+          if (!this.messengerStore.selectionMode) return false;
+          this.messengerStore.clearSelection();
           return true;
         },
         // 4) Sidebar sub-panels / nested settings.
@@ -1256,30 +1259,40 @@ export default {
     },
 
     async onSelectConversation(conv, opts) {
+      // Conversation rows can receive repeated pointer/click events while the
+      // async history request is still in flight. Serialize normal selections
+      // so the legacy store cannot start overlapping fetch/subscribe cycles.
+      if (!conv?.id) return;
+      const keepPending = !!(opts && typeof opts === 'object' && opts.keepPendingForward);
+      if (!keepPending && this._selectingConversationId === conv.id) return;
+      if (!keepPending) this._selectingConversationId = conv.id;
+
       // Switching chats cancels an unfinished forward compose — unless we are
       // opening the target chat for an in-progress forward pick.
-      const keepPending = !!(opts && typeof opts === 'object' && opts.keepPendingForward);
       if (!keepPending) {
-        this.$store.commit('messenger/CLEAR_PENDING_FORWARD');
+        this.messengerStore.clearPendingForward();
       }
-      this.$store.commit('messenger/CLEAR_DRAFT_CONVERSATION');
+      this.messengerStore.clearDraftConversation();
 
-      // Forward target: arm the chat shell immediately and let history load in
-      // the background so the forward bar above the input is never gated on fetch.
-      if (keepPending) {
-        this.selectConversation(conv.id).then((meta) => {
-          this.hasMore = meta?.has_more || false;
-          if (this.profileOpen) {
-            this.syncProfilePanelToConversation(conv);
-          }
-        }).catch(() => {});
-        return;
-      }
-
-      const meta = await this.selectConversation(conv.id);
-      this.hasMore = meta?.has_more || false;
-      if (this.profileOpen) {
-        await this.syncProfilePanelToConversation(conv);
+      // Always arm the chat shell immediately. History/pins/wallpaper must never
+      // gate the first paint (Telegram-style instant open).
+      try {
+        const meta = await this.selectConversation(conv.id);
+        // selectConversation returns as soon as the shell is active; cold history
+        // may still be in flight. Keep hasMore optimistic from cache/meta.
+        this.hasMore = meta?.has_more || false;
+        if (this.profileOpen) {
+          this.syncProfilePanelToConversation(conv).catch(() => {});
+        }
+      } catch (error) {
+        // Keep the messenger shell mounted when a conversation API call fails.
+        // The store may reject on a transient 401/network error; that must not
+        // bubble into Vue and tear down the page.
+        console.error('[messenger] conversation selection failed', error);
+      } finally {
+        if (this._selectingConversationId === conv.id) {
+          this._selectingConversationId = null;
+        }
       }
     },
 
@@ -1543,12 +1556,12 @@ export default {
             scope: effectiveScope,
           });
         } else if (kind === 'delete-selected') {
-          await this.$store.dispatch('messenger/bulkDeleteAction', {
+          await this.messengerStore.bulkDeleteAction({
             conversationId: this.activeConversationId,
             messageIds: payload.messageIds,
             scope: effectiveScope,
           });
-          this.$store.commit('messenger/CLEAR_SELECTION');
+          this.messengerStore.clearSelection();
         }
       } catch (e) { /* noop */ }
       this.focusActiveComposer();
@@ -1617,7 +1630,7 @@ export default {
           this.groupInfoOpen = false;
           this.profileOpen = false;
           if (payload.id === this.activeConversationId) {
-            this.$store.commit('messenger/SET_ACTIVE_CONVERSATION', null);
+            this.messengerStore.setActiveConversation(null);
           }
         } else if (kind === 'delete-contact') {
           await this.deleteContactAction(payload.contactId);
@@ -1628,7 +1641,7 @@ export default {
           this.profileOpen = false;
           this.groupInfoOpen = false;
         } else if (kind === 'logout') {
-          await this.$store.dispatch('auth/logout');
+          await this.authStore.logout();
           this.exit();
         }
       } catch (e) { /* noop */ }
@@ -1705,10 +1718,13 @@ export default {
     async onLoadMore() {
       const msgs = this.activeMessages;
       if (!msgs.length) return;
-      // Use the oldest *real* message id as the cursor (skip system notes).
-      const firstReal = msgs.find((m) => typeof m.id === 'number');
+      // Use the oldest *real* message id as the cursor (skip system notes / client ids).
+      const firstReal = msgs.find((m) => typeof m.id === 'number' || (typeof m.id === 'string' && /^\d+$/.test(m.id)));
       if (!firstReal) return;
-      const meta = await this.fetchMessages({ conversationId: this.activeConversationId, beforeId: firstReal.id });
+      const meta = await this.fetchMessages({
+        conversationId: this.activeConversationId,
+        beforeId: Number(firstReal.id),
+      });
       this.hasMore = meta?.has_more || false;
     },
 
@@ -1729,12 +1745,12 @@ export default {
         (c) => c.type === 'private' && this.partnerIdOf(c) === user.id,
       );
       if (empty) {
-        this.$store.commit('messenger/REMOVE_CONVERSATION', empty.id);
+        this.messengerStore.removeConversation(empty.id);
       }
       // Otherwise open a draft chat: it's not created on the server and never
       // appears in the sidebar until the first message is sent.
-      this.$store.commit('messenger/CLEAR_OVERLAY_CONVERSATION');
-      this.$store.commit('messenger/SET_DRAFT_CONVERSATION', {
+      this.messengerStore.clearOverlayConversation();
+      this.messengerStore.setDraftConversation({
         id: 'draft',
         type: 'private',
         isDraft: true,
@@ -1742,14 +1758,14 @@ export default {
         users: [user],
         unread_count: 0,
       });
-      this.$store.commit('messenger/SET_ACTIVE_CONVERSATION', 'draft');
+      this.messengerStore.setActiveConversation('draft');
       // Profile rail must follow the new peer (draft id stays `"draft"` so id-only
       // watchers miss contact→contact switches).
       if (this.profileOpen) {
         this.syncProfilePanelToConversation(this.activeConversation);
       }
       // Create conversation + warm crypto while the user types (Telegram-fast first send).
-      this.$store.dispatch('messenger/prefetchDraftConversation').catch(() => {});
+      this.messengerStore.prefetchDraftConversation().catch(() => {});
     },
 
     async onOpenSaved() {
@@ -1779,16 +1795,16 @@ export default {
 
       const idSet = new Set(messageIds.map(Number));
       const fromActive = (this.activeMessages || []).filter((m) => idSet.has(Number(m.id)));
-      const fromSelected = (this.$store.getters['messenger/selectedMessages'] || [])
+      const fromSelected = (this.messengerStore.selectedMessages || [])
         .filter((m) => idSet.has(Number(m.id)));
       const resolved = fromActive.length ? fromActive : fromSelected;
       const messages = resolved.length
         ? resolved
         : messageIds.map((id) => ({ id, body: '', type: 'text', user: null }));
 
-      this.$store.commit('messenger/CLEAR_PENDING_FORWARD');
-      this.$store.commit('messenger/SET_FORWARD_PICK', { messageIds, messages, dropAuthor });
-      this.$store.commit('messenger/CLEAR_SELECTION');
+      this.messengerStore.clearPendingForward();
+      this.messengerStore.setForwardPick({ messageIds, messages, dropAuthor });
+      this.messengerStore.clearSelection();
       this.profileOpen = false;
       this.groupInfoOpen = false;
 
@@ -1807,15 +1823,15 @@ export default {
       const pick = this.forwardPick;
       if (!pick?.messageIds?.length) return;
       this.$refs.sidebar?.closeForward?.({ cancel: false });
-      this.$store.commit('messenger/CLEAR_FORWARD_PICK');
+      this.messengerStore.clearForwardPick();
       // Arm the forward bar BEFORE opening the chat so it appears immediately,
       // even while message history is still loading.
-      this.$store.commit('messenger/SET_PENDING_FORWARD', {
+      this.messengerStore.setPendingForward({
         messageIds: pick.messageIds,
         messages: pick.messages || [],
         dropAuthor: !!pick.dropAuthor,
       });
-      this.$store.commit('messenger/SET_REPLY', null);
+      this.messengerStore.setReply(null);
       try {
         await openTarget();
         this.$nextTick(() => {
@@ -1827,7 +1843,7 @@ export default {
           }
         });
       } catch (e) {
-        this.$store.commit('messenger/CLEAR_PENDING_FORWARD');
+        this.messengerStore.clearPendingForward();
       }
     },
 
@@ -1847,7 +1863,7 @@ export default {
     },
 
     onForwardCancel() {
-      this.$store.commit('messenger/CLEAR_FORWARD_PICK');
+      this.messengerStore.clearForwardPick();
     },
 
     /**
@@ -1861,7 +1877,7 @@ export default {
 
       const { messageIds, messages, dropAuthor } = pick;
       this.$refs.sidebar?.closeForward?.({ cancel: false });
-      this.$store.commit('messenger/CLEAR_FORWARD_PICK');
+      this.messengerStore.clearForwardPick();
 
       // Resolve destinations first (saved / new DM need a network hop).
       const destIds = [];
@@ -1960,19 +1976,19 @@ export default {
       if (caption) {
         this.sendMessageAction({ conversationId: toId, body: caption }).catch(() => {});
       }
-      this.$store.commit('messenger/CLEAR_PENDING_FORWARD');
+      this.messengerStore.clearPendingForward();
       this.focusActiveComposer();
     },
 
     async onCommunityCreated(conversation) {
       const conv = conversation?.id ? conversation : conversation?.data;
       if (!conv?.id) return;
-      this.$store.commit('messenger/UPSERT_CONVERSATION', conv);
+      this.messengerStore.upsertConversation(conv);
       await this.selectConversation(conv.id);
     },
 
     onCommunityUpdated(conversation) {
-      this.$store.commit('messenger/UPSERT_CONVERSATION', conversation);
+      this.messengerStore.upsertConversation(conversation);
     },
 
     async onOpenProfile(userOrConversation) {
@@ -2052,8 +2068,8 @@ export default {
         if (!conv?.id) return;
 
         if (preview.is_member) {
-          this.$store.commit('messenger/CLEAR_OVERLAY_CONVERSATION');
-          this.$store.commit('messenger/UPSERT_CONVERSATION', { ...conv, is_preview: false });
+          this.messengerStore.clearOverlayConversation();
+          this.messengerStore.upsertConversation({ ...conv, is_preview: false });
           await this.selectConversation(conv.id);
           this.normalizeMessengerUrl();
           return;
@@ -2062,8 +2078,8 @@ export default {
         if (preview.can_preview && conv.is_public) {
           // Public: open chat in preview mode with Join bar — not in sidebar.
           this.pendingInviteCode = preview.invite_code || null;
-          this.$store.commit('messenger/SET_OVERLAY_CONVERSATION', { ...conv, is_preview: true });
-          this.$store.commit('messenger/REMOVE_FROM_SIDEBAR', conv.id);
+          this.messengerStore.setOverlayConversation({ ...conv, is_preview: true });
+          this.messengerStore.removeFromSidebar(conv.id);
           await this.selectConversation({ conversationId: conv.id, asPreview: true });
           this.normalizeMessengerUrl();
           return;
@@ -2108,7 +2124,7 @@ export default {
     syncChatUrl(conversationId) {
       if (this.$route?.params?.code || this.$route?.params?.username) return;
       const name = this.$route?.name;
-      if (name && name !== 'panel-messenger' && name !== 'panel-messenger-chat') return;
+      if (name && name !== 'panel-messenger') return;
 
       const key = encodeChatId(conversationId);
       this.syncingChatUrl = true;
@@ -2116,16 +2132,16 @@ export default {
         this.$nextTick(() => { this.syncingChatUrl = false; });
       };
       if (key) {
-        if (name === 'panel-messenger-chat' && this.$route.params.chatId === key) {
+        if (this.$route.params.chatId === key) {
           this.syncingChatUrl = false;
           return;
         }
         Promise.resolve(
-          this.$router.replace({ name: 'panel-messenger-chat', params: { chatId: key } }),
+          this.$router.replace({ name: 'panel-messenger', params: { chatId: key } }),
         ).catch(() => {}).finally(done);
         return;
       }
-      if (name === 'panel-messenger') {
+      if (!this.$route.params.chatId) {
         this.syncingChatUrl = false;
         return;
       }
@@ -2148,7 +2164,7 @@ export default {
       }
       const id = decodeChatId(chatId);
       if (id == null) {
-        this.$store.commit('messenger/SET_ACTIVE_CONVERSATION', null);
+        this.messengerStore.setActiveConversation(null);
         this.syncChatUrl(null);
         return;
       }
@@ -2175,8 +2191,8 @@ export default {
         }
         conv = conv?.id ? conv : (conv?.conversation || conv?.data || null);
         if (conv?.id) {
-          this.$store.commit('messenger/CLEAR_OVERLAY_CONVERSATION');
-          this.$store.commit('messenger/UPSERT_CONVERSATION', { ...conv, is_preview: false });
+          this.messengerStore.clearOverlayConversation();
+          this.messengerStore.upsertConversation({ ...conv, is_preview: false });
           await this.selectConversation(conv.id);
         }
         this.closeJoinPreview();
@@ -2200,8 +2216,8 @@ export default {
         conv = conv?.id ? conv : (conv?.conversation || conv?.data || null);
         this.pendingInviteCode = null;
         if (conv?.id) {
-          this.$store.commit('messenger/CLEAR_OVERLAY_CONVERSATION');
-          this.$store.commit('messenger/UPSERT_CONVERSATION', { ...conv, is_preview: false });
+          this.messengerStore.clearOverlayConversation();
+          this.messengerStore.upsertConversation({ ...conv, is_preview: false });
           await this.selectConversation(conv.id);
         }
       } catch (e) { /* noop */ }
@@ -2220,14 +2236,14 @@ export default {
           const conv = preview?.conversation;
           if (!conv?.id) return;
           if (preview.is_member) {
-            this.$store.commit('messenger/CLEAR_OVERLAY_CONVERSATION');
-            this.$store.commit('messenger/UPSERT_CONVERSATION', { ...conv, is_preview: false });
+            this.messengerStore.clearOverlayConversation();
+            this.messengerStore.upsertConversation({ ...conv, is_preview: false });
             await this.selectConversation(conv.id);
             return;
           }
           if (preview.can_preview) {
-            this.$store.commit('messenger/SET_OVERLAY_CONVERSATION', { ...conv, is_preview: true });
-            this.$store.commit('messenger/REMOVE_FROM_SIDEBAR', conv.id);
+            this.messengerStore.setOverlayConversation({ ...conv, is_preview: true });
+            this.messengerStore.removeFromSidebar(conv.id);
             await this.selectConversation({ conversationId: conv.id, asPreview: true });
             return;
           }
@@ -2241,13 +2257,13 @@ export default {
           const conv = await getConversation(chat.id);
           if (!conv?.id) return;
           if (conv.is_preview) {
-            this.$store.commit('messenger/SET_OVERLAY_CONVERSATION', { ...conv, is_preview: true });
-            this.$store.commit('messenger/REMOVE_FROM_SIDEBAR', conv.id);
+            this.messengerStore.setOverlayConversation({ ...conv, is_preview: true });
+            this.messengerStore.removeFromSidebar(conv.id);
             await this.selectConversation({ conversationId: conv.id, asPreview: true });
             return;
           }
-          this.$store.commit('messenger/CLEAR_OVERLAY_CONVERSATION');
-          this.$store.commit('messenger/UPSERT_CONVERSATION', conv);
+          this.messengerStore.clearOverlayConversation();
+          this.messengerStore.upsertConversation(conv);
           await this.selectConversation(conv.id);
         }
       } catch (e) { /* noop */ }
@@ -2274,7 +2290,7 @@ export default {
         await leaveCommunity(payload.id);
         this.groupInfoOpen = false;
         this.profileOpen = false;
-        this.$store.commit('messenger/REMOVE_CONVERSATION', payload.id);
+        this.messengerStore.removeConversation(payload.id);
       } catch (e) {
         const raw = e?.response?.data?.message || '';
         let message = raw || this.$t('messenger.saveError');
@@ -2401,16 +2417,16 @@ export default {
       this.groupInfoOpen = false;
       this.profileSavedOpen = false;
       const active = this.activeConversation;
-      this.$store.commit('messenger/CLEAR_DRAFT_CONVERSATION');
-      this.$store.commit('messenger/CLEAR_OVERLAY_CONVERSATION');
+      this.messengerStore.clearDraftConversation();
+      this.messengerStore.clearOverlayConversation();
       this.pendingInviteCode = null;
       // Defensive: drop any leaked preview / empty private from the list.
       if (active?.id && active.id !== 'draft') {
         if (active.is_preview || (active.type === 'private' && !active.last_message && !active.last_message_at)) {
-          this.$store.commit('messenger/REMOVE_CONVERSATION', active.id);
+          this.messengerStore.removeConversation(active.id);
         }
       }
-      this.$store.commit('messenger/SET_ACTIVE_CONVERSATION', null);
+      this.messengerStore.setActiveConversation(null);
       this.syncChatUrl(null);
     },
 
@@ -2451,13 +2467,13 @@ export default {
           const conv = await getConversation(conversationId);
           const c = conv?.id ? conv : conv?.data;
           if (c?.id) {
-            this.$store.commit('messenger/UPSERT_CONVERSATION', c);
+            this.messengerStore.upsertConversation(c);
             target = c;
           }
         } catch (e) { /* invalid / unauthorized */ }
       }
       if (!target) {
-        this.$store.commit('messenger/SET_ACTIVE_CONVERSATION', null);
+        this.messengerStore.setActiveConversation(null);
         this.syncChatUrl(null);
         return;
       }

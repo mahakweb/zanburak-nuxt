@@ -267,6 +267,7 @@
     </BottomSheetDrawer>
 </template>
 <script>
+import { useAdminCommentsStore } from '@/stores/adminComments'
 import axiosInstance from "@/store/axiosInstance";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
 import EditorComponent from "@/views/components/editor/EditorComponent.vue";
@@ -285,6 +286,7 @@ import AdminBottomSheetActions from "@/views/components/admin/bottomSheet/AdminB
 import * as bs from "@/views/components/admin/bottomSheet/adminBottomSheetStyles.js";
 import AdminInlineLoading from "@/views/components/admin/AdminInlineLoading.vue";
 export default {
+		setup() { return { adminCommentsStore: useAdminCommentsStore() } },
     components: {
         AdminInlineLoading,
         PaginationComponent,
@@ -410,9 +412,9 @@ export default {
 
                 comment.approved = !comment.approved;
                 
-                // Update Vuex if comment was unapproved and now is approved
+                // Update the Pinia count if comment was unapproved and now is approved
                 if (wasUnapproved && comment.approved) {
-                    this.$store.dispatch('adminComments/decreaseUnapprovedComments');
+                    this.adminCommentsStore.decreaseUnapprovedComments();
                     // Also update parent component if it has the method
                     if (this.$parent && typeof this.$parent.decreaseUnapprovedCount === 'function') {
                         this.$parent.decreaseUnapprovedCount();
@@ -420,7 +422,7 @@ export default {
                 }
                 // If comment was approved and now is unapproved, increment
                 if (!wasUnapproved && !comment.approved) {
-                    this.$store.dispatch('adminComments/incrementUnapprovedComments');
+                    this.adminCommentsStore.incrementUnapprovedComments();
                 }
             } catch (err) {
                 console.error(err);

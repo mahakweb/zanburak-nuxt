@@ -320,11 +320,13 @@
     </div>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { ChevronUpIcon } from '@heroicons/vue/20/solid'
 import TagChip from '@/views/components/tag/TagChip.vue'
 import SeoImage from '@/views/components/seo/SeoImage.vue'
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         Disclosure,
         DisclosureButton,
@@ -397,10 +399,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         }
     },
     created() {

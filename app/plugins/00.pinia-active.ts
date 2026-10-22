@@ -2,7 +2,7 @@ import { getActivePinia, setActivePinia } from 'pinia'
 
 /**
  * Ensure Pinia is active early on every request (SSR-safe).
- * Must run before route middleware / components call useStore().
+ * Must run before route middleware / components access Pinia stores.
  */
 export default defineNuxtPlugin({
   name: 'pinia-active',

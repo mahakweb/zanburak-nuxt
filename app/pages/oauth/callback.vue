@@ -1,9 +1,3 @@
-<script setup>
-definePageMeta({
-  name: "oauth-callback",
-})
-</script>
-
 <template>
     <div class="mx-auto max-w-screen-xl px-2 h-screen py-20">
         <DarkMode class="hidden" />
@@ -88,50 +82,45 @@ definePageMeta({
         </div>
     </div>
 </template>
-<script>
+<script setup>
+definePageMeta({
+  name: "oauth-callback",
+})
+
 import DarkMode from "@/views/components/DarkMode.vue";
 import axiosInstance from "@/store/axiosInstance";
-import { persistAuthToken } from "@/utils/authToken";
+import { onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { useAuthStore } from "@/stores/auth";
 
-export default {
-    components: {
-        DarkMode
-    },
-    computed: {
-        loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
-        }
-    },
-    created() {
-        if (this.loggedIn) {
-            this.$router.push({ name: 'home' });
-        }
-    },
-    mounted() {
-        document.title = this.$t('auth.oauth.pageTitle')
-        setTimeout(async () => {
-            if (this.loggedIn) {
-                const redirect = this.$route.query.redirect;
-                window.location = redirect || "/";
-                return;
+const route = useRoute();
+const auth = useAuthStore();
+const { t } = useI18n();
+
+function safeRedirect(value) {
+    return typeof value === "string" && value.startsWith("/") && !value.startsWith("//")
+        ? value
+        : "/";
+}
+
+onMounted(() => {
+    document.title = t("auth.oauth.pageTitle");
+    setTimeout(async () => {
+        const token = route.query.token;
+        if (typeof token === "string" && token) {
+            axiosInstance.addHeaders({ Authorization: `Bearer ${token}` });
+            try {
+                const { data: user } = await axiosInstance.get("/user");
+                await auth.completeLogin({ token, user });
+            } catch (error) {
+                console.error("[auth] OAuth user restore failed", error);
             }
-            const token = this.$route.query.token;
-            const redirect = this.$route.query.redirect;
-            if (token) {
-                persistAuthToken(String(token));
-                axiosInstance.addHeaders({ Authorization: "Bearer " + token });
-                try {
-                    const { data: user } = await axiosInstance.get("/user");
-                    await this.$store.dispatch("auth/completeLogin", { token, user });
-                } catch (e) {
-                    console.error("OAuth user restore failed", e);
-                }
-            } else {
-                console.error("No token found in query params");
-            }
-            if (redirect) window.location = redirect;
-            else window.location = "/";
-        }, 3000)
-    }
-};
+        } else {
+            await auth.restoreFromStorage();
+        }
+
+        window.location.assign(safeRedirect(route.query.redirect));
+    }, 3000);
+});
 </script>

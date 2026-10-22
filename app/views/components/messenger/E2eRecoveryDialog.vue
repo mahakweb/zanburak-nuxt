@@ -66,7 +66,9 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   name: 'E2eRecoveryDialog',
   props: {
     open: { type: Boolean, default: false },
@@ -132,7 +134,7 @@ export default {
       this.skip();
     },
     skip() {
-      this.$store.dispatch('messenger/dismissE2eRecoveryPrompt');
+      this.messengerStore.dismissE2eRecoveryPrompt();
       this.$emit('skip');
       this.$emit('close');
     },
@@ -148,9 +150,9 @@ export default {
       this.busy = true;
       try {
         if (this.mode === 'setup') {
-          await this.$store.dispatch('messenger/enableE2eRecovery', phrase);
+          await this.messengerStore.enableE2eRecovery(phrase);
         } else {
-          await this.$store.dispatch('messenger/restoreE2eFromRecovery', phrase);
+          await this.messengerStore.restoreE2eFromRecovery(phrase);
         }
         this.$emit('done');
         this.$emit('close');

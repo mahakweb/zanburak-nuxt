@@ -66,10 +66,12 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import { tagService } from "@/services/tag.service";
 import { toast } from "vue3-toastify";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     props: {
         tag: {
             type: Object,
@@ -85,7 +87,7 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
     },
     watch: {

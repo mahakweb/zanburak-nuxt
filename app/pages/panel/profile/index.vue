@@ -553,6 +553,7 @@ import axiosInstance from "@/store/axiosInstance";
 import { ref } from "vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { useAuthStore } from "@/stores/auth";
 
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const DEFAULT_PROFILE_PIC = "https://static.zanburak.ir/images/avatar/default.png";
@@ -566,6 +567,7 @@ export default {
     },
     data() {
         return {
+            authStore: useAuthStore(),
             uploadInProgressCover: false,
             uploadPercentageCover: 0,
             uploadInProgressProfile: false,
@@ -713,7 +715,7 @@ export default {
                         transition: toast.TRANSITIONS.BOUNCE,
                         position: toast.POSITION.BOTTOM_RIGHT,
                     });
-                    this.$store.dispatch("auth/getUser");
+                    this.authStore.getUser();
                 })
                 .catch((error) => {
                     if (error.response.status === 422) {
@@ -853,7 +855,7 @@ export default {
                     this.userData.user.cover_pic = response.data.coverPic;
                     this.bumpImageVersion("cover");
                 }
-                await this.$store.dispatch("auth/getUser");
+                await this.authStore.getUser();
                 this.getUserData();
                 this.showUploadToast("cover", this.$t("profile.account.coverUpdateSuccess"));
                 this.closeCropModal();
@@ -891,7 +893,7 @@ export default {
                     this.userData.user.profile_pic = response.data.profilePic;
                     this.bumpImageVersion("profile");
                 }
-                await this.$store.dispatch("auth/getUser");
+                await this.authStore.getUser();
                 this.getUserData();
                 this.showUploadToast("profile", this.$t("profile.account.profilePicUpdateSuccess"));
                 this.closeCropModal();

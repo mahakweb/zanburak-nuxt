@@ -352,6 +352,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/discuss/layouts/MasterPage.vue";
 import MarkdownRenderer from "@/views/components/home/MarkdownRenderer.vue";
 import CommentsList from "@/views/components/home/CommentsList.vue";
@@ -370,6 +371,7 @@ import { toast } from "vue3-toastify";
 import moment from "moment";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { MasterPage, MarkdownRenderer, CommentsList, ArticleShowSidebar, ArticleShowLoading, ArticleRating, BottomSheetDrawer, TagChip, SeoImage },
     props: { articleSlug: String },
     data() {
@@ -403,10 +405,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         shareUrl() {
             if (typeof window === "undefined") return "";

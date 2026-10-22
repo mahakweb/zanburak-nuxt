@@ -28,7 +28,9 @@ import { connectionManager } from '@/services/connectionManager';
 
 import { getPusher } from '@/lib/echo';
 
-import { isServerId } from '@/views/components/messenger/outbox';
+import { getAuthTokenSync } from '@/utils/authToken';
+
+import { isServerId } from './outbox';
 
 
 
@@ -74,7 +76,7 @@ export const MAX_OUTBOX_ATTEMPTS = 12;
 
  */
 
-export const CLOCK_REVEAL_MS = 1200;
+export const CLOCK_REVEAL_MS = 100;
 
 
 
@@ -85,19 +87,7 @@ const PERMANENT_HTTP = new Set([400, 401, 403, 404, 410, 413, 415, 422]);
 
 
 function readAuthToken() {
-
-  try {
-
-    if (typeof localStorage === 'undefined') return null;
-
-    return JSON.parse(localStorage.getItem('token'));
-
-  } catch {
-
-    return null;
-
-  }
-
+  return getAuthTokenSync();
 }
 
 
@@ -134,13 +124,72 @@ export function isPermanentSendError(e) {
 
   }
 
-  const msg = String(e?.message || '');
+  const msg = String(e?.message || e?.response?.data?.message || '');
 
-  if (msg === 'e2e_encrypt_required' || msg === 'Media file unavailable for send') return true;
+  if (
+    msg === 'e2e_encrypt_required' ||
+    msg === 'Media file unavailable for send' ||
+    /requires end-to-end encryption/i.test(msg) ||
+    /missing[-_ ]?conversation[-_ ]?key/i.test(msg) && e?.permanent === true
+  ) {
+    return true;
+  }
 
   const status = e?.response?.status;
 
   return !!(status && PERMANENT_HTTP.has(status));
+
+}
+
+
+
+/**
+
+ * Wire-sent / receipt-stamped bubbles must never be demoted back to the clock.
+
+ * (Checkmark → pending was the group/channel/Saved send regression.)
+
+ */
+
+export function isWireSentBubble(m) {
+
+  if (!m || m.failed) return false;
+
+  if (m.delivered_at || m.read_at) return true;
+
+  if (isServerId(m.id) && !m.pending) return true;
+
+  const status = m.send_status;
+
+  if (
+    status === SEND_STATUS.SENT ||
+    status === SEND_STATUS.DELIVERED ||
+    status === SEND_STATUS.READ
+  ) {
+    return true;
+  }
+
+  return !!(m.awaiting_server && !m.pending);
+
+}
+
+
+
+/**
+
+ * Apply queued/sending patches only when the bubble is not already wire-sent.
+
+ * Returns null when the UI status must stay put (outbox metadata may still update).
+
+ */
+
+export function outboundStatusPatch(clientId, kind, bubble) {
+
+  if (isWireSentBubble(bubble)) return null;
+
+  if (kind === 'sending') return sendingPatch(clientId);
+
+  return queuedPatch(clientId);
 
 }
 
@@ -499,5 +548,3 @@ export function mergeReceiptFields(prev = {}, incoming = {}) {
     read_at: incoming.read_at || prev.read_at || null,
   };
 }
-
-

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive } from 'vue'
+import { computed, reactive } from 'vue'
 import axiosInstance from '@/store/axiosInstance'
 import AuthService from '@/services/auth.service'
 import {
@@ -7,113 +7,72 @@ import {
   getAuthToken,
   persistAuthToken,
 } from '@/utils/authToken'
-import { getDispatch } from './storeRoot'
-
-let refreshUserPromise = null
-let restorePromise = null
 
 export const useAuthStore = defineStore('auth', () => {
-  const state = reactive({
-    status: { loggedIn: false, userInfo: null },
-    token: null,
+  const status = reactive({
+    loggedIn: false,
+    userInfo: null,
   })
+  const isAuthenticated = computed(() => status.loggedIn)
+  let refreshUserPromise = null
+  let restorePromise = null
 
-  function applyAxiosAuth(token) {
-    if (token) {
-      axiosInstance.addHeaders({ Authorization: 'Bearer ' + token })
+  function applyAxiosAuth(value) {
+    // On the server the request interceptor reads the token from this request's
+    // cookie. Never mutate shared Axios defaults across concurrent SSR requests.
+    if (import.meta.server) return
+    if (value) {
+      axiosInstance.addHeaders({ Authorization: `Bearer ${value}` })
     } else if (axiosInstance.defaults?.headers?.common) {
       delete axiosInstance.defaults.headers.common.Authorization
     }
   }
 
   function setUserInfo(userInfo) {
-    state.status.userInfo = userInfo
+    status.userInfo = userInfo
   }
 
-  function loginSuccess(data) {
-    state.status.loggedIn = true
-    state.status.user = data.token
-    state.status.userInfo = data.user
-    state.token = data.token
-  }
-
-  function loginFailure() {
-    state.status.loggedIn = false
-    state.status.user = null
-    state.status.userInfo = null
-    state.token = null
-  }
-
-  function logoutMutation() {
-    state.status.loggedIn = false
-    state.status.user = null
-    state.status.userInfo = null
-    state.token = null
-  }
-
-  function registerSuccess(data) {
-    state.status.loggedIn = true
-    state.status.user = data.token
-    state.status.userInfo = data.user
-    state.token = data.token
-  }
-
-  function registerFailure() {
-    state.status.loggedIn = false
-    state.status.user = null
-    state.status.userInfo = null
-    state.token = null
-  }
-
-  function commit(type, payload) {
-    switch (type) {
-      case 'setUserInfo':
-        setUserInfo(payload)
-        break
-      case 'loginSuccess':
-        loginSuccess(payload)
-        break
-      case 'loginFailure':
-        loginFailure()
-        break
-      case 'logout':
-        logoutMutation()
-        break
-      case 'registerSuccess':
-        registerSuccess(payload)
-        break
-      case 'registerFailure':
-        registerFailure()
-        break
-      default:
-        console.warn(`[auth] Unknown mutation: ${type}`)
+  function setSession(data) {
+    status.loggedIn = true
+    status.userInfo = data.user
+    if (data.token) {
+      persistAuthToken(data.token)
+      applyAxiosAuth(data.token)
+    } else {
+      clearAuthToken()
+      applyAxiosAuth(null)
     }
+  }
+
+  function clearSession() {
+    status.loggedIn = false
+    status.userInfo = null
   }
 
   async function refreshUser() {
     if (refreshUserPromise) return refreshUserPromise
 
-    const token = state.token || getAuthToken()
-    if (!token) {
-      return Promise.resolve(null)
-    }
-
-    applyAxiosAuth(token)
+    const authToken = getAuthToken()
+    if (authToken) applyAxiosAuth(authToken)
 
     refreshUserPromise = axiosInstance
       .get('/user')
       .then((response) => {
         if (response.data) {
-          commit('setUserInfo', response.data)
+          status.loggedIn = true
+          setUserInfo(response.data)
           return response.data
         }
+        clearAuthToken()
+        applyAxiosAuth(null)
+        clearSession()
         return null
       })
       .catch((error) => {
         if (error.response?.status === 401) {
           clearAuthToken()
           applyAxiosAuth(null)
-          commit('loginFailure')
+          clearSession()
         }
         throw error
       })
@@ -124,96 +83,80 @@ export const useAuthStore = defineStore('auth', () => {
     return refreshUserPromise
   }
 
-  function getUser() {
-    return refreshUser()
-  }
-
-  function completeLogin(data) {
-    commit('loginSuccess', data)
-    if (data?.token) {
-      persistAuthToken(data.token)
-      applyAxiosAuth(data.token)
+  async function completeLogin(data) {
+    if (!data?.user) {
+      throw new TypeError('Authentication response must include a user')
     }
-    return Promise.resolve()
+    setSession(data)
   }
 
-  function login(user) {
-    return AuthService.login(user)
-      .then((response) => completeLogin(response.data).then(() => response))
-      .catch((error) => {
-        clearAuthToken()
-        applyAxiosAuth(null)
-        commit('loginFailure')
-        return Promise.reject(error)
-      })
+  async function login(credentials) {
+    try {
+      const response = await AuthService.login(credentials)
+      await completeLogin(response.data)
+      return response
+    } catch (error) {
+      clearAuthToken()
+      applyAxiosAuth(null)
+      clearSession()
+      throw error
+    }
   }
 
-  function logout() {
-    AuthService.logout()
-      .catch(() => {})
-      .finally(() => {
-        clearAuthToken()
-        applyAxiosAuth(null)
-        commit('logout')
-        try {
-          getDispatch()('notification/resetFeed', null, { root: true })
-        } catch {
-          /* ignore */
-        }
-      })
+  async function register(user) {
+    try {
+      const response = await AuthService.register(user)
+      await completeLogin(response.data)
+      return response.data
+    } catch (error) {
+      clearAuthToken()
+      applyAxiosAuth(null)
+      clearSession()
+      throw error
+    }
   }
 
-  function register(user) {
-    return AuthService.register(user)
-      .then((response) => {
-        commit('registerSuccess', response.data)
-        if (response.data?.token) {
-          persistAuthToken(response.data.token)
-          applyAxiosAuth(response.data.token)
-        }
-        return Promise.resolve(response.data)
-      })
-      .catch((error) => {
-        clearAuthToken()
-        applyAxiosAuth(null)
-        commit('registerFailure')
-        return Promise.reject(error)
-      })
+  async function logout() {
+    try {
+      await AuthService.logout()
+    } catch (error) {
+      console.warn('[auth] Server logout failed; clearing the local session', error)
+    } finally {
+      clearAuthToken()
+      applyAxiosAuth(null)
+      clearSession()
+      try {
+        const { useNotificationStore } = await import('./notification')
+        useNotificationStore().resetFeed()
+      } catch (error) {
+        console.error('[auth] Failed to reset notifications after logout', error)
+      }
+      try {
+        const { useMessengerStore } = await import('./messenger')
+        useMessengerStore().forgetSession()
+      } catch (error) {
+        console.error('[auth] Failed to reset messenger after logout', error)
+      }
+    }
   }
 
   /**
-   * Restore session from cookie (SSR + client) and localStorage (client).
-   * Safe to call from a universal plugin before route middleware.
+   * Restore the browser's HttpOnly Laravel session cookie. A legacy Bearer
+   * token remains supported for sessions created by older Nuxt deployments.
    */
   async function restoreFromStorage() {
     if (restorePromise) return restorePromise
 
     restorePromise = (async () => {
-      const token = getAuthToken()
-      if (!token) {
-        applyAxiosAuth(null)
-        return
-      }
-
-      // Keep cookie + localStorage in sync on the client
-      persistAuthToken(token)
-      applyAxiosAuth(token)
-      state.token = token
-      state.status.loggedIn = true
+      const authToken = getAuthToken()
+      if (authToken) applyAxiosAuth(authToken)
 
       try {
-        const response = await axiosInstance.get('/user')
-        if (response.data) {
-          state.status.userInfo = response.data
-        }
+        const user = await refreshUser()
+        if (!user) clearSession()
       } catch (error) {
-        if (error.response?.status === 401) {
-          clearAuthToken()
-          applyAxiosAuth(null)
-          loginFailure()
-        } else {
-          console.error(error)
-        }
+        if (error.response?.status !== 401) console.error('[auth] Failed to restore user profile', error)
+        clearSession()
       }
     })().finally(() => {
       restorePromise = null
@@ -223,10 +166,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    $state: state,
-    commit,
+    status,
+    isAuthenticated,
+    setUserInfo,
     refreshUser,
-    getUser,
+    getUser: refreshUser,
     completeLogin,
     login,
     logout,

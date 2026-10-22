@@ -1,5 +1,5 @@
 /**
- * Top-level encrypt/decrypt API used by the messenger Vuex store. Encodes the
+ * Top-level encrypt/decrypt API used by the messenger store. Encodes the
  * wire protocol shared with the backend:
  *
  *  message.e2e   = { v: 1, alg: 'A256GCM', iv: base64, kid: number }
@@ -17,6 +17,7 @@ import {
   pullAndConsumePackages,
   peekInlineKeyWraps,
   scheduleInlineKeyWraps,
+  buildInlineKeyWraps,
   ingestInlineKeyWraps,
   pullAndConsumeKeyVault,
 } from './session';
@@ -28,6 +29,24 @@ export const E2E_ALG = 'A256GCM';
 export const LOCKED_PLACEHOLDER = '🔒 پیام رمزنگاری‌شده';
 
 const MEDIA_TYPES = new Set(['photo', 'video', 'voice', 'audio', 'file']);
+
+function looksLikeCiphertextBody(body) {
+  const b = String(body || '').trim();
+  if (!b || b === LOCKED_PLACEHOLDER) return false;
+  if (/\s/.test(b)) return false;
+  return b.length >= 32 && /^[A-Za-z0-9+/=]+$/.test(b);
+}
+
+async function senderDeviceIdOrThrow() {
+  const deviceApi = await import('./device');
+  let senderDeviceId = await deviceApi.getMyDeviceId();
+  if (!senderDeviceId) {
+    await deviceApi.ensureDevice({ waitForServer: false }).catch(() => {});
+    senderDeviceId = await deviceApi.getMyDeviceId();
+  }
+  if (!senderDeviceId) throw new Error('missing-device-id');
+  return senderDeviceId;
+}
 
 /** AAD binds ciphertext to conversation + key version (+ optional sender device). */
 export function messageAadBytes(conversationId, kid, senderDeviceId = '') {
@@ -141,31 +160,32 @@ function applyDecryptedPayload(message, payload) {
   return out;
 }
 
-/**
- * Memory-only wraps. If the chat is still cold, fill the cache in the
- * background — the ciphertext itself must not wait on /bundles.
- */
-function inlineWrapsForSend(conversationId, kid, keyBytes) {
+/** First send: wait briefly for peer wraps so the recipient can decrypt live. */
+async function wrapsForOutgoing(conversationId, kid, keyBytes, allowMint) {
   const peeked = peekInlineKeyWraps(conversationId, kid);
-  if (!peeked) {
-    scheduleInlineKeyWraps(conversationId, kid, keyBytes);
-    return [];
-  }
-  return peeked.wraps || [];
+  if (peeked?.wraps?.length) return peeked.wraps;
+  scheduleInlineKeyWraps(conversationId, kid, keyBytes);
+  if (!allowMint) return peeked?.wraps || [];
+  try {
+    const built = await Promise.race([
+      buildInlineKeyWraps(conversationId, kid, keyBytes, { forceBundles: true }),
+      new Promise((resolve) => setTimeout(() => resolve(null), 800)),
+    ]);
+    if (built?.wraps?.length) return built.wraps;
+  } catch (e) { /* send ciphertext anyway */ }
+  return peeked?.wraps || [];
 }
 
 export async function encryptOutgoingMessage(conversationId, type, fields = {}, options = {}) {
   const allowMint = options.allowMint !== false;
-  const [{ keyBytes, kid }, senderDeviceId] = await Promise.all([
-    ensureConversationKey(conversationId, { allowMint }),
-    import('./device').then((m) => m.getMyDeviceId()),
-  ]);
+  const { keyBytes, kid } = await ensureConversationKey(conversationId, { allowMint });
+  const senderDeviceId = await senderDeviceIdOrThrow();
   const payload = buildTextLikePayload(type, fields);
   const aad = messageAadBytes(conversationId, kid);
-  // Local AES only. Peer wraps are attached when already in memory.
-  // A cold cache must not block the send on GET /bundles.
+  // Local AES only. First send waits briefly for peer wraps so the recipient
+  // can decrypt from the envelope instead of after a refresh.
   const { ivB64, ciphertextB64 } = await encryptJson(keyBytes, payload, aad);
-  const wraps = inlineWrapsForSend(conversationId, kid, keyBytes);
+  const wraps = await wrapsForOutgoing(conversationId, kid, keyBytes, allowMint);
 
   return {
     body: ciphertextB64,
@@ -191,10 +211,8 @@ export async function encryptOutgoingMediaEnvelope(conversationId, type, {
   caption = '', fileKey, name, mime, width = null, height = null, duration = null,
 } = {}, options = {}) {
   const allowMint = options.allowMint !== false;
-  const [{ keyBytes, kid }, senderDeviceId] = await Promise.all([
-    ensureConversationKey(conversationId, { allowMint }),
-    import('./device').then((m) => m.getMyDeviceId()),
-  ]);
+  const { keyBytes, kid } = await ensureConversationKey(conversationId, { allowMint });
+  const senderDeviceId = await senderDeviceIdOrThrow();
   const payload = {
     t: type,
     c: caption || '',
@@ -208,7 +226,7 @@ export async function encryptOutgoingMediaEnvelope(conversationId, type, {
   if (duration != null) payload.duration = duration;
   const aad = messageAadBytes(conversationId, kid);
   const { ivB64, ciphertextB64 } = await encryptJson(keyBytes, payload, aad);
-  const wraps = inlineWrapsForSend(conversationId, kid, keyBytes);
+  const wraps = await wrapsForOutgoing(conversationId, kid, keyBytes, allowMint);
   return {
     body: ciphertextB64,
     is_encrypted: true,
@@ -225,7 +243,7 @@ export async function encryptOutgoingMediaEnvelope(conversationId, type, {
   };
 }
 
-/** Store-compatible helpers (used by messenger.module.js). */
+/** Shared messenger cryptography helpers. */
 export async function encryptTextMessage(conversationId, text, options = {}) {
   return encryptOutgoingMessage(conversationId, 'text', { body: text }, options);
 }
@@ -269,17 +287,31 @@ export async function encryptMediaMessage(conversationId, {
   };
 }
 
+/** Bind a wire/list row to its chat so AAD + IndexedDB key lookup can succeed. */
+export function withConversationId(message, conversationId) {
+  if (!message || conversationId == null) return message;
+  const cid = message.conversation_id != null ? message.conversation_id : conversationId;
+  let out = message;
+  if (message.conversation_id == null) out = { ...message, conversation_id: cid };
+  if (out.reply_to && out.reply_to.conversation_id == null) {
+    out = { ...out, reply_to: { ...out.reply_to, conversation_id: cid } };
+  }
+  return out;
+}
+
 /**
  * Decrypt an incoming (or server-echoed) encrypted message for display.
  * Never throws — falls back to a locked placeholder on failure.
  * Original ciphertext is kept on `_e2e_ciphertext` so a later key pull can retry.
  *
  * @param {object} message
- * @param {{ skipPull?: boolean }} [options]  When true, do not hit /packages
- *   (caller already pulled, or decrypting a list in bulk).
+ * @param {{ skipPull?: boolean, conversationId?: string|number }} [options]
+ *   skipPull: caller already pulled packages. Still pulls if local keys are empty
+ *   (refresh / new device must not stay locked because of a skipped fetch).
  */
 export async function decryptIncomingMessage(message, options = {}) {
   if (!message) return message;
+  message = withConversationId(message, options.conversationId);
 
   // Nested reply quotes — decrypt independently (may share conversation keys).
   let replyTo = message.reply_to;
@@ -287,19 +319,11 @@ export async function decryptIncomingMessage(message, options = {}) {
     replyTo = await decryptIncomingMessage({
       ...replyTo,
       conversation_id: replyTo.conversation_id || message.conversation_id,
-    }, { skipPull: true });
+    }, { skipPull: true, conversationId: message.conversation_id });
   }
 
   if (!message.is_encrypted) {
     return replyTo !== message.reply_to ? { ...message, reply_to: replyTo } : message;
-  }
-
-  // Device must exist before wrap ingest / package pull.
-  try {
-    const { ensureDevice } = await import('./device');
-    await ensureDevice();
-  } catch (e) {
-    console.warn('[e2e] ensureDevice before decrypt failed', e);
   }
 
   // Already unlocked — keep media keys / empty captions (photos without text).
@@ -319,9 +343,24 @@ export async function decryptIncomingMessage(message, options = {}) {
 
   const cipherBody = (
     message._e2e_ciphertext
-    || (message.body && message.body !== LOCKED_PLACEHOLDER ? message.body : null)
+    || (message.body && message.body !== LOCKED_PLACEHOLDER && looksLikeCiphertextBody(message.body)
+      ? message.body
+      : null)
   );
+  // Own optimistic / hydrated plaintext: is_encrypted but no envelope yet.
+  // Never rewrite readable text as «پیام رمزنگاری‌شده».
   if (!envelope || !cipherBody) {
+    const plain = message.body && message.body !== LOCKED_PLACEHOLDER
+      && !looksLikeCiphertextBody(message.body);
+    if (plain) {
+      const out = replyTo !== message.reply_to ? { ...message, reply_to: replyTo } : message;
+      return {
+        ...out,
+        _e2e_decrypted: true,
+        _e2e_locked: false,
+        _decryptFailed: false,
+      };
+    }
     return {
       ...message,
       reply_to: replyTo,
@@ -345,7 +384,18 @@ export async function decryptIncomingMessage(message, options = {}) {
     };
   }
 
-  const conversationId = message.conversation_id;
+  const conversationId = message.conversation_id ?? options.conversationId ?? null;
+  if (conversationId == null) {
+    return {
+      ...message,
+      reply_to: replyTo,
+      body: LOCKED_PLACEHOLDER,
+      _e2e_ciphertext: cipherBody,
+      _decryptFailed: true,
+      _e2e_locked: true,
+      preview: LOCKED_PLACEHOLDER,
+    };
+  }
   const kid = Number(envelope.kid ?? envelope.key_version ?? 1);
   const iv = envelope.iv;
   const senderDeviceId = message.sender_device_id || envelope.sid || '';
@@ -364,39 +414,19 @@ export async function decryptIncomingMessage(message, options = {}) {
     aadCandidates.push(a);
   });
 
+  const skipPull = options.skipPull === true;
+  const lockedResult = () => ({
+    ...message,
+    reply_to: replyTo,
+    body: LOCKED_PLACEHOLDER,
+    _e2e_ciphertext: cipherBody,
+    e2e: envelope,
+    _decryptFailed: true,
+    _e2e_locked: true,
+    preview: LOCKED_PLACEHOLDER,
+  });
+
   try {
-    // Prefer the key the sender embedded for us — self-healing even when
-    // package relay / IndexedDB state is out of sync.
-    if (Array.isArray(envelope.wraps) && envelope.wraps.length) {
-      await ingestInlineKeyWraps(conversationId, kid, envelope.wraps).catch(() => false);
-    }
-
-    let candidates = await getConversationKeyCandidates(conversationId, kid);
-    if (!candidates.length && !options.skipPull) {
-      // Vault first (identity-wrapped, durable) then device packages.
-      await pullAndConsumeKeyVault(conversationId, { force: true }).catch(() => 0);
-      candidates = await getConversationKeyCandidates(conversationId, kid);
-    }
-    if (!candidates.length && !options.skipPull) {
-      await pullAndConsumePackages(conversationId, { bypassCooldown: true });
-      if (Array.isArray(envelope.wraps) && envelope.wraps.length) {
-        await ingestInlineKeyWraps(conversationId, kid, envelope.wraps).catch(() => false);
-      }
-      candidates = await getConversationKeyCandidates(conversationId, kid);
-    }
-    if (!candidates.length) {
-      return {
-        ...message,
-        reply_to: replyTo,
-        body: LOCKED_PLACEHOLDER,
-        _e2e_ciphertext: cipherBody,
-        _decryptFailed: true,
-        _e2e_locked: true,
-        preview: LOCKED_PLACEHOLDER,
-      };
-    }
-
-    let payload = null;
     let lastErr = null;
     const tryDecrypt = async (keys) => {
       // eslint-disable-next-line no-restricted-syntax
@@ -411,31 +441,52 @@ export async function decryptIncomingMessage(message, options = {}) {
       return null;
     };
 
-    payload = await tryDecrypt(candidates);
-    if (!payload && Array.isArray(envelope.wraps) && envelope.wraps.length) {
-      const ingested = await ingestInlineKeyWraps(conversationId, kid, envelope.wraps).catch(() => false);
+    const ingestWraps = async () => {
+      if (!Array.isArray(envelope.wraps) || !envelope.wraps.length) return false;
+      return ingestInlineKeyWraps(conversationId, kid, envelope.wraps).catch(() => false);
+    };
+
+    const pullRemoteKeys = async () => {
+      try {
+        const { ensureDevice } = await import('./device');
+        await ensureDevice({ waitForServer: false });
+      } catch (e) {
+        console.warn('[e2e] ensureDevice before key pull failed', e);
+      }
+      await pullAndConsumeKeyVault(conversationId, { force: true }).catch(() => 0);
+      await pullAndConsumePackages(conversationId, { bypassCooldown: true }).catch(() => {});
+      await ingestWraps();
+      return getConversationKeyCandidates(conversationId, kid);
+    };
+
+    // Phase 1: local IndexedDB keys + inline wraps. Never wait on device
+    // registration / vault HTTP — that is why refresh used to stay locked.
+    await ingestWraps();
+    let candidates = await getConversationKeyCandidates(conversationId, kid);
+    let payload = candidates.length ? await tryDecrypt(candidates) : null;
+
+    if (!payload && !skipPull) {
+      candidates = await pullRemoteKeys();
+      payload = candidates.length ? await tryDecrypt(candidates) : null;
+    }
+    if (!payload && !skipPull && Array.isArray(envelope.wraps) && envelope.wraps.length) {
+      const ingested = await ingestWraps();
       if (ingested) {
         candidates = await getConversationKeyCandidates(conversationId, kid);
         payload = await tryDecrypt(candidates);
       }
     }
     if (!payload) {
-      console.warn('[e2e] decrypt failed for all candidate keys', {
-        conversationId,
-        kid,
-        candidateCount: candidates.length,
-        hasWraps: Array.isArray(envelope.wraps) && envelope.wraps.length > 0,
-        err: lastErr,
-      });
-      return {
-        ...message,
-        reply_to: replyTo,
-        body: LOCKED_PLACEHOLDER,
-        _e2e_ciphertext: cipherBody,
-        _decryptFailed: true,
-        _e2e_locked: true,
-        preview: LOCKED_PLACEHOLDER,
-      };
+      if (!skipPull) {
+        console.warn('[e2e] decrypt failed for all candidate keys', {
+          conversationId,
+          kid,
+          candidateCount: candidates.length,
+          hasWraps: Array.isArray(envelope.wraps) && envelope.wraps.length > 0,
+          err: lastErr,
+        });
+      }
+      return lockedResult();
     }
 
     const out = applyDecryptedPayload({ ...message, e2e: envelope, reply_to: replyTo }, payload);
@@ -458,18 +509,50 @@ export async function decryptIncomingMessage(message, options = {}) {
   }
 }
 
-/** Decrypt an array of messages; one vault+package pull per conversation, then parallel decrypt. */
-export async function decryptMessages(messages) {
+function isStillLockedEncrypted(message) {
+  if (!message?.is_encrypted) return false;
+  if (message._e2e_decrypted && !message._e2e_locked && !message._decryptFailed) {
+    return message.body === LOCKED_PLACEHOLDER;
+  }
+  return true;
+}
+
+/** Decrypt an array of messages. Local IndexedDB keys first; network only for leftovers. */
+export async function decryptMessages(messages, fallbackConversationId = null) {
   if (!Array.isArray(messages) || !messages.length) return messages;
+  const stamped = messages.map((m) => withConversationId(m, fallbackConversationId));
   const convIds = new Set();
-  messages.forEach((m) => {
+  stamped.forEach((m) => {
     if (m?.is_encrypted && m.conversation_id != null) convIds.add(String(m.conversation_id));
   });
+  if (!convIds.size && fallbackConversationId != null) {
+    convIds.add(String(fallbackConversationId));
+  }
+  const fallbackCid = fallbackConversationId != null
+    ? fallbackConversationId
+    : (convIds.size === 1 ? [...convIds][0] : null);
+
+  let next = await Promise.all(stamped.map((m) => decryptIncomingMessage(
+    withConversationId(m, fallbackCid),
+    { skipPull: true, conversationId: fallbackCid },
+  )));
+
+  const locked = next.filter(isStillLockedEncrypted);
+  if (!locked.length) return next;
+
   await Promise.all([...convIds].map(async (cid) => {
     await pullAndConsumeKeyVault(cid, { force: true }).catch(() => 0);
     await pullAndConsumePackages(cid, { bypassCooldown: true }).catch(() => {});
   }));
-  return Promise.all(messages.map((m) => decryptIncomingMessage(m, { skipPull: true })));
+
+  next = await Promise.all(next.map((m) => {
+    if (!isStillLockedEncrypted(m)) return m;
+    return decryptIncomingMessage(
+      withConversationId(m, fallbackCid),
+      { skipPull: false, conversationId: fallbackCid },
+    );
+  }));
+  return next;
 }
 
 export const decryptMessageList = decryptMessages;

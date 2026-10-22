@@ -408,6 +408,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import { useClipboard } from "@vueuse/core";
 import config from "@/store/config";
@@ -421,6 +422,7 @@ import "moment/locale/fa";
 import EditorComponent from "@/views/components/editor/EditorComponent.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         MarkdownRenderer,
         BottomSheetDrawer,
@@ -485,10 +487,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     // updated() {

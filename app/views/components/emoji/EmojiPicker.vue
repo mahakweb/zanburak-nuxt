@@ -12,6 +12,7 @@
 import data from './emojis-data.json';
 
 export default {
+    emits: ['emoji_click'],
     props:
     {
         show_arrow:

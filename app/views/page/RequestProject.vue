@@ -143,7 +143,7 @@
                                     </span>
                                     <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.attachFile') }}</h2>
                                 </div>
-                                <DropzoneComponent ref="dropzone" :errors="errors && errors.attach_file ? errors.attach_file[0] : ''" @uploaded-files="handleUploadedFiles" :headers="dropzoneHeader" :uploadUrl="`${apiBaseUrl}/request-project/upload-file`" :xhrTimeout="60000" :maxSize="10485760" :allowedFormats="['jpg', 'jpeg', 'png', 'pdf', 'txt', 'rar', 'zip']" :maxFiles="1" :parallelUpload="false" :maxParallelUploads="3" :retryOnError="false" :bulkUpload="false" />
+                                <DropzoneComponent ref="dropzone" :errors="errors && errors.attach_file ? errors.attach_file[0] : ''" @uploaded-files="handleUploadedFiles" :headers="dropzoneHeader" :uploadUrl="`${apiBaseUrl}/request-project/upload-file`" :xhrTimeout="60000" :withCredentials="true" :maxSize="10485760" :allowedFormats="['jpg', 'jpeg', 'png', 'pdf', 'txt', 'rar', 'zip']" :maxFiles="1" :parallelUpload="false" :maxParallelUploads="3" :retryOnError="false" :bulkUpload="false" />
                             </div>
                         </div>
 
@@ -245,11 +245,13 @@
     </MasterPage>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import EditorComponent from "@/views/components/editor/EditorComponent.vue";
 import DropzoneComponent from "@/views/components/dropzone/DropzoneComponent.vue";
 import axiosInstance from "@/store/axiosInstance";
 import PN from "persian-number";
+import { getAuthTokenSync } from "@/utils/authToken";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import config from "@/store/config";
@@ -262,10 +264,8 @@ export default {
     },
     data() {
         return {
-            dropzoneHeader: {
-                Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`,
-            },
-            apiBaseUrl: config.apiBaseUrl,
+            authStore: useAuthStore(),
+apiBaseUrl: config.apiBaseUrl,
             title: "",
             type: "",
             min_price: "",
@@ -400,8 +400,12 @@ export default {
         },
     },
     computed: {
+        dropzoneHeader() {
+            const token = this.authStore?.status?.loggedIn ? getAuthTokenSync() : null;
+            return token ? { Authorization: `Bearer ${token}` } : {};
+        },
         currentUser() {
-            const info = this.$store?.state?.auth?.status?.userInfo;
+            const info = this.authStore?.status?.userInfo;
             return info && info.value ? info.value : info;
         },
         isEmailVerified() {

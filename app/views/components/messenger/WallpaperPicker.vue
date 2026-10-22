@@ -439,7 +439,8 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import {
   PATTERNS,
   IMAGES,
@@ -465,6 +466,7 @@ import {
 } from './wallpaper';
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   name: 'WallpaperPicker',
   props: {
     conversationId: { type: [Number, String], default: null },
@@ -489,7 +491,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['wallpaper', 'myWallpapers']),
+    ...mapState(useMessengerStore, ['wallpaper', 'myWallpapers']),
     isChatMode() {
       return this.conversationId != null && this.conversationId !== '' && this.conversationId !== 'draft';
     },
@@ -536,7 +538,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('messenger/fetchWallpapers').catch(() => {});
+    this.messengerStore.fetchWallpapers().catch(() => {});
   },
   beforeUnmount() {
     this.clearPendingLocal();
@@ -635,7 +637,7 @@ export default {
       if (this.globalSyncTimer) clearTimeout(this.globalSyncTimer);
       this.globalSyncTimer = setTimeout(() => {
         this.globalSyncTimer = null;
-        this.$store.dispatch('messenger/setWallpaper', { ...this.draft });
+        this.messengerStore.setWallpaper({ ...this.draft });
       }, 120);
     },
     flushGlobalSync() {
@@ -643,7 +645,7 @@ export default {
         clearTimeout(this.globalSyncTimer);
         this.globalSyncTimer = null;
       }
-      return this.$store.dispatch('messenger/setWallpaper', { ...this.draft });
+      return this.messengerStore.setWallpaper({ ...this.draft });
     },
     clearPendingLocal() {
       if (this.pendingLocalUrl) {
@@ -715,7 +717,7 @@ export default {
       if (!this.pendingFile) return normalizeWallpaper(this.draft);
       this.busy = true;
       try {
-        const w = await this.$store.dispatch('messenger/uploadWallpaper', this.pendingFile);
+        const w = await this.messengerStore.uploadWallpaper(this.pendingFile);
         const next = normalizeWallpaper({
           ...this.draft,
           type: 'custom',
@@ -734,7 +736,7 @@ export default {
       const cfg = await this.ensureUploaded();
       this.draft = normalizeWallpaper(cfg);
       await this.flushGlobalSync();
-      await this.$store.dispatch('messenger/syncWallpaperSettings').catch(() => {});
+      await this.messengerStore.syncWallpaperSettings().catch(() => {});
       this.$emit('applied-global', cfg);
     },
     async applyGlobalPending() {
@@ -752,7 +754,7 @@ export default {
     },
     async removeWallpaper(w) {
       try {
-        await this.$store.dispatch('messenger/deleteWallpaper', w.id);
+        await this.messengerStore.deleteWallpaper(w.id);
         if (Number(this.draft.wallpaper_id) === Number(w.id)) {
           this.set({ type: 'image', url: '', wallpaper_id: null });
         }
@@ -767,7 +769,7 @@ export default {
         return;
       }
       this.draft = { ...DEFAULT_WALLPAPER };
-      this.$store.dispatch('messenger/setWallpaper', { ...DEFAULT_WALLPAPER });
+      this.messengerStore.setWallpaper({ ...DEFAULT_WALLPAPER });
     },
     swatchStyle(patternId) {
       return buildWallpaperStyle({

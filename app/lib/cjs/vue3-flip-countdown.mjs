@@ -8,7 +8,7 @@
  */
 import * as VueNS from 'vue'
 
-const Vue = VueNS.default ?? VueNS
+const Vue = VueNS
 const g = globalThis
 const hadVue = Object.prototype.hasOwnProperty.call(g, 'Vue')
 const prevVue = g.Vue

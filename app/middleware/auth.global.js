@@ -1,4 +1,4 @@
-import { useStore } from '@/composables/useStore'
+import { useAuthStore } from '@/stores/auth'
 import { getRouteAccessRedirect } from '@/utils/routePermissions'
 import { ROUTE_META } from '@/utils/routeMeta'
 
@@ -45,31 +45,21 @@ function enrichRouteForAcl(to) {
 }
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  try {
-    const nuxtApp = tryUseNuxtApp()
-    if (nuxtApp?.$pinia) {
-      const { setActivePinia } = await import('pinia')
-      setActivePinia(nuxtApp.$pinia)
-    }
-  } catch {
-    /* ignore */
-  }
-
-  const store = useStore()
+  const auth = useAuthStore()
 
   // Ensure cookie/localStorage session is restored before ACL checks (hard refresh).
-  if (!store.state.auth.status.loggedIn) {
+  if (!auth.status.loggedIn) {
     try {
-      await store.dispatch('auth/restoreFromStorage')
-    } catch {
-      /* ignore restore errors */
+      await auth.restoreFromStorage()
+    } catch (error) {
+      console.error('[auth] Failed to restore session before route access', error)
     }
   }
 
-  const isLoggedIn = store.state.auth.status.loggedIn
+  const isLoggedIn = auth.status.loggedIn
   const routeLabel = routeName(to)
 
-  if (isLoggedIn && needsMobileVerification(store.state.auth.status.userInfo)) {
+  if (isLoggedIn && needsMobileVerification(auth.status.userInfo)) {
     if (!MOBILE_VERIFY_ALLOWLIST.has(routeLabel)) {
       return navigateTo({
         name: 'panel-profile-manage-phone',
@@ -96,9 +86,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (to.path.startsWith('/admin')) {
     try {
-      await store.dispatch('auth/refreshUser')
-    } catch {
-      if (!store.state.auth.status.loggedIn) {
+      await auth.refreshUser()
+    } catch (error) {
+      console.error('[auth] Failed to refresh user before admin access', error)
+      if (!auth.status.loggedIn) {
         return navigateTo({
           name: 'login',
           query: { redirect: to.fullPath },
@@ -107,7 +98,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     if (
-      needsMobileVerification(store.state.auth.status.userInfo) &&
+      needsMobileVerification(auth.status.userInfo) &&
       !MOBILE_VERIFY_ALLOWLIST.has(routeLabel)
     ) {
       return navigateTo({
@@ -118,7 +109,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   const aclRoute = enrichRouteForAcl(to)
-  const redirect = getRouteAccessRedirect(store.state.auth.status.userInfo, aclRoute)
+  const redirect = getRouteAccessRedirect(auth.status.userInfo, aclRoute)
   if (redirect) {
     if (typeof redirect === 'string') return navigateTo(redirect)
     if (redirect.name) return navigateTo(redirect)

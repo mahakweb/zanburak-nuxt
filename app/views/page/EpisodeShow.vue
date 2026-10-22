@@ -671,7 +671,7 @@
                                 </div>
                             </div>
                             <div id="comments-list" class="mb-8">
-                                <CommentsList v-if="episode" :type="'episode'" :id="episode.id"></CommentsList>
+                                <CommentsList v-if="episode" :type="'episode'" :id="episode.id" :per-page="10"></CommentsList>
                             </div>
                         </div>
                         <div class="xl:col-span-3 lg:col-span-4 lg:order-last order-first">
@@ -689,6 +689,10 @@
     </MasterPage>
 </template>
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+const authStore = useAuthStore()
+const cartStore = useCartStore()
     import MasterPage from "@/views/page/layouts/MasterPage.vue";
     import CommentsList from "@/views/components/home/CommentsList.vue";
     import CourseSidebar from "@/views/components/course/CourseSidebar.vue";
@@ -701,7 +705,6 @@
     import axiosInstance from "@/store/axiosInstance";
     import config from "@/store/config";
     import router from "@/routes/router";
-    import { useStore } from "@/composables/useStore";
     import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
     import { ChevronRightIcon } from "@heroicons/vue/20/solid";
     import { ChevronLeftIcon } from "@heroicons/vue/20/solid";
@@ -722,12 +725,11 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
 
     // Plyr options moved to VideoPlayer component
 
-    const store = useStore();
     const route = useRoute();
     const { t, locale } = useI18n();
     const courseSlug = ref(route.params.courseSlug);
     const episodeOrder = ref(route.params.episodeOrder);
-    const isLoggedin = computed(() => store.state.auth.status.loggedIn);
+    const isLoggedin = computed(() => authStore.status.loggedIn);
     const episode = ref(null);
     const course = ref(null);
     const userCompletedCourse = ref(false);
@@ -776,7 +778,7 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
 
     const isCourseInCart = computed(() => {
         if (!course.value?.id) return false;
-        return store.getters["cart/isItemInCart"]('course', course.value.id);
+        return cartStore.isItemInCart('course', course.value.id);
     });
 
     const sidebarRatings = computed(() => course.value?.ratings || emptyCourseRatings());
@@ -791,7 +793,7 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
         if (!course.value?.id) return;
         addToCartLoading.value = true;
         try {
-            await store.dispatch("cart/addToCart", { type: 'course', itemId: course.value.id });
+            await cartStore.addToCart({ type: 'course', itemId: course.value.id });
         } catch (error) {
             console.error("Error adding to cart:", error);
         } finally {

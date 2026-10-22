@@ -35,11 +35,14 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { useAdminCommentsStore } from '@/stores/adminComments'
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import { ADMIN_MENU_ITEMS } from "@/config/adminMenuItems";
 import { filterAdminMenuByPermission } from "@/utils/adminMenu";
 
 export default {
+		setup() { return { authStore: useAuthStore(), adminCommentsStore: useAdminCommentsStore() } },
     components: {
         Disclosure,
         DisclosureButton,
@@ -47,10 +50,10 @@ export default {
     },
     computed: {
         unapprovedCommentsCount() {
-            return this.$store.getters['adminComments/unapprovedCommentsCount'];
+            return this.adminCommentsStore.unapprovedCommentsCount;
         },
         user() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         visibleMenuItems() {
             return filterAdminMenuByPermission(this.user, this.menuItems);
@@ -82,7 +85,7 @@ export default {
     },
     methods: {
         logout() {
-            this.$store.dispatch("auth/logout");
+            this.authStore.logout();
             this.$router.push("/");
         },
         scrollToActiveItem() {
@@ -134,8 +137,8 @@ export default {
     },
     mounted() {
         this.scrollToActiveItem();
-        // Fetch unapproved comments count from Vuex
-        this.$store.dispatch('adminComments/fetchUnapprovedCommentsCount');
+        // Fetch the unapproved comments count from Pinia
+        this.adminCommentsStore.fetchUnapprovedCommentsCount();
     },
 };
 </script>

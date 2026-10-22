@@ -17,9 +17,11 @@ import {
   getPusher,
   initEcho,
   mapPusherState,
+  setEchoAuthenticated,
   teardownEcho,
 } from '@/lib/echo';
 import config from '@/store/config';
+import { getAuthTokenSync } from '@/utils/authToken';
 import {
   CONNECTION_DISPLAY,
   resolveConnectionDisplayStatus,
@@ -32,6 +34,7 @@ const RECONNECT_BASE_MS = 1_000;
 const RECONNECT_MAX_MS = 5_000;
 const CONNECTING_STUCK_MS = 4_000;
 const NETWORK_PROBE_TIMEOUT_MS = 4_000;
+let sessionAuthenticated = false;
 
 /** @typedef {'connecting' | 'connected' | 'unavailable'} ConnectionUiState */
 
@@ -53,12 +56,7 @@ function apiOrigin() {
 }
 
 function readAuthToken() {
-  try {
-    if (typeof localStorage === 'undefined') return null;
-    return JSON.parse(localStorage.getItem('token'));
-  } catch {
-    return null;
-  }
+  return getAuthTokenSync();
 }
 
 class ConnectionManager {
@@ -117,7 +115,15 @@ class ConnectionManager {
 
   /** Auth token present (required before durable / realtime send). */
   get isAuthenticated() {
-    return !!readAuthToken();
+    return sessionAuthenticated || !!readAuthToken();
+  }
+
+  setAuthenticated(value) {
+    if (import.meta.server) return;
+    sessionAuthenticated = !!value;
+    setEchoAuthenticated(sessionAuthenticated);
+    if (!sessionAuthenticated && !readAuthToken()) this.stop();
+    this.emit();
   }
 
   /**

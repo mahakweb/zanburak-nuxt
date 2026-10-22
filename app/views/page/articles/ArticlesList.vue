@@ -440,6 +440,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/discuss/layouts/MasterPage.vue";
 import ArticleCard from "@/views/components/articles/ArticleCard.vue";
 import ArticleCardLoading from "@/views/components/articles/ArticleCardLoading.vue";
@@ -450,6 +451,7 @@ import debounce from "lodash/debounce";
 import { useSEO, generateBreadcrumbSchema } from "@/composables/useSEO";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     inject: {
         ssrArticlesBootstrap: { from: 'ssrArticlesBootstrap', default: null },
     },
@@ -492,7 +494,7 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         hasMore() {
             return this.currentPage <= this.lastPage;

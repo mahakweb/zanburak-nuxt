@@ -7,7 +7,6 @@ const BLANK_PREFIXES = [
   '/panel',
   '/admin',
   '/messenger',
-  '/cart',
   '/oauth',
   '/checkout',
   '/certificate',

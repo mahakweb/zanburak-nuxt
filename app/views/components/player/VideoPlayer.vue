@@ -78,6 +78,7 @@ const VuePlyr = import.meta.server
 import Hls from "hls.js";
 import axiosInstance from "@/store/axiosInstance";
 import config from "@/store/config";
+import { getAuthTokenSync } from "@/utils/authToken";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import PlayerMenuOverlay from "@/views/components/player/PlayerMenuOverlay.vue";
@@ -477,16 +478,8 @@ let loadToken = 0;
 
 const getPlayerRequestHeaders = () => {
     const headers = { [PLAYER_HEADER]: PLAYER_HEADER_VALUE };
-    try {
-        const raw = localStorage.getItem('token');
-        if (raw) {
-            const token = JSON.parse(raw);
-            const value = typeof token === 'string' ? token : token?.token;
-            if (value) {
-                headers.Authorization = `Bearer ${value}`;
-            }
-        }
-    } catch (_) { /* ignore */ }
+    const token = getAuthTokenSync();
+    if (token) headers.Authorization = `Bearer ${token}`;
     return headers;
 };
 
@@ -504,11 +497,17 @@ const createHlsInstance = () => new Hls({
     abrEwmaDefaultEstimate: 500000,
     abrBandWidthFactor: 0.8,
     abrBandWidthUpFactor: 0.6,
-    xhrSetup: (xhr) => {
+    xhrSetup: (xhr, url) => {
         const headers = getPlayerRequestHeaders();
         Object.entries(headers).forEach(([key, value]) => {
             xhr.setRequestHeader(key, value);
         });
+        try {
+            xhr.withCredentials = new URL(url, window.location.href).origin
+                === new URL(config.apiBaseUrl, window.location.href).origin;
+        } catch {
+            xhr.withCredentials = false;
+        }
     },
 });
 
@@ -741,17 +740,27 @@ const postProgress = async (payload, { keepalive = false } = {}) => {
     if (!props.streamVideoId || !props.isLoggedIn) return;
 
     const url = `${config.apiBaseUrl}/video-views/${props.streamVideoId}/setWatched`;
-    const token = JSON.parse(localStorage.getItem("token") || "null");
+    const token = getAuthTokenSync();
 
-    if (keepalive && token && typeof fetch !== "undefined") {
+    if (keepalive && typeof fetch !== "undefined") {
         try {
+            const headers = {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            };
+            if (token) headers.Authorization = `Bearer ${token}`;
+            const xsrfMatch = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+            if (xsrfMatch) {
+                try {
+                    headers["X-XSRF-TOKEN"] = decodeURIComponent(xsrfMatch[1]);
+                } catch {
+                    headers["X-XSRF-TOKEN"] = xsrfMatch[1];
+                }
+            }
             await fetch(url, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                    Accept: "application/json",
-                },
+                headers,
+                credentials: "include",
                 body: JSON.stringify(payload),
                 keepalive: true,
             });

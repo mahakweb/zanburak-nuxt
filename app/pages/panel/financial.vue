@@ -816,6 +816,7 @@ import CartAnimatedPrice from "@/views/components/cart/CartAnimatedPrice.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { TabGroup, TabList, Tab, TabPanels, Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/vue";
+import { useAuthStore } from "@/stores/auth";
 
 export default {
 	components: {
@@ -836,10 +837,9 @@ export default {
 		ListboxOption
 	},
 	data() {
-		const urlParams = new URLSearchParams(window.location.search);
-		const typeSlugFromUrl = urlParams.get('type') || 'all';
-		const filterSlugFromUrl = urlParams.get('filter') || 'all';
-		const sortSlugFromUrl = urlParams.get('sort') || 'newest';
+		const typeSlugFromUrl = this.$route.query.type || 'all';
+		const filterSlugFromUrl = this.$route.query.filter || 'all';
+		const sortSlugFromUrl = this.$route.query.sort || 'newest';
 		const types = {
 			all: {
 				title: this.$t("panel.financial.typeAll"),
@@ -957,6 +957,7 @@ export default {
 		const selectedSort = sort[sortSlugFromUrl] || sort['newest'];
 
 		return {
+			authStore: useAuthStore(),
 			paymentLoading: false,
 			retryPayLoading: false,
 			paymentsList: null,
@@ -1034,10 +1035,10 @@ export default {
 			return this.paymentMethodForRetry === 'bank' && this.retryPricing.hasFee;
 		},
 		loggedIn() {
-			return this.$store.state.auth.status.loggedIn;
+			return this.authStore.status.loggedIn;
 		},
 		currentUser() {
-			return this.$store.state.auth.status.userInfo;
+			return this.authStore.status.userInfo;
 		},
 		walletBalance() {
 			return Number(this.currentUser?.wallet_balance || 0);
@@ -1172,7 +1173,7 @@ export default {
 			const queryString = new URLSearchParams(query).toString();
 			const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
 
-			window.history.pushState(null, '', newUrl);
+			window.history.pushState({ ...window.history.state }, '', newUrl);
 
 			this.getPaymentsList();
 		},

@@ -406,7 +406,7 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
-    errors: Object,
+    errors: String,
     modelValue: String,
     placeholder: {
         type: String,
@@ -2001,4 +2001,3 @@ span.CodeMirror-selectedtext {
     }
 }
 </style>
-

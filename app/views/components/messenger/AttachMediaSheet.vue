@@ -69,7 +69,8 @@
 </template>
 
 <script>
-import { mapGetters } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import BottomSheetDrawer from '@/views/components/common/BottomSheetDrawer.vue';
 import { MESSENGER_SHEET_PANEL, MESSENGER_SHEET_BACKDROP } from './sheetStyles';
 
@@ -81,7 +82,7 @@ export default {
   },
   emits: ['close', 'select'],
   computed: {
-    ...mapGetters('messenger', ['canMessengerUpload', 'canMessengerFeature']),
+    ...mapState(useMessengerStore, ['canMessengerUpload', 'canMessengerFeature']),
     panelClass() {
       return `${MESSENGER_SHEET_PANEL} attach-sheet-panel`;
     },

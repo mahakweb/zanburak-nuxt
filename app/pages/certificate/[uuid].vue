@@ -1,6 +1,7 @@
 <script setup>
 definePageMeta({
   name: "certificate",
+  props: true,
 })
 </script>
 

@@ -1,6 +1,7 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
 import { computed, ref } from 'vue';
-import { useStore } from "@/composables/useStore";
 import { usePermission } from '@/composables/usePermission';
 import AccountMenuTriggers from '@/views/components/common/AccountMenuTriggers.vue';
 import AccountMenuOptions from '@/views/components/common/AccountMenuOptions.vue';
@@ -9,10 +10,9 @@ import SeoImage from '@/views/components/seo/SeoImage.vue';
 
 const emit = defineEmits(['close']);
 
-const store = useStore();
 const { canAccessAdmin } = usePermission();
 
-const currentUser = computed(() => store.state.auth.status.userInfo);
+const currentUser = computed(() => authStore.status.userInfo);
 const walletBalance = computed(() => Number(currentUser.value?.wallet_balance ?? 0));
 const userScore = computed(() => Number(currentUser.value?.score ?? 0));
 const canAccessAdminPanel = computed(() => canAccessAdmin());
@@ -27,7 +27,7 @@ function close() {
 
 function logout() {
     close();
-    store.dispatch('auth/logout');
+    authStore.logout();
 }
 </script>
 

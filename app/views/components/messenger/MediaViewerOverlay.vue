@@ -318,6 +318,7 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
 import { formatDuration, mediaTypeLabelKey } from './mediaHelpers';
 import MessengerMediaPlayer from './MessengerMediaPlayer.vue';
 import { peerDisplayName, contactNameMap } from '@/utils/messengerPeerName';
@@ -335,6 +336,7 @@ const INERTIA_FRICTION = 0.92;
 const INERTIA_MIN = 0.15;
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   name: 'MediaViewerOverlay',
   components: { MessengerMediaPlayer },
   props: {
@@ -491,7 +493,7 @@ export default {
       if (this.currentItem?.senderName) return this.currentItem.senderName;
       const m = this.currentMessage;
       if (!m) return '';
-      const contactMap = contactNameMap(this.$store?.state?.messenger?.contacts);
+      const contactMap = contactNameMap(this.messengerStore?.contacts);
       const u = m.user || m.forwarded_from || null;
       if (u) {
         const nick = u.id != null ? contactMap[u.id] : '';

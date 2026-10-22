@@ -90,11 +90,13 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import { PANEL_MENU_SECTIONS } from "@/config/panelMenuItems";
 import ChangeLang from "@/views/components/ChangeLang.vue";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		Disclosure,
 		DisclosureButton,
@@ -176,7 +178,7 @@ export default {
 			];
 		},
 		logout() {
-			this.$store.dispatch("auth/logout");
+			this.authStore.logout();
 			this.$router.push("/");
 		},
 		scrollToActiveItem() {

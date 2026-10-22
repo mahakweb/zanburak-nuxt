@@ -100,7 +100,7 @@
                                     </svg>
                             </div>
                             <h3 class="mt-6 text-xl font-extrabold text-gray-800 dark:text-white">{{ $t('vip.card1.title') }}</h3>
-                            <p class="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400 font-medium" v-html="$t('vip.card1.desc')"></p>
+                            <i18n-t keypath="vip.card1.desc" scope="global" tag="p" class="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400 font-medium"><template #emphasis><strong>{{ $t('vip.card1.emphasis') }}</strong></template></i18n-t>
                         </div>
 
                         <!-- Card 2 -->
@@ -112,7 +112,7 @@
                                     </svg>
                             </div>
                             <h3 class="mt-6 text-xl font-extrabold text-gray-800 dark:text-white">{{ $t('vip.card2.title') }}</h3>
-                            <p class="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400 font-medium" v-html="$t('vip.card2.desc')"></p>
+                            <i18n-t keypath="vip.card2.desc" scope="global" tag="p" class="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400 font-medium"><template #emphasis><strong>{{ $t('vip.card2.emphasis') }}</strong></template></i18n-t>
                         </div>
 
                         <!-- Card 3 -->
@@ -125,7 +125,7 @@
                                     </svg>
                             </div>
                             <h3 class="mt-6 text-xl font-extrabold text-gray-800 dark:text-white">{{ $t('vip.card3.title') }}</h3>
-                            <p class="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400 font-medium" v-html="$t('vip.card3.desc')"></p>
+                            <i18n-t keypath="vip.card3.desc" scope="global" tag="p" class="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400 font-medium"><template #emphasis><strong>{{ $t('vip.card3.emphasis') }}</strong></template></i18n-t>
                         </div>
                     </div>
                 </section>
@@ -143,7 +143,7 @@
                                 </svg>
                             </span>
                             <h2 class="mt-6 text-2xl md:text-4xl font-extrabold text-white">{{ $t('vip.cta.title') }}</h2>
-                            <p class="mt-5 text-base leading-8 text-gray-300 font-medium" v-html="$t('vip.cta.desc')"></p>
+                            <i18n-t keypath="vip.cta.desc" scope="global" tag="p" class="mt-5 text-base leading-8 text-gray-300 font-medium"><template #emphasis><strong>{{ $t('vip.cta.emphasis') }}</strong></template></i18n-t>
                             <a href="#plans-list"
                                 class="group mt-9 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 px-8 py-3.5 text-base font-bold text-gray-900 shadow-lg shadow-amber-500/30 transition hover:-translate-y-0.5 hover:shadow-xl">
                                 {{ $t('vip.plans.title') }}
@@ -263,15 +263,21 @@
     </MasterPage>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import axiosInstance from "@/store/axiosInstance";
 import { useSEO } from "@/composables/useSEO";
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 export default {
     components: {
         MasterPage,
     },
     data() {
         return {
+            authStore: useAuthStore(),
+            cartStore: useCartStore(),
             plans: [],
             loadPlansLoading: false,
             addToCartLoading: [],
@@ -314,11 +320,11 @@ export default {
     },
     computed: {
         loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore?.status?.loggedIn ?? false;
         },
 
         isPlanInCart(id) {
-            return this.$store.getters["cart/isItemInCart"]("vip", id);
+            return this.cartStore.isItemInCart("vip", id);
         },
         mergedPlans() {
             return this.plans.map((plan, index) => {
@@ -334,7 +340,7 @@ export default {
         async addToCart(type, itemId, index) {
             this.addToCartLoading[index] = true;
             try {
-                await this.$store.dispatch("cart/addToCart", { type, itemId });
+                await this.cartStore.addToCart({ type, itemId });
             } catch (error) {
                 console.error("Error adding to cart:", error);
             } finally {

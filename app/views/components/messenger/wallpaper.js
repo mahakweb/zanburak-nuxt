@@ -596,7 +596,7 @@ export function saveWallpaper(cfg) {
 /**
  * Call from MessengerPage only — never at module import.
  * Import-time preload used to fire dozens of pattern SVG requests on every
- * site page (home, courses, …) because the Vuex messenger module is eager.
+ * site page (home, courses, …) because the messenger store is eager.
  */
 export function warmWallpaperAssets(cfg) {
   preloadWallpaperPatterns(cfg || loadWallpaper());

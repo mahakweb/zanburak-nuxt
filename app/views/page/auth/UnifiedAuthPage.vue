@@ -2562,10 +2562,9 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { mapActions } from 'pinia'
 import axiosInstance from "@/store/axiosInstance";
-import { persistAuthToken } from "@/utils/authToken";
-
-import { mapActions } from "@/composables/useStore";
 
 import DarkMode from "@/views/components/DarkMode.vue";
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
@@ -2579,6 +2578,7 @@ import {
 } from "@/utils/otpInput";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
   name: "UnifiedAuthPage",
 
   components: {
@@ -2841,7 +2841,7 @@ export default {
         this.registerLoading = false;
       }
     },
-    ...mapActions("auth", ["login"]),
+    ...mapActions(useAuthStore, ["login"]),
 
     focusCurrentStepInput() {
       this.$nextTick(() => {
@@ -3674,11 +3674,8 @@ export default {
           code: this.otp.join(""),
         });
 
-        if (data.exists && data.token) {
-          persistAuthToken(data.token);
-          // set auth header immediately to avoid 401s on subsequent requests
-          axiosInstance.addHeaders({ Authorization: "Bearer " + data.token });
-          await this.$store.dispatch("auth/completeLogin", data);
+        if (data.exists && data.user) {
+          await this.authStore.completeLogin(data);
 
           // Show login success step before redirecting (same as password login)
           this.registeredUser = data.user;
@@ -3724,26 +3721,22 @@ export default {
           password: this.password,
         });
 
-        if (data.token) {
-          persistAuthToken(data.token);
-          axiosInstance.addHeaders({ Authorization: "Bearer " + data.token });
-          await this.$store.dispatch("auth/completeLogin", data);
+        await this.authStore.completeLogin(data);
 
-          // Show login success step before redirecting
-          this.registeredUser = data.user;
-          this.step = "login_success";
-          this.loginRedirectSeconds = 3;
-          if (this.loginRedirectTimer) clearInterval(this.loginRedirectTimer);
-          this.loginRedirectTimer = setInterval(() => {
-            this.loginRedirectSeconds -= 1;
-            if (this.loginRedirectSeconds <= 0) {
-              clearInterval(this.loginRedirectTimer);
-              this.loginRedirectTimer = null;
-              this.resetForm();
-              this.redirectAfterAuth();
-            }
-          }, 1000);
-        }
+        // Show login success step before redirecting
+        this.registeredUser = data.user;
+        this.step = "login_success";
+        this.loginRedirectSeconds = 3;
+        if (this.loginRedirectTimer) clearInterval(this.loginRedirectTimer);
+        this.loginRedirectTimer = setInterval(() => {
+          this.loginRedirectSeconds -= 1;
+          if (this.loginRedirectSeconds <= 0) {
+            clearInterval(this.loginRedirectTimer);
+            this.loginRedirectTimer = null;
+            this.resetForm();
+            this.redirectAfterAuth();
+          }
+        }, 1000);
       } catch (error) {
         this.normalizeAndSetErrors(error, "password");
       } finally {
@@ -3804,14 +3797,7 @@ export default {
 
         const { data } = await axiosInstance.post("/auth/register", payload);
 
-        persistAuthToken(data.token);
-        axiosInstance.addHeaders({ Authorization: "Bearer " + data.token });
-
-        try {
-          await this.$store.dispatch("auth/completeLogin", data);
-        } catch (loginError) {
-          console.error("Failed to update auth state after registration:", loginError);
-        }
+        await this.authStore.completeLogin(data);
 
         this.registeredUser = data.user;
         this.mobileVerificationRequired = !!data.mobile_verification_required;
@@ -3863,7 +3849,7 @@ export default {
         });
 
         if (data.verified) {
-          this.$store.commit("auth/setUserInfo", data.user);
+          this.authStore.setUserInfo(data.user);
 
           this.resetForm();
           this.redirectAfterAuth();
@@ -3876,7 +3862,7 @@ export default {
     },
 
     redirectAfterAuth() {
-      const user = this.$store.state.auth.status.userInfo;
+      const user = this.authStore.status.userInfo;
       if (user?.mobile && !user.mobile_verified_at) {
         this.$router.replace({
           name: "panel-profile-manage-phone",

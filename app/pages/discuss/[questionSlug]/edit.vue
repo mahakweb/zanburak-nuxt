@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "question-edit",
 })
@@ -532,6 +533,7 @@ import "vue3-toastify/dist/index.css";
 import { ref } from "vue";
 import debounce from 'lodash/debounce';
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		MasterPage,
 		// LoadingComponent,
@@ -564,10 +566,10 @@ export default {
 
 	computed: {
 		isLoggedin() {
-			return this.$store.state.auth.status.loggedIn;
+			return this.authStore.status.loggedIn;
 		},
 		currentUser() {
-			return this.$store.state.auth.status.userInfo;
+			return this.authStore.status.userInfo;
 		},
 		metaKeywordsCount() {
 			if (!this.meta_keywords) return 0;

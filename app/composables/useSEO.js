@@ -1,4 +1,5 @@
-import { useHead } from '@vueuse/head'
+import { useHead } from '#imports'
+import { getCurrentInstance } from 'vue'
 
 const SITE_NAME = 'زنبورک'
 const SITE_URL = process.env.VUE_APP_SITE_URL || 'https://zanburak.ir'
@@ -307,13 +308,17 @@ export function useSEO(options = {}) {
         innerHTML: JSON.stringify(s)
     }))
 
-    // Set up head
-    useHead({
-        title: fullTitle,
-        meta: filteredMetaTags,
-        link: linkTags,
-        script: schemaScripts.length > 0 ? schemaScripts : []
-    })
+    // Set up head when a component/composable context exists; otherwise fall back to document title.
+    if (getCurrentInstance()) {
+        useHead({
+            title: fullTitle,
+            meta: filteredMetaTags,
+            link: linkTags,
+            script: schemaScripts.length > 0 ? schemaScripts : []
+        })
+    } else if (typeof document !== 'undefined') {
+        document.title = fullTitle
+    }
 
     // Let prerender-spa-plugin capture HTML after meta/content are applied
     signalPrerenderReady()
@@ -723,4 +728,3 @@ export function generateVideoObjectSchema({
 }
 
 export { SITE_NAME, SITE_URL, DEFAULT_DESCRIPTION, DEFAULT_IMAGE }
-

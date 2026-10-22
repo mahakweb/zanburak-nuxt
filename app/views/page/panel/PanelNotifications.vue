@@ -1455,6 +1455,7 @@
 </template>
 
 <script>
+import { useNotificationStore } from '@/stores/notification'
 import PanelMasterPage from "@/views/page/panel/layouts/PanelMasterPage.vue";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
 import { ref, computed, reactive } from "vue";
@@ -1511,9 +1512,7 @@ export default {
 		const isRtl = computed(() => (localStorage.getItem("direction") === "rtl" ? true : false));
 		if (isRtl.value) moment.loadPersian();
 
-		return {
-			moment
-		};
+		return {moment, notificationStore: useNotificationStore()};
 	},
 	computed: {
 		filterValue() {
@@ -1525,7 +1524,7 @@ export default {
 			return s && typeof s === "object" && "value" in s ? s.value : s;
 		},
 		allFilteredNotifications() {
-			return this.$store.getters["notification/filteredItems"](this.filterValue, this.sortValue);
+			return this.notificationStore.filteredItems(this.filterValue, this.sortValue);
 		},
 		notifications() {
 			const all = this.allFilteredNotifications;
@@ -1547,11 +1546,11 @@ export default {
 			};
 		},
 		startLoading() {
-			return this.$store.state.notification.listLoading;
+			return this.notificationStore.listLoading;
 		},
 		notificationDetails() {
 			if (!this.selectedNotificationId) return {};
-			return this.$store.getters["notification/getItemById"](this.selectedNotificationId) || {};
+			return this.notificationStore.getItemById(this.selectedNotificationId) || {};
 		},
 	},
 	methods: {
@@ -1599,14 +1598,14 @@ export default {
 			const queryString = new URLSearchParams(query).toString();
 			const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
 
-			window.history.pushState(null, '', newUrl);
+			window.history.pushState({ ...window.history.state }, '', newUrl);
 
 			this.syncFeedData();
 		},
 		async syncFeedData() {
 			try {
 				const needed = (Number(this.currentPage) || 1) * this.perPage;
-				await this.$store.dispatch("notification/ensureEnoughItems", { neededCount: needed });
+				await this.notificationStore.ensureEnoughItems({ neededCount: needed });
 				if (this.mounted) {
 					setTimeout(() => {
 						const el = document.getElementById("notifications-list");
@@ -1620,7 +1619,7 @@ export default {
 			}
 		},
 		handleNotificationDetails(notificationId) {
-			const notification = this.$store.getters["notification/getItemById"](notificationId);
+			const notification = this.notificationStore.getItemById(notificationId);
 			if (!notification) return;
 
 			this.selectedNotificationId = notificationId;
@@ -1628,8 +1627,7 @@ export default {
 
 			if (!notification.read_at) {
 				this.markingRead = true;
-				this.$store
-					.dispatch("notification/markAsRead", notificationId)
+				this.notificationStore.markAsRead(notificationId)
 					.finally(() => {
 						if (this.selectedNotificationId === notificationId) {
 							this.markingRead = false;
@@ -1640,7 +1638,7 @@ export default {
 		async handleDeleteNotification(notificationId) {
 			this.isDeleting[notificationId] = true;
 			try {
-				await this.$store.dispatch("notification/deleteNotification", notificationId);
+				await this.notificationStore.deleteNotification(notificationId);
 			} catch (error) {
 				console.error(error);
 			} finally {
@@ -1728,7 +1726,7 @@ export default {
 
 			this.bulkLoading = true;
 			try {
-				await this.$store.dispatch("notification/bulkDelete", Array.from(this.selectedNotifications));
+				await this.notificationStore.bulkDelete(Array.from(this.selectedNotifications));
 				this.selectedNotifications.clear();
 			} catch (error) {
 				console.error("Error deleting notifications:", error);
@@ -1758,7 +1756,7 @@ export default {
 
 			this.bulkLoading = true;
 			try {
-				await this.$store.dispatch("notification/deleteAll");
+				await this.notificationStore.deleteAll();
 				this.selectedNotifications.clear();
 			} catch (error) {
 				console.error("Error deleting all notifications:", error);
@@ -1778,7 +1776,7 @@ export default {
 
 			this.bulkLoading = true;
 			try {
-				await this.$store.dispatch("notification/bulkMarkAsRead", Array.from(this.selectedNotifications));
+				await this.notificationStore.bulkMarkAsRead(Array.from(this.selectedNotifications));
 				this.selectedNotifications.clear();
 			} catch (error) {
 				console.error("Error marking notifications as read:", error);
@@ -1798,7 +1796,7 @@ export default {
 
 			this.bulkLoading = true;
 			try {
-				await this.$store.dispatch("notification/bulkMarkAsUnread", Array.from(this.selectedNotifications));
+				await this.notificationStore.bulkMarkAsUnread(Array.from(this.selectedNotifications));
 				this.selectedNotifications.clear();
 			} catch (error) {
 				console.error("Error marking notifications as unread:", error);
@@ -1816,7 +1814,7 @@ export default {
 		async handleMarkAllAsRead() {
 			this.bulkLoading = true;
 			try {
-				await this.$store.dispatch("notification/markAllAsRead");
+				await this.notificationStore.markAllAsRead();
 			} catch (error) {
 				console.error("Error marking all as read:", error);
 				await this.showConfirmDialog(
@@ -1833,7 +1831,7 @@ export default {
 		async handleMarkAllAsUnread() {
 			this.bulkLoading = true;
 			try {
-				await this.$store.dispatch("notification/markAllAsUnread");
+				await this.notificationStore.markAllAsUnread();
 			} catch (error) {
 				console.error("Error marking all as unread:", error);
 				await this.showConfirmDialog(
@@ -1857,7 +1855,7 @@ export default {
 	mounted() {
 		document.title = this.$t("panel.notifications.documentTitle");
 		initDrawers();
-		this.$store.dispatch("notification/initForUser");
+		this.notificationStore.initForUser();
 		this.updateUrlAndFetchData();
 	}
 };

@@ -89,12 +89,14 @@
     </div>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import axiosInstance from "@/store/axiosInstance";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import PriceDisplay from "@/views/components/price/PriceDisplay.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { PriceDisplay, SeoImage },
     props: {
         course: {
@@ -110,10 +112,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         courseStatusEnglishTitle() {
             const status = this.localCourse?.status;

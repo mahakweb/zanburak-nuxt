@@ -80,7 +80,8 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import {
   subscribeMediaPlayer,
   toggleMediaPlayer,
@@ -122,7 +123,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['messages']),
+    ...mapState(useMessengerStore, ['messages']),
     visible() {
       return !!this.snap.active && (this.snap.type === 'voice' || this.snap.type === 'audio');
     },

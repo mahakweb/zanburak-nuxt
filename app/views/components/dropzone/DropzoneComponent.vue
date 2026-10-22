@@ -92,6 +92,7 @@
     </div>
 </template>
 <script>
+import { ensureCsrfCookie, getXsrfToken } from "@/store/axiosInstance";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 export default {
@@ -110,8 +111,8 @@ export default {
             default: true,
         },
         errors: {
-            type: Object,
-            default: () => {},
+            type: String,
+            default: "",
         },
         uploadUrl: {
             type: String,
@@ -366,13 +367,29 @@ export default {
         findFileInSelectedFiles(file) {
             return this.selectedFiles.find((item) => item.file.name === file.name && item.file.size === file.size && item.file.lastModified === file.lastModified);
         },
-        uploadFile(file) {
+        async uploadFile(file) {
             const fileForUpload = this.findFileInSelectedFiles(file);
             if (!fileForUpload || fileForUpload.status === "uploaded") {
                 console.error("File not found in selectedFiles or file uploaded.");
                 return;
             }
             fileForUpload.status = "uploading";
+            let xsrfToken = null;
+            try {
+                if (this.withCredentials) {
+                    await ensureCsrfCookie();
+                    xsrfToken = getXsrfToken();
+                    if (!xsrfToken) {
+                        throw new Error("The CSRF cookie was not set by the API.");
+                    }
+                }
+            } catch (error) {
+                fileForUpload.status = "error";
+                console.error("Failed to initialize CSRF for file upload:", error);
+                this.handleError(fileForUpload);
+                return;
+            }
+
             const attemptUpload = () => {
                 const xhr = new XMLHttpRequest();
                 xhr.open(this.method, this.uploadUrl, true);
@@ -383,6 +400,9 @@ export default {
 
                 for (const [key, value] of Object.entries(this.headers)) {
                     xhr.setRequestHeader(key, value);
+                }
+                if (xsrfToken) {
+                    xhr.setRequestHeader("X-XSRF-TOKEN", xsrfToken);
                 }
 
                 const formData = new FormData();
@@ -415,6 +435,15 @@ export default {
                         }
                     } else {
                         fileForUpload.status = "error";
+                        let message = `File upload failed (${xhr.status}).`;
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            message = response.message || response.error || message;
+                        } catch {
+                            // Keep the HTTP status message when the response is not JSON.
+                        }
+                        toast.error(message);
+                        console.error("File upload failed:", xhr.status, xhr.responseText);
                         this.handleError(fileForUpload);
                         delete this.uploadRequests[file.name];
                     }

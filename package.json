@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "node scripts/bundle-cjs.mjs && nuxt prepare",
     "bundle:cjs": "node scripts/bundle-cjs.mjs",
-    "bundle:hljs": "node scripts/bundle-cjs.mjs"
+    "bundle:hljs": "node scripts/bundle-cjs.mjs",
+    "test:messenger": "node --test tests/messenger/*.test.mjs"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",

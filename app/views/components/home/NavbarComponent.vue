@@ -1,4 +1,12 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+import { useNotificationStore } from '@/stores/notification'
+import { useMessengerStore } from '@/stores/messenger'
+const authStore = useAuthStore()
+const cartStore = useCartStore()
+const notificationStore = useNotificationStore()
+const messengerStore = useMessengerStore()
 import DarkMode from "@/views/components/DarkMode.vue";
 import ChangeLang from "@/views/components/ChangeLang.vue";
 import DrawerComponent from "@/views/components/home/DrawerComponent.vue";
@@ -10,15 +18,12 @@ import CartSummarySheet from "@/views/components/cart/CartSummarySheet.vue";
 import UserAccountMenuContent from "@/views/components/user/UserAccountMenuContent.vue";
 import NotificationBell from "@/views/components/notification/NotificationBell.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
-import { useStore } from "@/composables/useStore";
 // const cartCount = ref(1)
-const store = useStore();
+const isLoggedin = computed(() => authStore.status.loggedIn);
+const currentUser = computed(() => authStore.status.userInfo);
 
-const isLoggedin = computed(() => store.state.auth.status.loggedIn);
-const currentUser = computed(() => store.state.auth.status.userInfo);
-
-const messengerUnread = computed(() => store.getters['messenger/unreadCount'] || 0);
-const cartItems = computed(() => store.state.cart.cartItems);
+const messengerUnread = computed(() => messengerStore.unreadCount || 0);
+const cartItems = computed(() => cartStore.cartItems);
 
 const isOpenCartModal = ref(false);
 const isOpenUserInfoModal = ref(false);
@@ -37,8 +42,8 @@ const handleKeyDown = (event) => {
 
 function bootstrapLoggedInChrome() {
     if (!isLoggedin.value) return;
-    store.dispatch("cart/loadCartItems");
-    store.dispatch("notification/initForUser");
+    cartStore.loadCartItems();
+    notificationStore.initForUser();
 }
 
 onMounted(() => {
@@ -187,9 +192,9 @@ watch(isLoggedin, (loggedIn) => {
                     </NuxtLink>
 
                     <div class="flex items-center">
-                        <!-- is login user -->
-                        <div v-if="isLoggedin">
-                            <div v-if="currentUser" class="inline-flex items-center">
+                        <ClientOnly>
+                            <!-- Auth state can be restored from browser storage after SSR. -->
+                            <div v-if="isLoggedin && currentUser" class="inline-flex items-center">
                                 <ChangeLang class="hidden lg:flex ltr:mr-2 rtl:ml-2">
                                     <template #trigger="{ open, current }">
                                         <button type="button" @click.prevent="open" :title="$t('lang.select')"
@@ -272,7 +277,7 @@ watch(isLoggedin, (loggedIn) => {
                                     </button>
                                 </div>
                             </div>
-                            <div v-else class="animate-pulse inline-flex items-center">
+                            <div v-else-if="isLoggedin" class="animate-pulse inline-flex items-center">
                                 <div
                                     class="mx-4 relative hidden lg:inline-flex bg-gray-300 dark:bg-gray-700 rounded-full text-sm p-3">
                                     <svg class="w-5 h-5 text-gray-200 dark:text-gray-600" viewBox="0 0 22 22"
@@ -329,9 +334,8 @@ watch(isLoggedin, (loggedIn) => {
                                     </svg>
                                 </div>
                             </div>
-                        </div>
-                        <!-- is not login user -->
-                        <div v-if="!isLoggedin" class="ltr:ml-3 rtl:mr-3 flex items-center">
+                            <!-- is not login user -->
+                            <div v-if="!isLoggedin" class="ltr:ml-3 rtl:mr-3 flex items-center">
                             <div class="inline-flex items-center">
                                 <ChangeLang class="hidden lg:flex ltr:mr-2 rtl:ml-2">
                                     <template #trigger="{ open, current }">
@@ -401,11 +405,19 @@ watch(isLoggedin, (loggedIn) => {
                                         </span>
                                         <span class="nav-auth__label">{{ $t("auth.register") }}</span>
                                     </NuxtLink>
-                                </div>
+                                    </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                                    <template #fallback>
+                                        <div class="nav-auth ltr:ml-3 rtl:mr-3">
+                                            <NuxtLink :to="{ name: 'login' }" class="nav-auth__btn nav-auth__btn--login">
+                                                <span class="nav-auth__label">{{ $t("auth.login") }}</span>
+                                            </NuxtLink>
+                                        </div>
+                                    </template>
+                                </ClientOnly>
+                            </div>
+                        </div>
             </nav>
         </div>
         <div

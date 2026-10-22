@@ -20,9 +20,11 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import axiosInstance from "@/store/axiosInstance";
 import { useSEO } from "@/composables/useSEO";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {},
     props: {
         username: String,
@@ -36,10 +38,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     methods: {

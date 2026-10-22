@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { useStore } from '@/composables/useStore';
+import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { hasAnyPermission, hasAllPermissions, hasAnyRole, isSuperUser, extractPermissionNames, extractRoleNames, canAccessAdminArea, getContentScope, hasContentScopeAny, hasContentScopeOwn, hasContentScope } from '@/utils/acl';
 import { canAccessRoute, getAdminAreaPermissions } from '@/utils/routePermissions';
@@ -34,12 +34,12 @@ import { canAccessRoute, getAdminAreaPermissions } from '@/utils/routePermission
  * redirectIfNoPermission('users.create');
  */
 export function usePermission() {
-    const store = useStore();
+    const auth = useAuthStore();
     const router = useRouter();
 
     // دریافت اطلاعات کاربر از store
-    const user = computed(() => store.state.auth.status.userInfo);
-    const isLoggedIn = computed(() => store.state.auth.status.loggedIn);
+    const user = computed(() => auth.status.userInfo);
+    const isLoggedIn = computed(() => auth.status.loggedIn);
 
     /**
      * بررسی دسترسی کاربر به یک یا چند permission
@@ -207,4 +207,3 @@ export function usePermission() {
         redirectIfNoRole,
     };
 }
-

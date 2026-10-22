@@ -1678,7 +1678,7 @@
                             </div>
                         </div>
                         <div id="comments-list" class="mb-8">
-                            <CommentsList v-if="course" :type="'course'" :id="course.id"></CommentsList>
+                            <CommentsList v-if="course" :type="'course'" :id="course.id" :per-page="10"></CommentsList>
                         </div>
                     </div>
                     <div class="xl:col-span-3 lg:col-span-4 lg:order-last order-first">
@@ -1771,6 +1771,10 @@
     </MasterPage>
 </template>
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+const authStore = useAuthStore()
+const cartStore = useCartStore()
 definePageMeta({
   name: "course.show",
 })
@@ -1790,7 +1794,6 @@ import { useRoute } from "vue-router";
 // import axios from "axios";
 import axiosInstance from "@/store/axiosInstance";
 import router from "@/routes/router";
-import { useStore } from "@/composables/useStore";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import moment from "moment-jalaali";
 moment().format("jYYYY/jM/jD");
@@ -1822,10 +1825,13 @@ const likesCount = ref(0);
 const userHasLiked = ref(false);
 
 const { data: ssrCoursePayload } = await useAsyncData(
-  () => `course-show-${route.params.courseSlug}`,
+  () => `course-show-${route.params.courseSlug || 'unknown'}`,
   async () => {
+    const slug = route.params.courseSlug;
+    if (!slug) return null;
+
     try {
-      const { data } = await axiosInstance.get("/course/" + route.params.courseSlug);
+      const { data } = await axiosInstance.get("/course/" + slug);
       return data;
     } catch {
       return null;
@@ -2023,8 +2029,11 @@ function applyCoursePayload(data) {
 }
 
 async function getCourse() {
+    const slug = courseSlug.value || route.params.courseSlug;
+    if (!slug) return;
+
     try {
-        const { data } = await axiosInstance.get("/course/" + courseSlug.value);
+        const { data } = await axiosInstance.get("/course/" + slug);
         applyCoursePayload(data);
     } catch (error) {
         if (error.response?.status === 404) {
@@ -2038,10 +2047,9 @@ if (ssrCoursePayload.value) {
     applyCoursePayload(ssrCoursePayload.value);
 }
 
-const isLoggedin = computed(() => store.state.auth.status.loggedIn);
-const store = useStore();
+const isLoggedin = computed(() => authStore.status.loggedIn);
 const isCourseInCart = computed(() => {
-    return store.getters["cart/isItemInCart"]('course', course.value.id);
+    return cartStore.isItemInCart('course', course.value.id);
 });
 const addToCartLoading = ref(false);
 
@@ -2056,7 +2064,7 @@ const addToCart = async (type, itemId) => {
     addToCartLoading.value = true;
 
     try {
-        await store.dispatch("cart/addToCart", { type: type, itemId: itemId });
+        await cartStore.addToCart({ type: type, itemId: itemId });
         addToCartLoading.value = false;
     } catch (error) {
         addToCartLoading.value = false;

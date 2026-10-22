@@ -7,6 +7,7 @@
  */
 
 import config from '@/store/config';
+import { getAuthTokenSync } from '@/utils/authToken';
 import {
   getCachedBlobUrl,
   putCachedBlob,
@@ -24,11 +25,7 @@ const BASE_CHUNK = 256 * 1024;
 const sessions = new Map();
 
 function getAuthToken() {
-  try {
-    return JSON.parse(localStorage.getItem('token'));
-  } catch (e) {
-    return null;
-  }
+  return getAuthTokenSync();
 }
 
 function resolveUrl(url) {
@@ -37,6 +34,15 @@ function resolveUrl(url) {
   if (/^https?:\/\//i.test(raw) || raw.startsWith('blob:') || raw.startsWith('data:')) return raw;
   const base = String(config.apiBaseUrl || '').replace(/\/$/, '');
   return `${base}/${raw.replace(/^\//, '')}`;
+}
+
+function usesApiCredentials(url) {
+  try {
+    const apiOrigin = new URL(config.apiBaseUrl, window.location.href).origin;
+    return new URL(url, window.location.href).origin === apiOrigin;
+  } catch {
+    return false;
+  }
 }
 
 async function authHeaders(extra = {}) {
@@ -363,7 +369,7 @@ class ProgressiveSession {
     this.startedAt = performance.now?.() || Date.now();
     const res = await fetch(this.resolved, {
       headers,
-      credentials: 'omit',
+      credentials: usesApiCredentials(this.resolved) ? 'include' : 'omit',
       signal: this.controller?.signal,
     });
 
@@ -452,7 +458,7 @@ class ProgressiveSession {
     const headers = await authHeaders({ Range: `bytes=${start}-${end}` });
     const res = await fetch(this.resolved, {
       headers,
-      credentials: 'omit',
+      credentials: usesApiCredentials(this.resolved) ? 'include' : 'omit',
       signal: this.controller?.signal,
     });
     if (res.status !== 206 && res.status !== 200) {
@@ -661,15 +667,25 @@ export async function streamMedia(url, {
  */
 export async function fetchSignedMediaUrl(messageId, variant = 'file') {
   const token = getAuthToken();
-  if (!token || !messageId) return null;
+  if (!messageId) return null;
   const base = String(config.apiBaseUrl || '').replace(/\/$/, '');
+  const xsrfMatch = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+  let xsrfToken = null;
+  try {
+    xsrfToken = xsrfMatch ? decodeURIComponent(xsrfMatch[1]) : null;
+  } catch {
+    xsrfToken = xsrfMatch?.[1] || null;
+  }
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (xsrfToken) headers['X-XSRF-TOKEN'] = xsrfToken;
   const res = await fetch(`${base}/messenger/media/${messageId}/signed-url`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
+    headers,
+    credentials: 'include',
     body: JSON.stringify({ v: variant }),
   });
   if (!res.ok) return null;

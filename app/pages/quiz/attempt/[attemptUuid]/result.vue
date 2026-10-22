@@ -1,7 +1,9 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "quiz-result",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 
@@ -304,6 +306,7 @@ const ReviewIcon = {
 };
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { LoadingComponent, QuizThemeToggle },
     props: { attemptUuid: { type: String, required: true } },
     data() {
@@ -324,7 +327,7 @@ export default {
             return this.result?.show_questions_in_result === true;
         },
         currentUser() {
-            return this.$store.state.auth?.status?.userInfo || null;
+            return this.authStore?.status?.userInfo || null;
         },
         userDisplayName() {
             const u = this.currentUser;

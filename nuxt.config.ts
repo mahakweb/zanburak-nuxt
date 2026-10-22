@@ -53,13 +53,13 @@ export default defineNuxtConfig({
         dir: 'rtl',
       },
       bodyAttrs: {
-        class: 'rtl:font-YekanBakh bg-slate-100 dark:bg-gray-800 custom-scrollbar',
+        class: 'rtl:font-YekanBakh bg-slate-100 dark:bg-gray-800',
       },
-      // Theme/dir + sync legacy localStorage token → cookie before Vue boots
+      // Apply theme/direction before Vue boots.
       script: [
         {
           innerHTML:
-            "(function(){try{var d=document.documentElement;var t=localStorage.getItem('theme');var dark=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);d.classList.toggle('dark',!!dark);var dir=localStorage.getItem('direction');if(dir)d.setAttribute('dir',dir);var raw=localStorage.getItem('token');if(raw){var tok=JSON.parse(raw);if(tok){document.cookie='zb_token='+encodeURIComponent(tok)+'; Path=/; Max-Age=2592000; SameSite=Lax';}}}catch(e){}})();",
+            "(function(){try{var d=document.documentElement;var t=localStorage.getItem('theme');var dark=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);d.classList.toggle('dark',!!dark);var dir=localStorage.getItem('direction');if(dir)d.setAttribute('dir',dir);}catch(e){}})();",
           tagPosition: 'head',
         },
       ],
@@ -151,6 +151,12 @@ export default defineNuxtConfig({
         { find: /^leaflet$/, replacement: fileURLToPath(new URL('./app/lib/cjs/leaflet.mjs', import.meta.url)) },
         // Webpack CJS lib — named `Countdown` missing under noDiscovery.
         { find: /^vue3-flip-countdown$/, replacement: fileURLToPath(new URL('./app/lib/cjs/vue3-flip-countdown.mjs', import.meta.url)) },
+        // vue-cropperjs dist is Babel CJS (`exports is not defined`) under noDiscovery.
+        { find: /^vue-cropperjs$/, replacement: fileURLToPath(new URL('./app/lib/cjs/vue-cropperjs.mjs', import.meta.url)) },
+        // Package "browser" is UMD without a default export — force the ESM build.
+        { find: /^cropperjs$/, replacement: fileURLToPath(new URL('./node_modules/cropperjs/dist/cropper.esm.js', import.meta.url)) },
+        // Webpack CJS main (`module.exports`) — compile the Vue SFC instead.
+        { find: /^vue3-persian-datetime-picker$/, replacement: fileURLToPath(new URL('./node_modules/vue3-persian-datetime-picker/src/picker/Vue3PersianDatetimePicker.vue', import.meta.url)) },
       ],
     },
     optimizeDeps: {
@@ -196,6 +202,9 @@ export default defineNuxtConfig({
         'markdown-it-task-lists',
         'leaflet',
         'vue3-flip-countdown',
+        'vue-cropperjs',
+        'cropperjs',
+        'vue3-persian-datetime-picker',
       ],
     },
     ssr: {

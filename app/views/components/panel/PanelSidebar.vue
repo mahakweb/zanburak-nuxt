@@ -135,25 +135,27 @@
 </template>
 
 <script>
-	import SidebarMenu from "@/views/components/panel/SidebarMenu.vue";
+import { useAuthStore } from '@/stores/auth'
+import SidebarMenu from "@/views/components/panel/SidebarMenu.vue";
 	import SeoImage from "@/views/components/seo/SeoImage.vue";
 	export default {
+		setup() { return { authStore: useAuthStore() } },
 		components: {
 			SidebarMenu,
 			SeoImage,
 		},
 		methods: {
 			logout() {
-				this.$store.dispatch("auth/logout");
+				this.authStore.logout();
 				this.$router.push("/");
 			}
 		},
 		computed: {
 			loggedIn() {
-				return this.$store.state.auth.status.loggedIn;
+				return this.authStore.status.loggedIn;
 			},
 			currentUser() {
-				return this.$store.state.auth.status.userInfo;
+				return this.authStore.status.userInfo;
 			},
 			userInitials() {
 				const first = this.currentUser?.first_name?.[0] || "";

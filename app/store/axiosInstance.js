@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useRequestHeaders, useRuntimeConfig } from '#app'
 import config from '@/store/config'
 import { acquireCryptoSlot, shouldLimitCryptoRequest } from '@/utils/cryptoHttpLimit';
 import { getAuthTokenSync } from '@/utils/authToken';
@@ -8,8 +9,42 @@ const baseURL = config.apiBaseUrl;
 const instance = axios.create({
   baseURL: baseURL,
   timeout: 60000,
+  withCredentials: true,
+  withXSRFToken: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
 //   headers: {'X-Custom-Header': 'foobar'}
 });
+
+const apiOrigin = baseURL.replace(/\/api\/?$/, '');
+let csrfCookieRequest = null;
+
+export async function ensureCsrfCookie() {
+  if (!csrfCookieRequest) {
+    csrfCookieRequest = fetch(`${apiOrigin}/sanctum/csrf-cookie`, {
+      credentials: 'include',
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Could not initialize CSRF session (${response.status})`);
+      }
+    }).finally(() => {
+      csrfCookieRequest = null;
+    });
+  }
+  return csrfCookieRequest;
+}
+
+export function getXsrfToken() {
+  if (!import.meta.client) return null;
+  const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+  if (!match) return null;
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+}
 
 
 // Track in-flight requests to allow cancellation on route changes
@@ -99,9 +134,11 @@ instance.addHeaders = function(headers) {
 
 // Attach Bearer on both SSR and client when a token cookie/localStorage exists.
 try {
-  const token = getAuthTokenSync();
-  if (token) {
-    instance.addHeaders({ Authorization: 'Bearer ' + token });
+  if (import.meta.client) {
+    const token = getAuthTokenSync();
+    if (token) {
+      instance.addHeaders({ Authorization: 'Bearer ' + token });
+    }
   }
 } catch (_) {
   /* ignore invalid token */
@@ -110,6 +147,7 @@ try {
 /** Ensure Authorization matches the latest cookie/localStorage token (SSR-safe). */
 instance.syncAuthHeader = function syncAuthHeader() {
   const token = getAuthTokenSync();
+  if (import.meta.server) return token;
   if (token) {
     this.addHeaders({ Authorization: 'Bearer ' + token });
   } else if (this.defaults?.headers?.common) {
@@ -118,17 +156,31 @@ instance.syncAuthHeader = function syncAuthHeader() {
   return token;
 };
 
-instance.interceptors.request.use((requestConfig) => {
-  try {
-    const token = getAuthTokenSync();
-    if (token) {
-      requestConfig.headers = requestConfig.headers || {};
-      if (!requestConfig.headers.Authorization) {
-        requestConfig.headers.Authorization = 'Bearer ' + token;
+instance.interceptors.request.use(async (requestConfig) => {
+  const token = getAuthTokenSync();
+  if (token) {
+    requestConfig.headers = requestConfig.headers || {};
+    requestConfig.headers.Authorization = 'Bearer ' + token;
+  }
+
+  requestConfig.headers = requestConfig.headers || {};
+  if (import.meta.client) {
+    requestConfig.withCredentials = true;
+    if (String(requestConfig.url || '').startsWith('/auth/')) {
+      requestConfig.headers['X-Auth-Mode'] = 'session';
+      if (requestConfig.method?.toLowerCase() !== 'get') {
+        await ensureCsrfCookie();
       }
     }
-  } catch (_) {
-    /* ignore */
+  } else {
+    try {
+      const incomingCookie = useRequestHeaders(['cookie']).cookie;
+      if (incomingCookie) requestConfig.headers.Cookie = incomingCookie;
+      const appUrl = useRuntimeConfig().public.appUrl;
+      if (appUrl) requestConfig.headers.Origin = new URL(appUrl).origin;
+    } catch {
+      // Calls outside an active Nuxt SSR request can still use bearer auth.
+    }
   }
   return requestConfig;
 });

@@ -131,12 +131,14 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import MarkdownRenderer from "@/views/components/home/MarkdownRenderer.vue";
 import { episodeShowRoute } from "@/utils/episodeRoute";
 import moment from "moment";
 import "moment/locale/fa";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         BottomSheetDrawer,
         MarkdownRenderer,
@@ -152,10 +154,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     methods: {

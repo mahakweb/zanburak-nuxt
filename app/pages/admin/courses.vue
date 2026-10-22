@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "admin-courses-list",
   middleware: ['auth'],
@@ -490,6 +491,7 @@ import AdminListFilterBar from "@/views/components/admin/AdminListFilterBar.vue"
 import AdminFilterSelect from "@/views/components/admin/AdminFilterSelect.vue";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         AdminMasterPage,
         AdminBulkCheckbox,
@@ -651,10 +653,10 @@ export default {
             return this.selectedIds.length > 0 && !this.isAllSelected
         },
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     methods: {

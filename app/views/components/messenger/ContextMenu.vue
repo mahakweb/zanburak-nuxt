@@ -86,7 +86,8 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import MessengerToggle from './MessengerToggle.vue';
 import { fontFamily, defaultFontId } from './appearance';
 import { ICONS } from './messengerIcons';
@@ -111,7 +112,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['fontSlots']),
+    ...mapState(useMessengerStore, ['fontSlots']),
     /** Teleported to body — inherit menu font from store, not shell CSS vars. */
     menuFontFamily() {
       return fontFamily(this.fontSlots?.menu || this.fontSlots?.message || defaultFontId());

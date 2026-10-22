@@ -412,6 +412,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import { ref } from "vue";
 import DarkMode from "@/views/components/DarkMode.vue";
@@ -422,6 +423,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 document.documentElement.dir = localStorage.getItem("direction");
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		DarkMode,
 		LoadingComponent,
@@ -443,7 +445,7 @@ export default {
 	},
 	computed: {
 		loggedIn() {
-			return this.$store.state.auth.status.loggedIn;
+			return this.authStore.status.loggedIn;
 		},
 	},
 	created() {

@@ -72,6 +72,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import { tagService } from "@/services/tag.service";
 import { toast } from "vue3-toastify";
 
@@ -85,6 +86,7 @@ const SIDEBAR_PALETTES = [
 ];
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     emits: ["navigate"],
     props: {
         tag: {
@@ -113,7 +115,7 @@ export default {
             return this.tag.slug || this.tag.normalized;
         },
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         popoverOnTop() {
             return this.variant !== "sidebar";

@@ -256,10 +256,12 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import PanelMasterPage from "@/views/page/panel/layouts/PanelMasterPage.vue";
 import axiosInstance from "@/store/axiosInstance";
 import { Countdown } from "vue3-flip-countdown";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         PanelMasterPage,
         Countdown,
@@ -274,10 +276,10 @@ export default {
     },
     computed: {
         loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     methods: {

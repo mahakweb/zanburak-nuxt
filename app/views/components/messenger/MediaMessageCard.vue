@@ -492,6 +492,7 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
 import {
   downloadMedia,
   getCachedBlobUrl,
@@ -523,6 +524,7 @@ import UploadProgressRing from './UploadProgressRing.vue';
 import PendingClockIcon from './PendingClockIcon.vue';
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   name: 'MediaMessageCard',
   inject: {
     consumeChatAccessoryTap: { default: null },
@@ -1399,7 +1401,7 @@ export default {
         coverUrl: this.resolvedCover || null,
         messageId: this.message.id,
         conversationId: this.message.conversation_id
-          ?? this.$store?.state?.messenger?.activeConversationId
+          ?? this.messengerStore?.activeConversationId
           ?? null,
         type: this.type,
         duration: Number(this.meta.duration) || 0,

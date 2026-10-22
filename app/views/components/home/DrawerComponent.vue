@@ -1,4 +1,8 @@
 <script setup>
+import { useCartStore } from '@/stores/cart'
+import { useMessengerStore } from '@/stores/messenger'
+const cartStore = useCartStore()
+const messengerStore = useMessengerStore()
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { defineEmits } from "vue";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
@@ -8,15 +12,13 @@ import ChangeLang from "@/views/components/ChangeLang.vue";
 import SearchComponent from "@/views/components/home/SearchComponent.vue";
 import NotificationBell from "@/views/components/notification/NotificationBell.vue";
 import { Drawer } from "flowbite";
-import { useStore } from "@/composables/useStore";
 import { cleanupStuckOverlays } from "@/utils/cleanupOverlays";
-const store = useStore();
 defineProps({
     isLoggedin: Boolean,
 });
 defineEmits(['open-cart-modal'])
-const messengerUnread = computed(() => store.getters['messenger/unreadCount'] || 0);
-const cartItems = computed(() => store.state.cart.cartItems);
+const messengerUnread = computed(() => messengerStore.unreadCount || 0);
+const cartItems = computed(() => cartStore.cartItems);
 const drawer = ref(null);
 
 const drawerShown = ref(false);

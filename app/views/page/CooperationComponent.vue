@@ -88,8 +88,9 @@
             </div>
 
             <!-- bottom sheet drawer component for form-->
-            <BottomSheetDrawer class="" v-model="showModal" :initial-height="0.8" :min-height="0.5" :max-height="0.95"
+            <BottomSheetDrawer v-model="showModal" :initial-height="0.8" :min-height="0.5" :max-height="0.95"
                 :header-height="8" :show-handle="true" :auto-close-on-min="true" :auto-fullscreen-on-max="false"
+                :panelClass="'lg:w-[45rem] backdrop-blur-md bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-lg border border-gray-200/70 dark:border-gray-800/70'"
                 :backdrop-class="['backdrop-blur-sm bg-gray-500/10']">
                 <div class="font-anjoman p-3 md:p-4 flex items-center justify-between flex-none">
                     <div class="flex items-center">
@@ -291,6 +292,7 @@
                                             @uploaded-files="files => handleDZ('melli_card_image', files)"
                                             :headers="dropzoneHeader"
                                             :uploadUrl="`${apiBaseUrl}/cooperation/upload-file`" :xhrTimeout="60000"
+                                            :withCredentials="true"
                                             :maxSize="10485760" :allowedFormats="['jpg', 'jpeg', 'png', 'pdf']"
                                             :maxFiles="2" :parallelUpload="false" :maxParallelUploads="2"
                                             :retryOnError="false" :bulkUpload="false" />
@@ -303,6 +305,7 @@
                                             @uploaded-files="files => handleDZ('resume', files)"
                                             :headers="dropzoneHeader"
                                             :uploadUrl="`${apiBaseUrl}/cooperation/upload-file`" :xhrTimeout="60000"
+                                            :withCredentials="true"
                                             :maxSize="10485760" :allowedFormats="['pdf', 'doc', 'docx']" :maxFiles="1"
                                             :parallelUpload="false" :maxParallelUploads="1" :retryOnError="false"
                                             :bulkUpload="false" />
@@ -315,6 +318,7 @@
                                             @uploaded-files="files => handleDZ('samples', files)"
                                             :headers="dropzoneHeader"
                                             :uploadUrl="`${apiBaseUrl}/cooperation/upload-file`" :xhrTimeout="60000"
+                                            :withCredentials="true"
                                             :maxSize="20971520"
                                             :allowedFormats="['jpg', 'jpeg', 'png', 'pdf', 'zip', 'rar', 'mp4']"
                                             :maxFiles="5" :parallelUpload="true" :maxParallelUploads="3"
@@ -353,8 +357,9 @@
             </BottomSheetDrawer>
 
             <!-- bottom sheet drawer component for details-->
-            <BottomSheetDrawer class="" v-model="showDetailsModal" :initial-height="0.7" :min-height="0.5"
+            <BottomSheetDrawer v-model="showDetailsModal" :initial-height="0.7" :min-height="0.5"
                 :max-height="0.95" :header-height="8" :show-handle="true" :auto-close-on-min="true"
+                :panelClass="'lg:w-[35rem] backdrop-blur-md bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-lg border border-gray-200/70 dark:border-gray-800/70'"
                 :auto-fullscreen-on-max="false" :backdrop-class="['backdrop-blur-sm bg-gray-500/10']">
                 <div class="flex flex-none items-center justify-between gap-3 p-3 md:px-5 md:pt-4">
                     <h4 class="min-w-0 truncate text-base font-bold text-gray-800 dark:text-white">{{ currentRoleTitle }}</h4>
@@ -425,6 +430,7 @@
     </MasterPage>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import engineering_team from '@/assets/image/other/engineering-team.svg'
 import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import { useSEO } from "@/composables/useSEO";
@@ -439,6 +445,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         MasterPage,
         DropzoneComponent,
@@ -449,6 +456,7 @@ export default {
     },
     data() {
         return {
+            engineering_team,
             apiBaseUrl: config.apiBaseUrl,
             dropzoneHeader: {
                 Authorization: "",
@@ -507,7 +515,7 @@ export default {
             ];
         },
         currentUser() {
-            const info = this.$store?.state?.auth?.status?.userInfo;
+            const info = this.authStore?.status?.userInfo;
             return info && info.value ? info.value : info;
         },
         currentRoleTitle() {

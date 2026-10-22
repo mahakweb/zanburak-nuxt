@@ -2,6 +2,7 @@
 definePageMeta({
   name: "admin-quiz-question-edit",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 

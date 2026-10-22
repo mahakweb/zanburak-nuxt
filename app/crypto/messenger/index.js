@@ -1,6 +1,6 @@
 /**
  * Public surface of the messenger E2E crypto client.
- * Vuex / services should import from here only.
+ * Stores / services should import from here only.
  *
  * Architecture:
  *   User Identity Key (account, stable) → Device Keys (per browser)
@@ -16,6 +16,7 @@ export {
   decryptIncomingMessage,
   decryptMessages,
   decryptMessageList,
+  withConversationId,
   encryptFile,
   decryptFile,
   E2E_VERSION,
@@ -27,6 +28,7 @@ export {
 
 export {
   ensureDevice,
+  ensureLocalDevice,
   refillPrekeysIfLow,
   getMyDeviceId,
   getMyIdentityPublicKeys,

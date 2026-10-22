@@ -723,6 +723,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import axiosInstance from "@/store/axiosInstance";
 import QuizCard from "@/views/components/quiz/QuizCard.vue";
 import CourseSidebarStatusCard from "@/views/components/course/CourseSidebarStatusCard.vue";
@@ -731,6 +732,7 @@ import SeoImage from "@/views/components/seo/SeoImage.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { QuizCard, CourseSidebarStatusCard, CourseSidebarInstallmentCard, SeoImage },
     props: {
         course: {
@@ -787,10 +789,10 @@ export default {
     },
     computed: {
         isLoggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         quizTarget() {
             if (!this.quizzes || !this.quizzes.length) return null;

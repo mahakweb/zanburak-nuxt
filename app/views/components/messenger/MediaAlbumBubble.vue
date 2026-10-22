@@ -240,10 +240,11 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import MessengerAvatar from './MessengerAvatar.vue';
 import MediaAlbumCard from './MediaAlbumCard.vue';
 import PendingClockIcon from './PendingClockIcon.vue';
-import { mapGetters } from "@/composables/useStore";
 import { peerDisplayName } from '@/utils/messengerPeerName';
 import { LONG_PRESS_MS } from './motion';
 import { shapeUiDigits } from './appearance';
@@ -285,7 +286,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('messenger', ['contactNameByUserId']),
+    ...mapState(useMessengerStore, ['contactNameByUserId']),
     isOwnAvatar() {
       return !!this.isMine;
     },

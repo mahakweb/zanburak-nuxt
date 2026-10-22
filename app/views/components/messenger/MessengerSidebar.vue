@@ -823,8 +823,9 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import { searchUsers, searchAllMessages } from "@/services/messenger";
-import { mapGetters, mapState } from "@/composables/useStore";
 import ContextMenu from "./ContextMenu.vue";
 import AccountMenu from "./AccountMenu.vue";
 import MenuPanel from "./MenuPanel.vue";
@@ -876,6 +877,7 @@ function readRecents() {
 }
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   components: {
     MessengerAvatar,
     ContextMenu,
@@ -890,7 +892,7 @@ export default {
   props: {
     conversations: { type: Array, default: () => [] },
     contacts: { type: Array, default: () => [] },
-    activeId: { type: [Number, null], default: null },
+    activeId: { type: [Number, String], default: null },
     meId: { type: [Number, String], default: null },
     loading: { type: Boolean, default: false },
     connected: { type: Boolean, default: false },
@@ -957,8 +959,8 @@ export default {
     };
   },
   computed: {
-    ...mapState("messenger", ["messages", "syncedContacts", "syncedContactsLoading"]),
-    ...mapGetters("messenger", [
+    ...mapState(useMessengerStore, ["messages", "syncedContacts", "syncedContactsLoading"]),
+    ...mapState(useMessengerStore, [
       "typingByConversation",
       "draftForConversation",
     ]),
@@ -1174,7 +1176,7 @@ export default {
     },
     async ensureSyncedContacts() {
       try {
-        await this.$store.dispatch("messenger/fetchSyncedContacts");
+        await this.messengerStore.fetchSyncedContacts();
       } catch {
         /* offline / first paint */
       } finally {
@@ -1309,7 +1311,7 @@ export default {
     },
     openForward() {
       this.panel = "forward";
-      this.$store.dispatch("messenger/fetchContacts").catch(() => {});
+      this.messengerStore.fetchContacts().catch(() => {});
       this.$nextTick(() => this.$refs.forwardPanel?.armPicks?.());
     },
     /** Close forward picker. Pass `{ cancel: false }` after a successful pick. */
@@ -1370,7 +1372,7 @@ export default {
       this.themeDark = value === "dark";
       localStorage.setItem("theme", value);
       document.documentElement.dispatchEvent(new Event("onChangeTheme"));
-      this.$store.dispatch("messenger/saveSettings", { theme: value });
+      this.messengerStore.saveSettings({ theme: value });
     },
 
     // -------- Recent searches --------
@@ -1512,7 +1514,7 @@ export default {
         const rawCap = view._e2e_decrypted
           && view.body
           && view.body !== LOCKED_PLACEHOLDER
-          && !/^[A-Za-z0-9+/=\s]{24,}$/.test(String(view.body).trim())
+          && !(/^[A-Za-z0-9+/=]{32,}$/.test(String(view.body).trim()) && !/\s/.test(String(view.body).trim()))
           ? stripFormatMarkers(view.body || "").trim()
           : "";
         // GIF: accent "GIF" + optional caption after it.
@@ -1534,12 +1536,12 @@ export default {
         || view._decryptFailed
         || (view.is_encrypted && !view._e2e_decrypted)
         || view.body === LOCKED_PLACEHOLDER
-        || (view.is_encrypted && view.body && /^[A-Za-z0-9+/=\s]{24,}$/.test(String(view.body).trim()))
+        || (view.is_encrypted && view.body && /^[A-Za-z0-9+/=]{32,}$/.test(String(view.body).trim()) && !/\s/.test(String(view.body)))
       );
       if (locked) return '…';
 
       const body = stripFormatMarkers(view.body || "");
-      if (body && /^[A-Za-z0-9+/=\s]{24,}$/.test(body) && (view.is_encrypted || view.e2e)) {
+      if (body && /^[A-Za-z0-9+/=]{32,}$/.test(body) && !/\s/.test(body) && (view.is_encrypted || view.e2e)) {
         return '…';
       }
       return body.length > 38 ? `${body.slice(0, 38)}…` : body;
@@ -1650,13 +1652,17 @@ export default {
       if (!msg || msg.failed) return false;
       // Durable / receipt-stamped tips must never show the waiting clock.
       if (msg.delivered_at || msg.read_at) return false;
+      // Wire-sent / server-accepted: single check, not clock (Telegram order).
+      const status = msg.send_status;
+      if (status === 'sent' || status === 'delivered' || status === 'read') return false;
+      if (msg.awaiting_server && !msg.pending) return false;
       const id = msg.id;
       const durable = id != null && (
         (typeof id === 'number' && Number.isFinite(id))
         || (typeof id === 'string' && /^\d+$/.test(id))
       );
       if (durable && !msg.awaiting_server) return false;
-      return !!(msg.pending || msg.awaiting_server || msg.queued);
+      return !!(msg.pending || msg.queued);
     },
     lastDelivered(c) {
       const msg = c.last_message;

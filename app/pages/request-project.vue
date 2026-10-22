@@ -1,4 +1,6 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+import { getAuthTokenSync } from '@/utils/authToken'
 definePageMeta({
   name: "request-project",
   middleware: ['auth'],
@@ -150,7 +152,7 @@ definePageMeta({
                                     </span>
                                     <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.attachFile') }}</h2>
                                 </div>
-                                <DropzoneComponent ref="dropzone" :errors="errors && errors.attach_file ? errors.attach_file[0] : ''" @uploaded-files="handleUploadedFiles" :headers="dropzoneHeader" :uploadUrl="`${apiBaseUrl}/request-project/upload-file`" :xhrTimeout="60000" :maxSize="10485760" :allowedFormats="['jpg', 'jpeg', 'png', 'pdf', 'txt', 'rar', 'zip']" :maxFiles="1" :parallelUpload="false" :maxParallelUploads="3" :retryOnError="false" :bulkUpload="false" />
+                                <DropzoneComponent ref="dropzone" :errors="errors && errors.attach_file ? errors.attach_file[0] : ''" @uploaded-files="handleUploadedFiles" :headers="dropzoneHeader" :uploadUrl="`${apiBaseUrl}/request-project/upload-file`" :xhrTimeout="60000" :withCredentials="true" :maxSize="10485760" :allowedFormats="['jpg', 'jpeg', 'png', 'pdf', 'txt', 'rar', 'zip']" :maxFiles="1" :parallelUpload="false" :maxParallelUploads="3" :retryOnError="false" :bulkUpload="false" />
                             </div>
                         </div>
 
@@ -269,10 +271,8 @@ export default {
     },
     data() {
         return {
-            dropzoneHeader: {
-                Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`,
-            },
-            apiBaseUrl: config.apiBaseUrl,
+authStore: useAuthStore(),
+apiBaseUrl: config.apiBaseUrl,
             title: "",
             type: "",
             min_price: "",
@@ -288,6 +288,20 @@ export default {
             
             sendVerificationEmailLoading: false,
         };
+    },
+    computed: {
+        dropzoneHeader() {
+            const token = this.authStore.status.loggedIn ? getAuthTokenSync() : null;
+            const headers = {};
+            if (token) headers.Authorization = 'Bearer ' + token;
+            if (typeof document !== 'undefined') {
+                const xsrf = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+                if (xsrf) {
+                    try { headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]); } catch { headers['X-XSRF-TOKEN'] = xsrf[1]; }
+                }
+            }
+            return headers;
+        },
     },
     methods: {
         async sendVerificationEmail() {
@@ -408,7 +422,7 @@ export default {
     },
     computed: {
         currentUser() {
-            const info = this.$store?.state?.auth?.status?.userInfo;
+            const info = this.authStore?.status?.userInfo;
             return info && info.value ? info.value : info;
         },
         isEmailVerified() {

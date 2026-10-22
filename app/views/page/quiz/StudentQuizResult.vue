@@ -274,6 +274,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import LoadingComponent from '@/views/components/LoadingComponent.vue';
 import QuizThemeToggle from '@/views/components/quiz/QuizThemeToggle.vue';
 import { getQuizAttemptResult } from '@/services/quiz.service';
@@ -297,6 +298,7 @@ const ReviewIcon = {
 };
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { LoadingComponent, QuizThemeToggle },
     props: { attemptUuid: { type: String, required: true } },
     data() {
@@ -317,7 +319,7 @@ export default {
             return this.result?.show_questions_in_result === true;
         },
         currentUser() {
-            return this.$store.state.auth?.status?.userInfo || null;
+            return this.authStore?.status?.userInfo || null;
         },
         userDisplayName() {
             const u = this.currentUser;

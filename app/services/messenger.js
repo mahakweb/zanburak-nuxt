@@ -1,5 +1,17 @@
 import axiosInstance from '@/store/axiosInstance';
 import config from '@/store/config';
+import { getAuthTokenSync } from '@/utils/authToken';
+import { createSingleFlight, createTtlCache } from '@/utils/requestGate';
+
+const singleFlight = createSingleFlight();
+const resourceCache = createTtlCache();
+const PINS_TTL_MS = 120_000;
+const WALLPAPER_TTL_MS = 5 * 60_000;
+const DEVICES_TTL_MS = 12_000;
+
+export function clearMessengerHttpCaches() {
+  resourceCache.invalidate();
+}
 
 // -------------------------------------------------------------------------
 // Conversations
@@ -52,9 +64,12 @@ export async function muteConversation(conversationId, mute = true) {
 // -------------------------------------------------------------------------
 
 export async function getMessages(conversationId, beforeId = null) {
-  const params = beforeId ? { before_id: beforeId } : {};
-  const r = await axiosInstance.get(`/messenger/conversations/${conversationId}/messages`, { params });
-  return r.data;
+  const key = `messages:${conversationId}:${beforeId || ''}`;
+  return singleFlight(key, async () => {
+    const params = beforeId ? { before_id: beforeId } : {};
+    const r = await axiosInstance.get(`/messenger/conversations/${conversationId}/messages`, { params });
+    return r.data;
+  });
 }
 
 /** Shared media tabs (photo/video/gif/audio/voice/links) with cursor pagination. */
@@ -91,7 +106,7 @@ export async function sendMessage(conversationId, body, clientId = null, options
   const r = await axiosInstance.post(
     `/messenger/conversations/${conversationId}/messages`,
     payload,
-    { timeout: 12000, skipCryptoLimit: true, skipCancelOnNavigate: true },
+    { timeout: 20000, skipCryptoLimit: true, skipCancelOnNavigate: true },
   );
   return r.data;
 }
@@ -261,6 +276,7 @@ export async function registerDevice(payload = {}) {
   };
 
   const r = await axiosInstance.post('/messenger/crypto/devices', body);
+  resourceCache.invalidate('crypto:devices');
   return r.data;
 }
 
@@ -279,19 +295,30 @@ export async function submitPrekeys({ device_id, prekeys = [], one_time_prekeys 
   return r.data;
 }
 
-export async function listCryptoDevices() {
-  const r = await axiosInstance.get('/messenger/crypto/devices');
-  return r.data;
+export async function listCryptoDevices({ force = false } = {}) {
+  const key = 'crypto:devices';
+  if (!force) {
+    const cached = resourceCache.get(key, DEVICES_TTL_MS);
+    if (cached) return cached;
+  }
+  return singleFlight(key, async () => {
+    const r = await axiosInstance.get('/messenger/crypto/devices');
+    resourceCache.set(key, r.data);
+    return r.data;
+  });
 }
 
 export async function revokeCryptoDevice(deviceId) {
   const r = await axiosInstance.delete(`/messenger/crypto/devices/${deviceId}`);
+  resourceCache.invalidate('crypto:devices');
   return r.data;
 }
 
 /** Normalized device bundles for a conversation (client-friendly shape). */
 export async function getConversationBundles(conversationId) {
-  const r = await axiosInstance.get(`/messenger/crypto/conversations/${conversationId}/bundles`);
+  const r = await axiosInstance.get(`/messenger/crypto/conversations/${conversationId}/bundles`, {
+    skipCryptoLimit: true,
+  });
   const bundles = r.data?.bundles || [];
   const devices = bundles.map((b) => {
     const identity = parseIdentityField(b.identity_public_key);
@@ -347,14 +374,17 @@ export async function upsertKeyVault({ sender_device_id, entries } = {}) {
 export async function pullKeyVault(conversationId = null) {
   const params = {};
   if (conversationId != null) params.conversation_id = conversationId;
-  const r = await axiosInstance.get('/messenger/crypto/vault', { params });
+  const r = await axiosInstance.get('/messenger/crypto/vault', { params, skipCryptoLimit: true });
   return r.data;
 }
 
 export async function pullPackages(deviceId, conversationId = null) {
   const params = { device_id: deviceId };
   if (conversationId) params.conversation_id = conversationId;
-  const r = await axiosInstance.get('/messenger/crypto/packages', { params });
+  const r = await axiosInstance.get('/messenger/crypto/packages', {
+    params,
+    skipCryptoLimit: true,
+  });
   return r.data;
 }
 
@@ -441,23 +471,39 @@ export async function deleteMessage(messageId, scope = 'everyone') {
 // Pinned messages
 // -------------------------------------------------------------------------
 
-export async function getPins(conversationId) {
-  const r = await axiosInstance.get(`/messenger/conversations/${conversationId}/pins`);
-  return r.data;
+export function invalidatePinsCache(conversationId) {
+  if (conversationId == null) resourceCache.invalidatePrefix('pins:');
+  else resourceCache.invalidate(`pins:${conversationId}`);
+}
+
+export async function getPins(conversationId, { force = false } = {}) {
+  const key = `pins:${conversationId}`;
+  if (!force) {
+    const cached = resourceCache.get(key, PINS_TTL_MS);
+    if (cached) return cached;
+  }
+  return singleFlight(key, async () => {
+    const r = await axiosInstance.get(`/messenger/conversations/${conversationId}/pins`);
+    resourceCache.set(key, r.data);
+    return r.data;
+  });
 }
 
 export async function pinMessage(messageId, forEveryone = false) {
   const r = await axiosInstance.post(`/messenger/messages/${messageId}/pin`, { for_everyone: forEveryone });
+  resourceCache.invalidatePrefix('pins:');
   return r.data;
 }
 
 export async function unpinMessage(messageId) {
   const r = await axiosInstance.delete(`/messenger/messages/${messageId}/pin`);
+  resourceCache.invalidatePrefix('pins:');
   return r.data;
 }
 
 export async function unpinAllMessages(conversationId) {
   const r = await axiosInstance.post(`/messenger/conversations/${conversationId}/unpin-all`);
+  resourceCache.invalidate(`pins:${conversationId}`);
   return r.data;
 }
 
@@ -524,13 +570,18 @@ export async function searchUsers(query, limit = 10) {
   return r.data;
 }
 
+function contactIdentifierPayload(identifier) {
+  const id = String(identifier ?? '').trim();
+  return { identifier: id };
+}
+
 export async function lookupContact(identifier) {
-  const r = await axiosInstance.post('/messenger/contacts/lookup', { identifier });
+  const r = await axiosInstance.post('/messenger/contacts/lookup', contactIdentifierPayload(identifier));
   return r.data;
 }
 
 export async function inviteContact(identifier) {
-  const r = await axiosInstance.post('/messenger/contacts/invite', { identifier });
+  const r = await axiosInstance.post('/messenger/contacts/invite', contactIdentifierPayload(identifier));
   return r.data;
 }
 
@@ -598,12 +649,22 @@ export function presenceOfflineBeacon() {
   // Best-effort offline signal; uses keepalive so it survives page unload.
   // session_id lets other devices of the same user stay online.
   try {
-    const token = JSON.parse(localStorage.getItem('token'));
-    if (!token) return;
+    const token = getAuthTokenSync();
+    const xsrfMatch = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+    let xsrfToken = null;
+    try {
+      xsrfToken = xsrfMatch ? decodeURIComponent(xsrfMatch[1]) : null;
+    } catch {
+      xsrfToken = xsrfMatch?.[1] || null;
+    }
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    if (xsrfToken) headers['X-XSRF-TOKEN'] = xsrfToken;
     const url = `${config.apiBaseUrl}/messenger/presence/offline`;
     fetch(url, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({ session_id: presenceSessionId() }),
       keepalive: true,
     }).catch(() => {});
@@ -666,9 +727,17 @@ export async function deleteWallpaper(wallpaperId) {
   return r.data;
 }
 
-export async function getConversationWallpaper(conversationId) {
-  const r = await axiosInstance.get(`/messenger/conversations/${conversationId}/wallpaper`);
-  return r.data;
+export async function getConversationWallpaper(conversationId, { force = false } = {}) {
+  const key = `wallpaper:${conversationId}`;
+  if (!force) {
+    const cached = resourceCache.get(key, WALLPAPER_TTL_MS);
+    if (cached) return cached;
+  }
+  return singleFlight(key, async () => {
+    const r = await axiosInstance.get(`/messenger/conversations/${conversationId}/wallpaper`);
+    resourceCache.set(key, r.data);
+    return r.data;
+  });
 }
 
 export async function setConversationWallpaper(conversationId, { config = null, forBoth = false, wallpaperId = null } = {}) {
@@ -678,6 +747,7 @@ export async function setConversationWallpaper(conversationId, { config = null, 
   };
   if (wallpaperId != null) payload.wallpaper_id = wallpaperId;
   const r = await axiosInstance.put(`/messenger/conversations/${conversationId}/wallpaper`, payload);
+  resourceCache.invalidate(`wallpaper:${conversationId}`);
   return r.data;
 }
 
@@ -755,8 +825,11 @@ export async function deleteProfilePic() {
 }
 
 export async function syncEvents(since = 0) {
-  const r = await axiosInstance.get('/messenger/sync', { params: { since } });
-  return r.data;
+  const key = `sync:${since}`;
+  return singleFlight(key, async () => {
+    const r = await axiosInstance.get('/messenger/sync', { params: { since } });
+    return r.data;
+  });
 }
 
 // -------------------------------------------------------------------------

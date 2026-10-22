@@ -1678,7 +1678,7 @@
                             </div>
                         </div>
                         <div id="comments-list" class="mb-8">
-                            <CommentsList v-if="course" :type="'course'" :id="course.id"></CommentsList>
+                            <CommentsList v-if="course" :type="'course'" :id="course.id" :per-page="10"></CommentsList>
                         </div>
                     </div>
                     <div class="xl:col-span-3 lg:col-span-4 lg:order-last order-first">
@@ -1771,6 +1771,10 @@
     </MasterPage>
 </template>
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+const authStore = useAuthStore()
+const cartStore = useCartStore()
 import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import CommentsList from "@/views/components/home/CommentsList.vue";
 import CourseSidebar from "@/views/components/course/CourseSidebar.vue";
@@ -1786,7 +1790,6 @@ import { useRoute } from "vue-router";
 // import axios from "axios";
 import axiosInstance from "@/store/axiosInstance";
 import router from "@/routes/router";
-import { useStore } from "@/composables/useStore";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import moment from "moment-jalaali";
 moment().format("jYYYY/jM/jD");
@@ -1891,8 +1894,11 @@ function scheduleAccentBarClass() {
 }
 
 async function getCourse() {
+    const slug = courseSlug.value || route.params.courseSlug;
+    if (!slug) return;
+
     //TODO complete recieve course details
-    await axiosInstance.get("/course/" + courseSlug.value).then(
+    await axiosInstance.get("/course/" + slug).then(
         (response) => {
             course.value = response.data.course;
             courseSections.value = response.data.course.section;
@@ -2015,10 +2021,9 @@ async function getCourse() {
     );
 }
 
-const isLoggedin = computed(() => store.state.auth.status.loggedIn);
-const store = useStore();
+const isLoggedin = computed(() => authStore.status.loggedIn);
 const isCourseInCart = computed(() => {
-    return store.getters["cart/isItemInCart"]('course', course.value.id);
+    return cartStore.isItemInCart('course', course.value.id);
 });
 const addToCartLoading = ref(false);
 
@@ -2033,7 +2038,7 @@ const addToCart = async (type, itemId) => {
     addToCartLoading.value = true;
 
     try {
-        await store.dispatch("cart/addToCart", { type: type, itemId: itemId });
+        await cartStore.addToCart({ type: type, itemId: itemId });
         addToCartLoading.value = false;
     } catch (error) {
         addToCartLoading.value = false;

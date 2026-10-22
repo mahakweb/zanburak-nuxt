@@ -328,6 +328,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/discuss/layouts/MasterPage.vue";
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import QuestionCard2 from "@/views/components/discuss/QuestionCard2.vue";
@@ -338,6 +339,7 @@ import debounce from "lodash/debounce";
 import { useSEO } from "@/composables/useSEO";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     inject: {
         ssrDiscussBootstrap: { from: 'ssrDiscussBootstrap', default: null },
     },
@@ -370,10 +372,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     created() {

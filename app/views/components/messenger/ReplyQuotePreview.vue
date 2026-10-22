@@ -75,9 +75,10 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import { formatDuration, isMediaType, mediaTypeLabelKey, parseAudioTitle } from './mediaHelpers';
 import { stripFormatMarkers } from './messageFormat';
-import { mapGetters, mapState } from "@/composables/useStore";
 import { peerDisplayName } from '@/utils/messengerPeerName';
 
 function parseMeta(raw) {
@@ -101,7 +102,8 @@ function looksLikeCiphertext(body) {
   const s = String(body || '').trim();
   if (!s) return false;
   if (s === LOCKED_PLACEHOLDER) return true;
-  return /^[A-Za-z0-9+/=\s._-]{24,}$/.test(s);
+  if (/\s/.test(s)) return false;
+  return /^[A-Za-z0-9+/=]{32,}$/.test(s);
 }
 
 function isLockedMsg(m) {
@@ -133,8 +135,8 @@ export default {
     },
   },
   computed: {
-    ...mapGetters('messenger', ['contactNameByUserId']),
-    ...mapState('messenger', ['messages', 'activeConversationId']),
+    ...mapState(useMessengerStore, ['contactNameByUserId']),
+    ...mapState(useMessengerStore, ['messages', 'activeConversationId']),
     /** Prefer decrypted bubble from the open chat over a locked reply snapshot. */
     resolvedMessage() {
       const m = this.message;

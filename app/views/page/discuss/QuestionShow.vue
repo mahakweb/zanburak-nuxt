@@ -926,6 +926,7 @@
     </MasterPage>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/discuss/layouts/MasterPage.vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import SideBar from "@/views/page/discuss/layouts/SideBar.vue";
@@ -946,6 +947,7 @@ import AddTagSheet from "@/views/components/tag/AddTagSheet.vue";
 import { useSEO, generateQuestionSchema, generateBreadcrumbSchema } from "@/composables/useSEO";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         MasterPage,
         SideBar,
@@ -989,10 +991,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         }
     },
     methods: {

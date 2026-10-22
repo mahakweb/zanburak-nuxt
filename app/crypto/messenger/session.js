@@ -40,6 +40,7 @@ import {
   markPackageSeen,
   clearDistributedForConversation,
   archiveConversationKeyToHistory,
+  isPersistedConversationId,
 } from './store';
 import { ensureDevice, loadIdentityKeys, repairDeviceRegistration } from './device';
 import { assertVaultUnlocked } from './vault';
@@ -174,7 +175,7 @@ export function ensureConversationKey(conversationId, options = {}) {
   if (ensureKeyPromises.has(inflightKey)) return ensureKeyPromises.get(inflightKey);
 
   const promise = (async () => {
-    await ensureDevice();
+    await ensureDevice({ waitForServer: false });
     await assertVaultUnlocked();
 
     let latest = await getLatestConversationKey(conversationId);
@@ -209,8 +210,12 @@ export function ensureConversationKey(conversationId, options = {}) {
     // True first send (allowMint): skip the packages round-trip — a brand-new
     // chat has nothing to consume, and the pull was adding 300–800ms + failures.
     if (!allowMint) {
-      await pullAndConsumePackages(conversationId, { bypassCooldown: true });
+      await pullAndConsumeKeyVault(conversationId, { force: true }).catch(() => 0);
       latest = await getLatestConversationKey(conversationId);
+      if (!latest?.keyB64) {
+        await pullAndConsumePackages(conversationId, { bypassCooldown: true });
+        latest = await getLatestConversationKey(conversationId);
+      }
     }
 
     if (!latest?.keyB64 && !allowMint) {
@@ -486,6 +491,7 @@ function isUnknownDeviceError(e) {
 }
 
 export async function pullAndConsumePackages(conversationId = null, { bypassCooldown = false } = {}) {
+  if (conversationId != null && !isPersistedConversationId(conversationId)) return 0;
   const cacheKey = pullCacheKey(conversationId);
 
   // An in-flight pull that started before sibling packages landed often
@@ -887,10 +893,9 @@ async function consumePackage(pkg, record) {
 
   let senderAgreementPubB64 = senderAgreementPubInline;
   if (!senderAgreementPubB64) {
-    const bundlesRes = await getConversationBundles(conversationId).catch(() => null);
-    const bundles = bundlesRes?.devices || bundlesRes?.bundles || [];
+    const bundles = await fetchConversationBundlesCached(conversationId).catch(() => []) || [];
     const senderDeviceId = pkg.sender_device_id ?? pkg.senderDeviceId;
-    const senderBundle = bundles.find((b) => (b.device_id ?? b.deviceId) === senderDeviceId);
+    const senderBundle = (Array.isArray(bundles) ? bundles : []).find((b) => (b.device_id ?? b.deviceId) === senderDeviceId);
     senderAgreementPubB64 = senderBundle?.identity_agreement_public_key;
   }
   if (!senderAgreementPubB64) throw new Error('Unable to resolve sender agreement key');
@@ -1011,7 +1016,7 @@ export function clearForceRedistributeGuard(conversationId = null) {
  * Never mints a key: if packages have not arrived yet, wait for redistribute.
  */
 export async function prewarmConversationCrypto(conversationId) {
-  if (conversationId == null) return false;
+  if (!isPersistedConversationId(conversationId)) return false;
   try {
     const cacheKey = String(conversationId);
     const cached = readyKeyCache.get(cacheKey);

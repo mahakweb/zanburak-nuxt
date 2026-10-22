@@ -271,7 +271,7 @@
                 </svg>
               </button>
               <div v-if="showMenu"
-                class="tg-menu absolute top-full mt-1 rtl:left-0 ltr:right-0 z-[200]"
+                class="tg-menu absolute top-full mt-1 start-0 z-[200]"
                 @click.stop>
                 <button type="button" @click="headerAction('profile')" class="tg-menu-item">
                   <span class="tg-menu-item-glyph" aria-hidden="true">
@@ -408,7 +408,7 @@
 
       <!-- Messages: shell paints chrome in the corner crescents; scroll has concave radii. -->
       <div :class="['chat-messages-shell flex-1 min-h-0 flex flex-col relative', messagesShellClass]">
-      <!-- Telegram-style empty chat greeting — centered in the message viewport -->
+      <!-- Telegram-style empty chat greeting — only when history is confirmed empty. -->
       <EmptyChatGreeting
         v-if="!messages.length && !messagesLoading"
         :conversation-id="emptyGreetingSeed"
@@ -428,7 +428,8 @@
             </span>
           </div>
         </transition>
-        <div v-if="messagesLoading && messages.length" class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+        <!-- Local history spinner: only when this chat has nothing to paint yet. -->
+        <div v-if="messagesLoading && !messages.length" class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
           <span
             class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/90 dark:bg-[#1e2c3a]/90 shadow ring-1 ring-black/5 dark:ring-white/10"
             role="status" aria-label="loading">
@@ -1466,7 +1467,8 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState, mapActions } from 'pinia'
 import MessageBubble from './MessageBubble.vue';
 import ContextMenu from './ContextMenu.vue';
 import PinMessageSheet from './PinMessageSheet.vue';
@@ -1537,7 +1539,7 @@ import {
   isConnectionHealthy,
   resolveConnectionDisplayStatus,
 } from '@/utils/connectionStatus';
-import { compareMessages } from './outbox';
+import { compareMessages, isServerId } from './outbox';
 import {
   PAGE_SWIPE_THRESHOLD,
   TG_EASE_OUT,
@@ -1568,6 +1570,7 @@ function defaultEmojiPanelHeight() {
 const MAX_SEND_LENGTH = 4096;
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   components: {
     MessageBubble,
     ContextMenu,
@@ -1881,8 +1884,8 @@ export default {
         { label: this.$t('messenger.locationTryAgain'), value: 'retry', primary: true },
       ];
     },
-    ...mapState('messenger', ['selectionMode', 'selectedIds', 'replyTo', 'settings', 'pendingForward']),
-    ...mapGetters('messenger', [
+    ...mapState(useMessengerStore, ['selectionMode', 'selectedIds', 'replyTo', 'settings', 'pendingForward']),
+    ...mapState(useMessengerStore, [
       'selectedCount',
       'selectedMessages',
       'selectionAllMine',
@@ -2012,7 +2015,7 @@ export default {
       const msgs = this.pendingForward?.messages || [];
       const seen = new Set();
       const names = [];
-      const contactMap = contactNameMap(this.$store.state.messenger?.contacts);
+      const contactMap = contactNameMap(this.messengerStore?.contacts);
       for (const m of msgs) {
         const u = m?.user || m?.forwarded_from;
         if (!u) continue;
@@ -2239,18 +2242,23 @@ export default {
     msgMenuItems() {
       const m = this.msgMenu.message;
       if (!m) return [];
-      // Failed / stuck-pending optimistic messages: only retry or discard locally.
-      if (m.failed || (m.pending && this.isStalePending(m))) {
+      // Local outbound (queued / sending / failed) — retry or cancel before server ack.
+      const isLocalId = !isServerId(m.id);
+      if (m.failed || isLocalId && (m.pending || m.awaiting_server || m.send_status === 'queued' || m.send_status === 'sending')) {
         const albumFail = Array.isArray(this.msgMenu.albumMessages) && this.msgMenu.albumMessages.length > 1;
-        return [
-          { label: this.$t('messenger.retry'), icon: 'retry', value: 'retry-failed' },
-          {
-            label: albumFail ? this.$t('messenger.deleteAlbum') : this.$t('messenger.delete'),
-            icon: 'trash',
-            value: 'delete-failed',
-            danger: true,
-          },
-        ];
+        const items = [];
+        if (m.failed || this.isStalePending(m)) {
+          items.push({ label: this.$t('messenger.retry'), icon: 'retry', value: 'retry-failed' });
+        }
+        items.push({
+          label: m.failed
+            ? (albumFail ? this.$t('messenger.deleteAlbum') : this.$t('messenger.delete'))
+            : (this.$t('messenger.cancel') || this.$t('messenger.delete')),
+          icon: 'trash',
+          value: 'delete-failed',
+          danger: true,
+        });
+        return items;
       }
 
       const mine = Number(m.user_id) === Number(this.meId);
@@ -2507,8 +2515,8 @@ export default {
       this.surfaceTransition = null;
       this.clearComposerFocusTimers();
       this.viewedIds = {};
-      this.$store.commit('messenger/CLEAR_SELECTION');
-      this.$store.commit('messenger/SET_REPLY', null);
+      this.messengerStore.clearSelection();
+      this.messengerStore.setReply(null);
       const skipOpenAnim = this.skipNextOpenAnim;
       this.skipNextOpenAnim = false;
       if (newConv?.id && animationsEnabled() && !skipOpenAnim) {
@@ -2655,7 +2663,7 @@ export default {
     this.closeMediaCompose();
   },
   methods: {
-    ...mapActions('messenger', ['setDraftText', 'clearDraftText']),
+    ...mapActions(useMessengerStore, ['setDraftText', 'clearDraftText']),
     menuIconPaths,
     /** Match backend: edit_window_minutes <= 0 means unlimited. */
     isWithinEditWindow(message) {
@@ -3062,7 +3070,7 @@ export default {
         if (
           m.id != null
           && (m._e2e_locked || (m.is_encrypted && !m._e2e_decrypted)
-            || (m.body && /^[A-Za-z0-9+/=\s]{24,}$/.test(String(m.body).trim())))
+            || (m.body && /^[A-Za-z0-9+/=]{32,}$/.test(String(m.body).trim())))
         ) {
           const local = (this.messages || []).find((x) => Number(x.id) === Number(m.id));
           if (local && local._e2e_decrypted && !local._e2e_locked) view = local;
@@ -3075,7 +3083,7 @@ export default {
           const raw = stripFormatMarkers(view.body || '').trim();
           const locked = view._e2e_locked
             || (view.is_encrypted && !view._e2e_decrypted)
-            || (raw && /^[A-Za-z0-9+/=\s]{24,}$/.test(raw));
+            || (raw && /^[A-Za-z0-9+/=]{32,}$/.test(raw));
           if (locked) return this.$t(mediaTypeLabelKey(view.type));
           return raw || this.$t(mediaTypeLabelKey(view.type));
         }
@@ -3083,7 +3091,7 @@ export default {
         if (
           view._e2e_locked
           || (view.is_encrypted && !view._e2e_decrypted)
-          || (body && /^[A-Za-z0-9+/=\s]{24,}$/.test(body))
+          || (body && /^[A-Za-z0-9+/=]{32,}$/.test(body))
         ) {
           return '…';
         }
@@ -3656,7 +3664,7 @@ export default {
         pool.push(m);
       };
       const cid = this.conversation?.id;
-      const fromStore = (cid != null && this.$store?.state?.messenger?.messages?.[cid]) || [];
+      const fromStore = (cid != null && this.messengerStore?.messages?.[cid]) || [];
       (this.messages || []).forEach(pushMsg);
       fromStore.forEach(pushMsg);
       // Album open may pass siblings that aren't all in the flat list yet.
@@ -3733,7 +3741,7 @@ export default {
     },
     resolveGallerySenderName(m) {
       if (!m) return '';
-      const contactMap = contactNameMap(this.$store.state.messenger?.contacts);
+      const contactMap = contactNameMap(this.messengerStore?.contacts);
       const u = m.user || null;
       if (u) {
         const nick = u.id != null ? contactMap[u.id] : '';
@@ -3811,7 +3819,7 @@ export default {
         if (this.mediaViewer.galleryToken !== token || !this.mediaViewer.open) return;
         let rows = Array.isArray(res?.data) ? res.data : [];
         try {
-          rows = await decryptMessageList(rows);
+          rows = await decryptMessageList(rows, cid);
         } catch (e) { /* keep ciphertext rows for merge */ }
         const merged = this.mergeGalleryMessages(this.mediaViewer.items, rows);
         this.applyGalleryItems(merged);
@@ -4708,9 +4716,9 @@ export default {
       return out;
     },
     onEdit(message) {
-      this.$store.commit('messenger/CLEAR_SELECTION');
-      this.$store.commit('messenger/SET_REPLY', null);
-      this.$store.commit('messenger/CLEAR_PENDING_FORWARD');
+      this.messengerStore.clearSelection();
+      this.messengerStore.setReply(null);
+      this.messengerStore.clearPendingForward();
       this.editingMessage = message;
       this.text = message.body || '';
       this.$nextTick(() => {
@@ -4742,14 +4750,14 @@ export default {
       });
     },
     onReply(message) {
-      this.$store.commit('messenger/CLEAR_SELECTION');
+      this.messengerStore.clearSelection();
       this.editingMessage = null;
-      this.$store.commit('messenger/CLEAR_PENDING_FORWARD');
-      this.$store.commit('messenger/SET_REPLY', message);
+      this.messengerStore.clearPendingForward();
+      this.messengerStore.setReply(message);
       this.$nextTick(() => this.scheduleComposerFocus({ openKeyboard: true }));
     },
     cancelReply() {
-      this.$store.commit('messenger/SET_REPLY', null);
+      this.messengerStore.setReply(null);
       this.focusInput(false);
     },
     cancelEdit() {
@@ -4912,7 +4920,7 @@ export default {
         Object.keys(views).forEach((id) => {
           const count = views[id];
           if (count == null) return;
-          this.$store.commit('messenger/UPDATE_MESSAGE', {
+          this.messengerStore.updateMessage({
             conversationId: cid,
             message: { id: Number(id), view_count: count },
           });
@@ -4973,7 +4981,7 @@ export default {
     },
     pinMessage(m, forEveryone) {
       if (!m || !this.conversation) return;
-      this.$store.dispatch('messenger/pinMessageAction', {
+      this.messengerStore.pinMessageAction({
         messageId: m.id,
         forEveryone,
         message: m,
@@ -4982,14 +4990,14 @@ export default {
     },
     unpinOne(m) {
       if (!m || !this.conversation) return;
-      this.$store.dispatch('messenger/unpinMessageAction', {
+      this.messengerStore.unpinMessageAction({
         messageId: m.id,
         conversationId: this.conversation.id,
       }).catch(() => {});
     },
     unpinAll() {
       if (!this.conversation) return;
-      this.$store.dispatch('messenger/unpinAllAction', this.conversation.id).catch(() => {});
+      this.messengerStore.unpinAllAction(this.conversation.id).catch(() => {});
       this.pinnedSheetOpen = false;
     },
     openPinnedSheet() {
@@ -5067,7 +5075,7 @@ export default {
     },
     enterSearchMode() {
       this.showMenu = false;
-      if (this.selectionMode) this.$store.commit('messenger/CLEAR_SELECTION');
+      if (this.selectionMode) this.messengerStore.clearSelection();
       this.searchMode = true;
       this.searchShowDates = false;
       // chrome-slide uses mode="out-in" — input mounts after the leave (~200ms).
@@ -5282,7 +5290,7 @@ export default {
         this.$emit('open-profile', (this.isCommunity || this.isSaved) ? this.conversation : this.partner);
       }
       if (type === 'mute') this.$emit('mute', this.conversation.id);
-      if (type === 'select') this.$store.commit('messenger/SET_SELECTION_MODE', true);
+      if (type === 'select') this.messengerStore.setSelectionMode(true);
       if (type === 'wallpaper') this.$emit('open-wallpaper');
       if (type === 'clear') this.$emit('clear');
       if (type === 'delete') this.$emit('delete-conversation');
@@ -5968,12 +5976,7 @@ export default {
     },
     onEmptyChatGreet(variant) {
       if (!variant?.emoji) return;
-      this.onSendStickerFromPanel({
-        id: variant.stickerId || `greet_${variant.id}`,
-        emoji: variant.emoji,
-        kind: 'emoji',
-        packId: 'greetings',
-      });
+      this.$emit('send', variant.emoji);
     },
     async onSendStickerFromPanel(payload) {
       if (!payload) return;
@@ -6172,11 +6175,11 @@ export default {
       } else if (item.value === 'add-gif') {
         this.addMessageGifToLibrary(m);
       } else if (item.value === 'select') {
-        this.$store.commit('messenger/SET_SELECTION_MODE', true);
+        this.messengerStore.setSelectionMode(true);
         if (albumIds && albumIds.length > 1) {
-          albumIds.forEach((id) => this.$store.commit('messenger/TOGGLE_SELECT', id));
+          albumIds.forEach((id) => this.messengerStore.toggleSelect(id));
         } else {
-          this.$store.commit('messenger/TOGGLE_SELECT', m.id);
+          this.messengerStore.toggleSelect(m.id);
         }
       } else if (item.value === 'pin') this.requestPin(m);
       else if (item.value === 'unpin') this.unpinOne(m);
@@ -6228,15 +6231,15 @@ export default {
       } catch (e) { /* noop */ }
     },
     toggleSelect(messageId) {
-      this.$store.commit('messenger/TOGGLE_SELECT', messageId);
+      this.messengerStore.toggleSelect(messageId);
     },
     onEnterSelect(messageId) {
       // Long-press: dismiss keyboard + blur, then enter selection (Telegram).
       this.blurComposer();
       this.closeInputMenu();
       this.msgMenu.visible = false;
-      this.$store.commit('messenger/SET_SELECTION_MODE', true);
-      this.$store.commit('messenger/TOGGLE_SELECT', messageId);
+      this.messengerStore.setSelectionMode(true);
+      this.messengerStore.toggleSelect(messageId);
     },
     onEnterSelectAlbum(ids) {
       const list = Array.isArray(ids) ? ids : [];
@@ -6244,8 +6247,8 @@ export default {
       this.blurComposer();
       this.closeInputMenu();
       this.msgMenu.visible = false;
-      this.$store.commit('messenger/SET_SELECTION_MODE', true);
-      list.forEach((id) => this.$store.commit('messenger/TOGGLE_SELECT', id));
+      this.messengerStore.setSelectionMode(true);
+      list.forEach((id) => this.messengerStore.toggleSelect(id));
     },
     // Close transient overlays on a back-button press. Returns true if one was open.
     handleBack() {
@@ -6292,7 +6295,7 @@ export default {
     },
     cancelPendingForward() {
       this.forwardMenuOpen = false;
-      this.$store.commit('messenger/CLEAR_PENDING_FORWARD');
+      this.messengerStore.clearPendingForward();
     },
     joinForwardNames(names) {
       const list = (names || []).filter(Boolean);
@@ -6316,9 +6319,7 @@ export default {
         return;
       }
       if (action === 'hide-sender' && this.pendingForward) {
-        this.$store.commit(
-          'messenger/SET_PENDING_FORWARD_DROP_AUTHOR',
-          !this.pendingForward.dropAuthor,
+        this.messengerStore.setPendingForwardDropAuthor(!this.pendingForward.dropAuthor,
         );
       }
     },
@@ -6329,14 +6330,14 @@ export default {
       this.exitSelection();
     },
     exitSelection() {
-      this.$store.commit('messenger/CLEAR_SELECTION');
+      this.messengerStore.clearSelection();
     },
     selectAllMessages() {
       const ids = (this.messages || [])
         .map((m) => m?.id)
         .filter((id) => id != null);
       if (!ids.length) return;
-      this.$store.commit('messenger/SELECT_ALL', ids);
+      this.messengerStore.selectAll(ids);
     },
     replySelected() {
       if (this.selectedCount !== 1) return;
@@ -6356,9 +6357,9 @@ export default {
       if (!list.length) return;
       const sources = (messages || []).filter((m) => list.some((id) => Number(id) === Number(m?.id)));
       try {
-        const conv = await this.$store.dispatch('messenger/openSavedMessages');
+        const conv = await this.messengerStore.openSavedMessages();
         if (!conv?.id) throw new Error('saved_unavailable');
-        await this.$store.dispatch('messenger/forwardMessagesAction', {
+        await this.messengerStore.forwardMessagesAction({
           messageIds: list,
           toConversationId: conv.id,
           dropAuthor: false,

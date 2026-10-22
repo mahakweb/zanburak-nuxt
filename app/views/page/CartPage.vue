@@ -352,6 +352,8 @@
 											<button v-else-if="appliedCoupon" @click.prevent="removeDiscount"
 												class=" text-xs font-medium bg-rose-500  text-white p-1 px-3 rounded-full hover:bg-opacity-80">{{ $t('cart.removeCode') }}</button>
 											<button v-else @click.prevent="applyDiscount"
+												:disabled="!discountCode.trim()"
+												:class="{ 'opacity-50 cursor-not-allowed': !discountCode.trim() }"
 												class=" text-xs font-medium bg-yellow-400  text-black p-1 px-3 rounded-full hover:bg-opacity-80">{{ $t('cart.applyCode') }}</button>
 
 										</div>
@@ -1312,12 +1314,15 @@
 	</MasterPage>
 </template>
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+const authStore = useAuthStore()
+const cartStore = useCartStore()
 import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import axiosInstance from "@/store/axiosInstance";
-import { useStore } from "@/composables/useStore";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { useI18n } from "vue-i18n";
@@ -1342,7 +1347,6 @@ import {
 	isInstallmentGateway,
 } from "@/config/paymentGateways";
 const { t } = useI18n();
-const store = useStore();
 const router = useRouter();
 
 const hiddenItems = ref([]);
@@ -1356,8 +1360,8 @@ const walletSplitGateway = ref(null);
 const paymentLoading = ref(false);
 let priceToastTimer = null;
 
-const currentUser = computed(() => store.state.auth.status.userInfo);
-const cartItems = computed(() => store.state.cart.cartItems);
+const currentUser = computed(() => authStore.status.userInfo);
+const cartItems = computed(() => cartStore.cartItems);
 const visibleCartItems = computed(() => {
 
 	return cartItems.value.filter(item => {
@@ -1367,18 +1371,18 @@ const visibleCartItems = computed(() => {
 	});
 
 });
-const cartLoading = computed(() => store.state.cart.loading);
+const cartLoading = computed(() => cartStore.loading);
 const totalCartPrice = computed(() => {
-	return store.getters["cart/totalCartPrice"];
+	return cartStore.totalCartPrice;
 });
 const totalDiscount = computed(() => {
-	return store.getters["cart/totalDiscount"];
+	return cartStore.totalDiscount;
 });
-const totalOriginal = computed(() => store.getters["cart/totalOriginal"]);
-const totalCourseDiscount = computed(() => store.getters["cart/totalCourseDiscount"]);
-const totalCouponDiscount = computed(() => store.getters["cart/totalCouponDiscount"]);
-const appliedCoupon = computed(() => store.getters["cart/appliedCoupon"]);
-const discountCodeApplied = computed(() => store.getters["cart/getDiscountCode"]);
+const totalOriginal = computed(() => cartStore.totalOriginal);
+const totalCourseDiscount = computed(() => cartStore.totalCourseDiscount);
+const totalCouponDiscount = computed(() => cartStore.totalCouponDiscount);
+const appliedCoupon = computed(() => cartStore.appliedCoupon);
+const discountCodeApplied = computed(() => cartStore.getDiscountCode);
 
 const gateways = computed(() => buildPaymentGateways(t));
 const availableGateways = computed(() => filterGatewaysForCart(gateways.value, visibleCartItems.value));
@@ -1605,7 +1609,9 @@ async function sendPaymentRequest(options = {}) {
 		});
 	} catch (error) {
 		paymentLoading.value = false;
-		console.error("An error occurred:", error);
+		if (error?.response?.status !== 422) {
+			console.error("An error occurred:", error);
+		}
 
 		if (error?.response?.data?.code === 'wallet_insufficient') {
 			walletSplitRemainder.value = Number(error.response.data.gateway_remainder || 0);
@@ -1645,10 +1651,14 @@ watch(appliedCoupon, (coupon) => {
 
 
 const applyDiscount = async () => {
+	if (!discountCode.value.trim()) {
+		return;
+	}
+
 	discountLoading.value = true;
 
 	try {
-		await store.dispatch("cart/applyDiscountCode", discountCode.value);
+		await cartStore.applyDiscountCode(discountCode.value);
 		discountLoading.value = false;
 	} catch (error) {
 		discountLoading.value = false;
@@ -1660,7 +1670,7 @@ const removeDiscount = async () => {
 	discountLoading.value = true;
 
 	try {
-		await store.dispatch("cart/removeDiscountCode");
+		await cartStore.removeDiscountCode();
 		discountLoading.value = false;
 		discountCode.value = "";
 	} catch (error) {
@@ -1727,9 +1737,7 @@ const finalizeDelete = (id) => {
 			x => x.id !== id
 		);
 
-	store.dispatch(
-		"cart/removeFromCart",
-		id
+	cartStore.removeFromCart(id
 	).catch(error => {
 
 		console.error(error);
@@ -1739,7 +1747,7 @@ const finalizeDelete = (id) => {
 				x => x !== id
 			);
 
-		store.dispatch("cart/getCart");
+		cartStore.getCart();
 
 		toast.error(t('cart.toastRemoveError'));
 
@@ -1759,9 +1767,7 @@ const flushPendingDeletes = async () => {
 
 			clearTimeout(item.timeoutId);
 
-			return store.dispatch(
-				"cart/removeFromCart",
-				item.id
+			return cartStore.removeFromCart(item.id
 			);
 
 		})

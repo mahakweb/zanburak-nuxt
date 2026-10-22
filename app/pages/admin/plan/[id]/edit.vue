@@ -2,10 +2,11 @@
 definePageMeta({
   name: "admin-plan-edit",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link :to="{ name: 'admin-plans-list' }" :class="BTN_SECONDARY">

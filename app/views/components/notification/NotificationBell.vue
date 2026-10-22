@@ -1,6 +1,7 @@
 <script setup>
+import { useNotificationStore } from '@/stores/notification'
+const notificationStore = useNotificationStore()
 import { ref, computed, watch, nextTick } from "vue";
-import { useStore } from "@/composables/useStore";
 import { useRouter } from "vue-router";
 import moment from "moment-jalaali";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
@@ -23,7 +24,6 @@ defineProps({
 
 const emit = defineEmits(["open"]);
 
-const store = useStore();
 const router = useRouter();
 
 const isOpen = ref(false);
@@ -33,16 +33,16 @@ const markingAll = ref(false);
 const markingRead = ref(false);
 const detailNotification = ref(null);
 
-const notifications = computed(() => store.state.notification.unreadItems);
-const listLoading = computed(() => store.state.notification.unreadListLoading);
-const loadingMore = computed(() => store.state.notification.unreadLoadingMore);
-const hasMore = computed(() => store.getters["notification/hasMoreUnreadItems"]);
-const unreadCount = computed(() => store.state.notification.unreadNotifications);
+const notifications = computed(() => notificationStore.unreadItems);
+const listLoading = computed(() => notificationStore.unreadListLoading);
+const loadingMore = computed(() => notificationStore.unreadLoadingMore);
+const hasMore = computed(() => notificationStore.hasMoreUnreadItems);
+const unreadCount = computed(() => notificationStore.unreadNotifications);
 
 const selectedNotification = computed(() => {
     if (!selectedId.value) return null;
     return (
-        store.getters["notification/getItemById"](selectedId.value) ||
+        notificationStore.getItemById(selectedId.value) ||
         (detailNotification.value?.id === selectedId.value ? detailNotification.value : null)
     );
 });
@@ -106,7 +106,7 @@ function checkNeedMoreIfListShort() {
     const el = listScrollEl.value;
     if (!el || listLoading.value || loadingMore.value || !hasMore.value) return;
     if (el.scrollHeight <= el.clientHeight + 80) {
-        store.dispatch("notification/loadMoreUnreadFeed");
+        notificationStore.loadMoreUnreadFeed();
     }
 }
 
@@ -119,7 +119,7 @@ function onListScroll() {
         el.scrollTop + el.clientHeight >= el.scrollHeight - thresholdPx;
 
     if (scrolledToBottom) {
-        store.dispatch("notification/loadMoreUnreadFeed");
+        notificationStore.loadMoreUnreadFeed();
     }
 }
 
@@ -130,8 +130,7 @@ function openNotificationDetail(notification) {
 
     if (!notification.read_at) {
         markingRead.value = true;
-        store
-            .dispatch("notification/markAsRead", notification.id)
+        notificationStore.markAsRead(notification.id)
             .then((updated) => {
                 if (updated && selectedId.value === notification.id) {
                     detailNotification.value = updated;
@@ -156,7 +155,7 @@ async function handleMarkAllRead() {
     if (!unreadCount.value || markingAll.value) return;
     markingAll.value = true;
     try {
-        await store.dispatch("notification/markAllAsRead");
+        await notificationStore.markAllAsRead();
     } catch (error) {
         console.error("Error marking all as read:", error);
     } finally {
@@ -182,8 +181,8 @@ function openActionUrl() {
 
 watch(isOpen, (open) => {
     if (open) {
-        store.dispatch("notification/ensureUnreadFeedLoaded");
-        store.dispatch("notification/fetchUnreadCount");
+        notificationStore.ensureUnreadFeedLoaded();
+        notificationStore.fetchUnreadCount();
     } else {
         resetSheetView();
     }

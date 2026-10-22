@@ -322,6 +322,10 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+import { useNotificationStore } from '@/stores/notification'
+import { useAdminCommentsStore } from '@/stores/adminComments'
 import SidebarMenu from "@/views/components/admin/SidebarMenu.vue";
 import AdminBreadcrumbBar from "@/views/components/admin/AdminBreadcrumbBar.vue";
 import DarkMode from "@/views/components/DarkMode.vue";
@@ -332,6 +336,7 @@ import { Popover, PopoverButton, PopoverPanel, PopoverOverlay } from "@headlessu
 import { getRouteAccessRedirect } from "@/utils/routePermissions";
 
 export default {
+		setup() { return { authStore: useAuthStore(), cartStore: useCartStore(), notificationStore: useNotificationStore(), adminCommentsStore: useAdminCommentsStore() } },
     components: {
         SidebarMenu,
         AdminBreadcrumbBar,
@@ -372,26 +377,26 @@ export default {
             };
         },
         loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         cartItems() {
-            return this.$store.state.cart.cartItems;
+            return this.cartStore.cartItems;
         },
         unreadNotifications() {
-            return this.$store.state.notification.unreadNotifications;
+            return this.notificationStore.unreadNotifications;
         },
     },
     methods: {
         async syncAccess() {
             try {
-                await this.$store.dispatch('auth/refreshUser');
+                await this.authStore.refreshUser();
             } catch {
                 return;
             }
-            const redirect = getRouteAccessRedirect(this.$store.state.auth.status.userInfo, this.$route);
+            const redirect = getRouteAccessRedirect(this.authStore.status.userInfo, this.$route);
             if (redirect) {
                 this.$router.replace(redirect);
             }
@@ -404,7 +409,7 @@ export default {
     },
     mounted() {
         document.title = "پنل مدیریت";
-        this.$store.dispatch('adminComments/fetchUnapprovedCommentsCount');
+        this.adminCommentsStore.fetchUnapprovedCommentsCount();
         document.addEventListener('visibilitychange', this.onAdminVisibilityChange);
         window.addEventListener('focus', this.syncAccess);
     },

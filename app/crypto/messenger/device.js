@@ -41,6 +41,9 @@ const PREKEY_BATCH_SIZE = 20;
 const REFILL_THROTTLE_MS = 6 * 60 * 60 * 1000;
 
 let ensureDevicePromise = null;
+let localDevicePromise = null;
+let registerInFlight = null;
+let cachedMyDeviceId = null;
 /** One server-side presence check per page load (catches stale registered flags). */
 let serverPresenceChecked = false;
 
@@ -84,6 +87,7 @@ async function generateAndPersistIdentity() {
     keyKind: 'device',
   };
   await saveDeviceRecord(record);
+  cachedMyDeviceId = record.deviceId;
   return record;
 }
 
@@ -165,6 +169,34 @@ async function serverHasDevice(deviceId) {
   }
 }
 
+/** Server upsert — never awaited by encrypt/send. */
+function kickServerRegister(seed = null) {
+  if (serverPresenceChecked || registerInFlight) return registerInFlight;
+  registerInFlight = (async () => {
+    try {
+      let record = seed || (await ensureLocalDevice());
+      if (record?.registered) {
+        const ok = await serverHasDevice(record.deviceId);
+        if (ok) {
+          serverPresenceChecked = true;
+          await refillPrekeysIfLow(record).catch(() => {});
+          return record;
+        }
+      }
+      record = await registerWithServer(record);
+      serverPresenceChecked = true;
+      await refillPrekeysIfLow(record).catch(() => {});
+      return record;
+    } catch (e) {
+      console.warn('[e2e] device register failed', e?.message || e?.response?.status);
+      return seed;
+    } finally {
+      registerInFlight = null;
+    }
+  })();
+  return registerInFlight;
+}
+
 /**
  * Upsert this device on the server. Retries without OTPs if bulk OTP validation fails.
  */
@@ -210,11 +242,11 @@ async function registerWithServer(record) {
 }
 
 /**
- * Ensure local identity exists AND is present on the server.
- * Safe to call repeatedly — uses upsert semantics on the backend.
+ * Local Device Keys only — never waits on register / listCryptoDevices.
+ * First encrypt and first contact send must not stall on HTTP.
  */
-export function ensureDevice({ forceReregister = false } = {}) {
-  if (ensureDevicePromise && !forceReregister) return ensureDevicePromise;
+export function ensureLocalDevice() {
+  if (localDevicePromise) return localDevicePromise;
 
   const run = (async () => {
     await assertVaultUnlocked().catch(() => {});
@@ -229,25 +261,50 @@ export function ensureDevice({ forceReregister = false } = {}) {
     } else {
       record = await ensureSignedPrekey(record);
     }
-
-    const needsRegister = forceReregister || !record.registered;
-    if (needsRegister) {
-      record = await registerWithServer(record);
-      serverPresenceChecked = true;
-    } else if (!serverPresenceChecked) {
-      serverPresenceChecked = true;
-      const ok = await serverHasDevice(record.deviceId);
-      if (!ok) {
-        record = await registerWithServer(record);
-      }
-    }
-
-    await refillPrekeysIfLow(record);
+    if (record?.deviceId) cachedMyDeviceId = record.deviceId;
     return record;
   })();
 
-  ensureDevicePromise = run;
-  run.finally(() => {
+  localDevicePromise = run;
+  run.catch(() => {
+    if (localDevicePromise === run) localDevicePromise = null;
+  });
+  return run;
+}
+
+/**
+ * Ensure local identity exists AND is present on the server.
+ * Safe to call repeatedly — uses upsert semantics on the backend.
+ *
+ * waitForServer=false: return as soon as local keys exist. Registration
+ * continues in the background so encrypt/send is not blocked.
+ */
+export function ensureDevice({ forceReregister = false, waitForServer = true } = {}) {
+  if (forceReregister) {
+    const run = (async () => {
+      let record = await ensureLocalDevice();
+      record = await registerWithServer(record);
+      serverPresenceChecked = true;
+      await refillPrekeysIfLow(record).catch(() => {});
+      return record;
+    })();
+    ensureDevicePromise = run.finally(() => {
+      if (ensureDevicePromise === run) ensureDevicePromise = null;
+    });
+    return run;
+  }
+
+  const local = ensureLocalDevice();
+  local.then((record) => kickServerRegister(record)).catch(() => {});
+  if (!waitForServer) return local;
+  if (ensureDevicePromise) return ensureDevicePromise;
+
+  const run = (async () => {
+    const record = await local;
+    kickServerRegister(record);
+    return record;
+  })();
+  ensureDevicePromise = run.finally(() => {
     if (ensureDevicePromise === run) ensureDevicePromise = null;
   });
   return run;
@@ -289,8 +346,6 @@ export async function refillPrekeysIfLow(recordArg = null, {
   }
   await patchDeviceRecord({ lastPrekeyRefillAt: now });
 }
-
-let cachedMyDeviceId = null;
 
 export async function getMyDeviceId() {
   if (cachedMyDeviceId) return cachedMyDeviceId;

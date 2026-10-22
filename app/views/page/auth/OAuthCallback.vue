@@ -83,14 +83,16 @@
     </div>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import DarkMode from "@/views/components/DarkMode.vue";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         DarkMode
     },
     computed: {
         loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         }
     },
     created() {

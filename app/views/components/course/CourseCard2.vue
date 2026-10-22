@@ -143,6 +143,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import { initPopovers } from "flowbite";
 import axiosInstance from "@/store/axiosInstance";
 import CourseStatusRibbon from "@/views/components/course/CourseStatusRibbon.vue";
@@ -155,6 +156,7 @@ import { courseDiscountPercent, courseHasDiscount } from "@/utils/priceDisplay";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { CourseStatusRibbon, InstallmentRibbon, PriceDisplay, DiscountBadge, SeoImage },
     props: {
         course: {
@@ -170,10 +172,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         displayTitle() {
             return cleanCourseTitle(this.localCourse.title, this.localCourse.status);

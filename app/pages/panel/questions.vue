@@ -209,7 +209,7 @@ export default {
 			const queryString = new URLSearchParams(query).toString();
 			const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
 
-			window.history.pushState(null, '', newUrl);
+			window.history.pushState({ ...window.history.state }, '', newUrl);
 
 			this.getData();
 		},

@@ -1,10 +1,11 @@
 <script setup>
 definePageMeta({
   name: 'panel-messenger',
+  key: 'panel-messenger',
   middleware: ['auth'],
 })
 
-// Messenger touches browser-only APIs (cropper, screen DPI, etc.) — client only.
+// Keep the messenger shell mounted while the optional chat id changes.
 const MessengerPage = defineAsyncComponent(() =>
   import('@/views/page/messenger/MessengerPage.vue'),
 )

@@ -2,6 +2,7 @@
 definePageMeta({
   name: "admin-payments-edit",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 

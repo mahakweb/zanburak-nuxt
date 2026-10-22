@@ -95,6 +95,15 @@ function txDone(tx) {
   });
 }
 
+/** Keep draft ids as strings; never coerce `'draft'` → NaN. */
+export function normalizeOutboxConversationId(id) {
+  if (id == null || id === '') return null;
+  if (typeof id === 'string' && (id === 'draft' || id.startsWith('draft'))) return id;
+  const n = Number(id);
+  if (Number.isFinite(n) && n > 0) return n;
+  return String(id);
+}
+
 /**
  * Persist a queued outgoing message. `blob` / `coverBlob` optional (media).
  */
@@ -103,7 +112,7 @@ export async function outboxPut(item, { blob = null, coverBlob = null } = {}) {
   if (!db || !item?.client_id) return false;
   const row = {
     client_id: item.client_id,
-    conversation_id: Number(item.conversation_id),
+    conversation_id: normalizeOutboxConversationId(item.conversation_id),
     kind: item.kind || 'text',
     body: item.body || '',
     type: item.type || 'text',
@@ -117,6 +126,7 @@ export async function outboxPut(item, { blob = null, coverBlob = null } = {}) {
     next_attempt_at: item.next_attempt_at || null,
     last_error: item.last_error || null,
     user_id: item.user_id ?? null,
+    partner_user_id: item.partner_user_id ?? null,
     silent: !!item.silent,
     animation: !!item.animation,
     sticker: !!item.sticker,
@@ -178,6 +188,35 @@ export async function outboxRemove(clientId) {
   } catch (e) { /* noop */ }
 }
 
+/** Drop every durable outbox row (logout / account switch). */
+export async function outboxClearAll() {
+  const db = await openDb();
+  if (!db) return;
+  try {
+    const tx = db.transaction([STORE_ITEMS, STORE_BLOBS], 'readwrite');
+    tx.objectStore(STORE_ITEMS).clear();
+    tx.objectStore(STORE_BLOBS).clear();
+    await txDone(tx);
+  } catch (e) { /* noop */ }
+}
+
+/** Keep only rows owned by `userId`; delete foreign / orphaned rows. */
+export async function outboxPurgeOtherUsers(userId) {
+  const me = userId == null ? null : Number(userId);
+  const rows = await outboxListAll();
+  if (!rows.length) return [];
+  const mine = [];
+  await Promise.all(rows.map(async (row) => {
+    const owner = row.user_id == null ? null : Number(row.user_id);
+    if (me != null && owner != null && owner !== me) {
+      await outboxRemove(row.client_id);
+      return;
+    }
+    mine.push(row);
+  }));
+  return mine;
+}
+
 export async function outboxListAll() {
   const db = await openDb();
   if (!db) return [];
@@ -199,8 +238,15 @@ export async function outboxListAll() {
 
 export async function outboxListForConversation(conversationId) {
   const all = await outboxListAll();
-  const id = Number(conversationId);
-  return all.filter((r) => Number(r.conversation_id) === id);
+  const id = normalizeOutboxConversationId(conversationId);
+  return all.filter((r) => {
+    const cid = normalizeOutboxConversationId(r.conversation_id);
+    if (cid === id) return true;
+    if (id != null && cid != null && Number(cid) === Number(id) && Number.isFinite(Number(id))) {
+      return true;
+    }
+    return false;
+  });
 }
 
 export async function outboxGetBlob(clientId) {
@@ -255,8 +301,8 @@ export function compareMessages(a, b) {
 
 export function isServerId(id) {
   if (id == null) return false;
-  if (typeof id === 'number') return Number.isFinite(id);
-  if (typeof id === 'string') return /^\d+$/.test(id);
+  if (typeof id === 'number') return Number.isFinite(id) && id > 0;
+  if (typeof id === 'string') return /^\d+$/.test(id) && Number(id) > 0;
   return false;
 }
 
@@ -314,6 +360,39 @@ export function mergeMessageMeta(prev, incoming) {
   };
 }
 
+const LOCKED_E2E_PLACEHOLDER = '🔒 پیام رمزنگاری‌شده';
+
+function isOpenE2eDisplay(m) {
+  return !!(
+    m &&
+    m._e2e_decrypted &&
+    !m._e2e_locked &&
+    !m._decryptFailed &&
+    m.body != null &&
+    m.body !== LOCKED_E2E_PLACEHOLDER
+  );
+}
+
+/** Prefer plaintext already decrypted in-session over a ciphertext/locked echo. */
+function mergeKeepingE2e(prev, next) {
+  if (!prev) return next;
+  if (!next) return prev;
+  if (isOpenE2eDisplay(prev) && !isOpenE2eDisplay(next)) {
+    return {
+      ...next,
+      body: prev.body,
+      _e2e_decrypted: true,
+      _e2e_locked: false,
+      _decryptFailed: false,
+      _e2e_ciphertext: next._e2e_ciphertext || prev._e2e_ciphertext || null,
+      _mediaKey: next._mediaKey || prev._mediaKey || null,
+      _mediaIv: next._mediaIv || prev._mediaIv || null,
+      e2e: next.e2e || prev.e2e || null,
+    };
+  }
+  return next;
+}
+
 /** Merge two message lists, dedupe by server id / client_id, keep sorted. */
 export function mergeMessageLists(existing, incoming) {
   const byServerId = new Map();
@@ -326,7 +405,7 @@ export function mergeMessageLists(existing, incoming) {
       const prev = byServerId.get(Number(m.id));
       const mediaTypes = new Set(['photo', 'video', 'voice', 'audio']);
       const merged = prev
-        ? {
+        ? mergeKeepingE2e(prev, {
           ...prev,
           ...m,
           // Keep optimistic client_id when the server echo omits it.
@@ -338,7 +417,7 @@ export function mergeMessageLists(existing, incoming) {
           // Monotonic receipts: never demote Read/Delivered on merge.
           delivered_at: m.delivered_at || prev.delivered_at || null,
           read_at: m.read_at || prev.read_at || null,
-        }
+        })
         : m;
       byServerId.set(Number(m.id), merged);
       if (merged.client_id) byClientId.set(merged.client_id, merged);
@@ -348,7 +427,7 @@ export function mergeMessageLists(existing, incoming) {
       const viaServer = byClientId.get(m.client_id);
       if (viaServer && isServerId(viaServer.id)) {
         // Fold any newer local-only fields onto the settled server row.
-        const folded = {
+        const folded = mergeKeepingE2e(viaServer, {
           ...viaServer,
           ...m,
           id: viaServer.id,
@@ -358,12 +437,12 @@ export function mergeMessageLists(existing, incoming) {
           meta: mergeMessageMeta(viaServer, m),
           delivered_at: m.delivered_at || viaServer.delivered_at || null,
           read_at: m.read_at || viaServer.read_at || null,
-        };
+        });
         byServerId.set(Number(viaServer.id), folded);
         byClientId.set(folded.client_id, folded);
         return;
       }
-      byClientId.set(m.client_id, m);
+      byClientId.set(m.client_id, mergeKeepingE2e(byClientId.get(m.client_id), m) || m);
       return;
     }
     orphans.push(m);

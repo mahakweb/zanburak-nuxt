@@ -33,6 +33,7 @@ import {
   saveConversationKeyAlternate,
   getConversationKey,
   reconcileConversationKeys,
+  isPersistedConversationId,
 } from './store';
 import { ensureDevice, loadIdentityKeys } from './device';
 import { b64Encode, b64Decode } from './bytes';
@@ -195,6 +196,7 @@ async function persistVaultKey(conversationId, kid, keyBytes) {
  * @returns {Promise<number>} number of keys newly stored
  */
 export async function pullAndConsumeKeyVault(conversationId = null, { force = false } = {}) {
+  if (conversationId != null && !isPersistedConversationId(conversationId)) return 0;
   const cacheKey = conversationId == null ? '__all__' : String(conversationId);
 
   const existing = pullInflight.get(cacheKey);
@@ -236,14 +238,6 @@ export async function pullAndConsumeKeyVault(conversationId = null, { force = fa
         const cid = entry.conversation_id ?? entry.conversationId;
         const kid = Number(entry.key_version ?? entry.kid);
         if (cid == null || !Number.isFinite(kid) || kid < 1) continue;
-
-        // Skip if we already hold this kid.
-        // eslint-disable-next-line no-await-in-loop
-        const have = await getConversationKey(cid, kid);
-        if (have?.keyB64) {
-          uploadedMem.add(uploadKey(cid, kid));
-          continue;
-        }
 
         let payload;
         try {

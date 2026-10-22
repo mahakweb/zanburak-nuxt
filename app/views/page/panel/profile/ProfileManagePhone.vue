@@ -149,12 +149,13 @@
 													</ListboxButton>
 
 													<transition leave-active-class="transition duration-100 ease-in"
+														@after-enter="focusCountrySearch"
 														leave-from-class="opacity-100" leave-to-class="opacity-0">
 														<ListboxOptions
 															class="absolute flex flex-col mt-3 p-2 max-h-52 w-80 bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-100 shadow-lg shadow-gray-300 dark:shadow-gray-700/60 ring-0 outline-none focus:outline-none sm:text-sm rounded-xl overflow-hidden">
 															<!-- Search input (fixed at top) -->
 															<div class="mb-3 z-10">
-																<input type="text" autofocus v-focus
+																<input ref="countrySearch" type="text"
 																	v-model="searchQuery" placeholder=""
 																	class="w-full rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-400" />
 															</div>
@@ -316,6 +317,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import ProfileMasterPage from "@/views/page/panel/profile/ProfileMasterPage.vue";
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
@@ -333,6 +335,7 @@ import {
 	OTP_LENGTH,
 } from "@/utils/otpInput";
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		ProfileMasterPage,
 		Listbox,
@@ -368,6 +371,9 @@ export default {
 		};
 	},
 	methods: {
+		focusCountrySearch() {
+			this.$nextTick(() => this.$refs.countrySearch?.focus());
+		},
 		validateMobileInput() {
 			this.mobile = this.mobile.replace(/\D/g, '');
 
@@ -559,8 +565,8 @@ export default {
 				this.mobile = ''
 				this.otp.fill("")
 
-				const currentUser = this.$store.state.auth.status.userInfo || {};
-				this.$store.commit('auth/setUserInfo', {
+				const currentUser = this.authStore.status.userInfo || {};
+				this.authStore.setUserInfo({
 					...currentUser,
 					mobile: response.data.new_mobile || currentUser.mobile,
 					mobile_verified_at: response.data.mobile_verified_at,

@@ -285,6 +285,7 @@
     </div>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 // import axios from "axios";
 import axiosInstance from "@/store/axiosInstance";
 import EditorComponent from "@/views/components/editor/EditorComponent.vue";
@@ -297,6 +298,7 @@ import moment from "moment";
 import "moment/locale/fa";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         EditorComponent,
         MarkdownRenderer,
@@ -314,7 +316,7 @@ export default {
         },
         perPage: {
             type: Number,
-            required: true,
+            required: false,
             default: 10,
         },
         hideTitle: {
@@ -343,10 +345,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     methods: {

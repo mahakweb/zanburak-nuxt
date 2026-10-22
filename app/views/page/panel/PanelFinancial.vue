@@ -798,6 +798,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import PanelMasterPage from "@/views/page/panel/layouts/PanelMasterPage.vue";
 import axiosInstance from "@/store/axiosInstance";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
@@ -811,6 +812,7 @@ import "vue3-toastify/dist/index.css";
 import { TabGroup, TabList, Tab, TabPanels, Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/vue";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		PanelMasterPage,
 		PaginationComponent,
@@ -1027,10 +1029,10 @@ export default {
 			return this.paymentMethodForRetry === 'bank' && this.retryPricing.hasFee;
 		},
 		loggedIn() {
-			return this.$store.state.auth.status.loggedIn;
+			return this.authStore.status.loggedIn;
 		},
 		currentUser() {
-			return this.$store.state.auth.status.userInfo;
+			return this.authStore.status.userInfo;
 		},
 		walletBalance() {
 			return Number(this.currentUser?.wallet_balance || 0);
@@ -1165,7 +1167,7 @@ export default {
 			const queryString = new URLSearchParams(query).toString();
 			const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
 
-			window.history.pushState(null, '', newUrl);
+			window.history.pushState({ ...window.history.state }, '', newUrl);
 
 			this.getPaymentsList();
 		},

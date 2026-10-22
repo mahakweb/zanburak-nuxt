@@ -1,6 +1,8 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "profile-page",
+  props: true,
 })
 </script>
 
@@ -319,6 +321,7 @@ import "moment/locale/fa";
 import { useSEO } from "@/composables/useSEO";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         MasterPage,
         ProfilePageLoading,
@@ -355,10 +358,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         authorDisplayName() {
             if (!this.user) return "";

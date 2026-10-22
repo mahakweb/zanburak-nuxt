@@ -2,6 +2,7 @@
 definePageMeta({
   name: "quiz-intro",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 

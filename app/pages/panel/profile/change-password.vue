@@ -228,6 +228,7 @@ import axiosInstance from "@/store/axiosInstance";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
+import { useAuthStore } from "@/stores/auth";
 
 export default {
 	components: {
@@ -236,6 +237,7 @@ export default {
 	},
 	data() {
 		return {
+			authStore: useAuthStore(),
 			authPasswordVisibility: ref(false),
 			authNewPasswordVisibility: ref(false),
 			password: '',
@@ -297,7 +299,7 @@ export default {
 		},
 		forgetPassword() {
 			this.forgetPasswordLoading = true
-			this.$store.dispatch("auth/logout").then(() => {
+			this.authStore.logout().then(() => {
 				this.forgetPasswordLoading = false
 				this.closeForgetPasswordModal();
 				this.$router.push({ name: "login", query: { step: "forgot_start" } });

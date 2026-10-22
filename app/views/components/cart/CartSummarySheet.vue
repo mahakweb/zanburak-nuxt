@@ -1,6 +1,7 @@
 <script setup>
+import { useCartStore } from '@/stores/cart'
+const cartStore = useCartStore()
 import { computed, ref } from "vue";
-import { useStore } from "@/composables/useStore";
 import { useI18n } from "vue-i18n";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
@@ -14,7 +15,6 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue"]);
 
-const store = useStore();
 const { t } = useI18n();
 
 const isOpen = computed({
@@ -22,10 +22,10 @@ const isOpen = computed({
     set: (value) => emit("update:modelValue", value),
 });
 
-const cartItems = computed(() => store.state.cart.cartItems);
-const totalCartPrice = computed(() => store.getters["cart/totalCartPrice"]);
-const totalDiscount = computed(() => store.getters["cart/totalDiscount"]);
-const payableAmount = computed(() => Math.max(0, Number(store.getters["cart/finalPrice"] ?? totalCartPrice.value - totalDiscount.value)));
+const cartItems = computed(() => cartStore.cartItems);
+const totalCartPrice = computed(() => cartStore.totalCartPrice);
+const totalDiscount = computed(() => cartStore.totalDiscount);
+const payableAmount = computed(() => Math.max(0, Number(cartStore.finalPrice ?? totalCartPrice.value - totalDiscount.value)));
 
 const removeFromCartLoading = ref({});
 
@@ -99,7 +99,7 @@ async function removeFromCart(idForDelete, index) {
     removeFromCartLoading.value[index] = true;
 
     try {
-        await store.dispatch("cart/removeFromCart", idForDelete);
+        await cartStore.removeFromCart(idForDelete);
     } catch (error) {
         console.error("Error removing from cart:", error);
     } finally {

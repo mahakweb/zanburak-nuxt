@@ -177,8 +177,8 @@
 .tg-menu {
   /* Hug content — avoid fixed wide rails like w-56 */
   width: max-content;
-  min-width: 0;
-  max-width: min(280px, calc(100vw - 1.5rem));
+  min-width: 13rem;
+  max-width: min(312px, calc(100vw - 1.5rem));
   padding: 5px;
   border-radius: 14px;
   background: var(--tg-menu-bg);
@@ -197,7 +197,7 @@
 .tg-menu--context {
   width: max-content;
   min-width: 0;
-  max-width: min(300px, calc(100vw - 1.5rem));
+  max-width: min(332px, calc(100vw - 1.5rem));
   padding: 4px;
   border-radius: 14px;
   animation: tg-menu-pop var(--tg-dur-fast) var(--tg-ease-out) both;
@@ -205,10 +205,10 @@
 
 @media (min-width: 640px) and (pointer: fine) {
   .tg-menu {
-    max-width: min(280px, calc(100vw - 24px));
+    max-width: min(312px, calc(100vw - 24px));
   }
   .tg-menu--context {
-    max-width: min(300px, calc(100vw - 24px));
+    max-width: min(332px, calc(100vw - 24px));
   }
 }
 
@@ -237,7 +237,7 @@
   letter-spacing: -0.015em;
   color: var(--tg-text);
   text-align: start;
-  white-space: nowrap;
+  white-space: normal;
   transition: background-color var(--tg-dur-fast, 140ms) ease, transform var(--tg-dur-instant, 100ms) ease;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -334,8 +334,9 @@
 .tg-menu-item-label {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
   pointer-events: none;
 }
 
@@ -1359,4 +1360,67 @@ html[dir="rtl"] .msg-fwd-icon,
 }
 [dir='rtl'] .tg-panel-slide-leave-to {
   transform: translateX(8%);
+}
+
+/* DaisyUI toggle classes are not loaded. Restyle leftover messenger checkboxes
+   so light and dark themes share the same blue switch. */
+.messenger-shell input[type="checkbox"].toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 36px;
+  height: 22px;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #d1d5db;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  color-scheme: light;
+  transition: background-color 0.2s ease;
+}
+.messenger-shell input[type="checkbox"].toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  inset-inline-start: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease;
+}
+.messenger-shell input[type="checkbox"].toggle:checked {
+  background: #3390ec;
+}
+.messenger-shell input[type="checkbox"].toggle:checked::after {
+  transform: translateX(14px);
+}
+[dir="rtl"] .messenger-shell input[type="checkbox"].toggle:checked::after {
+  transform: translateX(-14px);
+}
+.dark .messenger-shell input[type="checkbox"].toggle {
+  background: #3d4d5c;
+  color-scheme: dark;
+}
+.dark .messenger-shell input[type="checkbox"].toggle:checked {
+  background: #3390ec;
+}
+.messenger-shell input[type="checkbox"].toggle:hover {
+  filter: brightness(0.97);
+}
+.messenger-shell input[type="checkbox"].toggle:focus-visible {
+  outline: 2px solid #3390ec;
+  outline-offset: 2px;
+}
+.messenger-shell input[type="checkbox"].toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.messenger-shell select.tg-select {
+  color-scheme: light;
+}
+.dark .messenger-shell select.tg-select {
+  color-scheme: dark;
 }

@@ -286,6 +286,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/discuss/layouts/MasterPage.vue";
 import TagTabContent from "@/views/components/tag/TagTabContent.vue";
 import TagFilterDropdown from "@/views/components/tag/TagFilterDropdown.vue";
@@ -314,6 +315,7 @@ function emptyTabState() {
 }
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		MasterPage,
 		TagTabContent,
@@ -347,7 +349,7 @@ export default {
 	},
 	computed: {
 		isLoggedin() {
-			return this.$store.state.auth.status.loggedIn;
+			return this.authStore.status.loggedIn;
 		},
 		activeType() {
 			return this.tabs[this.selectedTabIndex]?.slug || "questions";

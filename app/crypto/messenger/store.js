@@ -10,7 +10,7 @@
  */
 
 const DB_NAME = 'zanburak_messenger_e2e';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 const STORE_DEVICE = 'device';       // single row, id = 'me' — Device Keys
 const STORE_USER_IDENTITY = 'userIdentity'; // single row, id = 'me' — User Identity Key
@@ -22,16 +22,22 @@ const STORE_KEY_HISTORY = 'keyHistory'; // retained old conversation kids for hi
 
 let dbPromise = null;
 
+function ensureIndex(store, name, keyPath) {
+  if (!store.indexNames.contains(name)) {
+    store.createIndex(name, keyPath, { unique: false });
+  }
+}
+
 function openDb() {
+  if (typeof indexedDB === 'undefined') {
+    return Promise.reject(new Error('IndexedDB unavailable'));
+  }
   if (dbPromise) return dbPromise;
   dbPromise = new Promise((resolve, reject) => {
-    if (typeof indexedDB === 'undefined') {
-      reject(new Error('IndexedDB unavailable'));
-      return;
-    }
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = (ev) => {
       const db = req.result;
+      const tx = req.transaction;
       if (!db.objectStoreNames.contains(STORE_DEVICE)) {
         db.createObjectStore(STORE_DEVICE, { keyPath: 'id' });
       }
@@ -42,9 +48,9 @@ function openDb() {
         db.createObjectStore(STORE_PREKEYS, { keyPath: 'keyId' });
       }
       if (!db.objectStoreNames.contains(STORE_CONV_KEYS)) {
-        const store = db.createObjectStore(STORE_CONV_KEYS, { keyPath: 'ckey' });
-        store.createIndex('by_conversation', 'conversationId', { unique: false });
+        db.createObjectStore(STORE_CONV_KEYS, { keyPath: 'ckey' });
       }
+      ensureIndex(tx.objectStore(STORE_CONV_KEYS), 'by_conversation', 'conversationId');
       if (!db.objectStoreNames.contains(STORE_DISTRIBUTED)) {
         db.createObjectStore(STORE_DISTRIBUTED, { keyPath: 'dkey' });
       }
@@ -52,15 +58,20 @@ function openDb() {
         db.createObjectStore(STORE_SEEN_PACKAGES, { keyPath: 'id' });
       }
       if (!db.objectStoreNames.contains(STORE_KEY_HISTORY)) {
-        const hist = db.createObjectStore(STORE_KEY_HISTORY, { keyPath: 'ckey' });
-        hist.createIndex('by_conversation', 'conversationId', { unique: false });
+        db.createObjectStore(STORE_KEY_HISTORY, { keyPath: 'ckey' });
       }
-      // v1 → v2: userIdentity store is created above when missing.
+      if (db.objectStoreNames.contains(STORE_KEY_HISTORY)) {
+        ensureIndex(tx.objectStore(STORE_KEY_HISTORY), 'by_conversation', 'conversationId');
+      }
       void ev;
     };
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error || new Error('IndexedDB open failed'));
+    req.onerror = () => {
+      dbPromise = null;
+      reject(req.error || new Error('IndexedDB open failed'));
+    };
   });
+  dbPromise.catch(() => { dbPromise = null; });
   return dbPromise;
 }
 
@@ -192,6 +203,13 @@ function convKeyId(conversationId, kid) {
   return `${String(conversationId)}:${Number(kid)}`;
 }
 
+export function isPersistedConversationId(conversationId) {
+  if (typeof conversationId === 'number') {
+    return Number.isSafeInteger(conversationId) && conversationId > 0;
+  }
+  return typeof conversationId === 'string' && /^[1-9]\d*$/.test(conversationId);
+}
+
 export async function saveConversationKey(conversationId, kid, keyB64, { overwrite = false } = {}) {
   const existing = await getConversationKey(conversationId, kid);
   if (existing?.keyB64 && !overwrite) {
@@ -243,22 +261,62 @@ export async function saveConversationKeyAlternate(conversationId, kid, keyB64) 
 export async function getConversationKey(conversationId, kid) {
   try {
     const db = await openDb();
-    const tx = db.transaction(STORE_CONV_KEYS, 'readonly');
-    return (await idbReq(tx.objectStore(STORE_CONV_KEYS).get(convKeyId(conversationId, kid))))
-      || (await idbReq(tx.objectStore(STORE_CONV_KEYS).get(convKeyId(String(conversationId), Number(kid)))))
-      || null;
+    const names = [STORE_CONV_KEYS, STORE_KEY_HISTORY].filter((s) => db.objectStoreNames.contains(s));
+    if (!names.length) return null;
+    const tx = db.transaction(names, 'readonly');
+    const keys = [
+      convKeyId(conversationId, kid),
+      convKeyId(String(conversationId), Number(kid)),
+    ];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const name of names) {
+      const store = tx.objectStore(name);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const key of keys) {
+        // eslint-disable-next-line no-await-in-loop
+        const row = await idbReq(store.get(key));
+        if (row?.keyB64) return row;
+      }
+    }
+    return null;
   } catch (e) {
     return null;
   }
 }
 
-/** All key rows for a conversation (primary + alternates), newest kid first. */
+function rowMatchesConversation(row, conversationId) {
+  if (!row || row.conversationId == null) return false;
+  const idStr = String(conversationId);
+  if (String(row.conversationId) === idStr) return true;
+  const n = Number(conversationId);
+  const rn = Number(row.conversationId);
+  return Number.isFinite(n) && Number.isFinite(rn) && n === rn;
+}
+
+/** All key rows for a conversation (primary + alternates + archived kids). */
 export async function listConversationKeys(conversationId) {
   try {
     const db = await openDb();
-    const tx = db.transaction(STORE_CONV_KEYS, 'readonly');
-    const idx = tx.objectStore(STORE_CONV_KEYS).index('by_conversation');
-    const rows = (await idbReq(idx.getAll(String(conversationId)))) || [];
+    const names = [STORE_CONV_KEYS, STORE_KEY_HISTORY].filter((s) => db.objectStoreNames.contains(s));
+    if (!names.length) return [];
+    const tx = db.transaction(names, 'readonly');
+    const rows = [];
+    const seen = new Set();
+    const push = (row) => {
+      if (!row?.keyB64 || !rowMatchesConversation(row, conversationId)) return;
+      const k = row.ckey || `${row.conversationId}:${row.kid}:${row.keyB64.slice(0, 16)}`;
+      if (seen.has(k) || seen.has(row.keyB64)) return;
+      seen.add(k);
+      seen.add(row.keyB64);
+      rows.push(row);
+    };
+    // eslint-disable-next-line no-restricted-syntax
+    for (const name of names) {
+      const store = tx.objectStore(name);
+      // Full scan is cheap (one key row per chat) and survives a missing index.
+      // eslint-disable-next-line no-await-in-loop
+      ((await idbReq(store.getAll())) || []).forEach(push);
+    }
     return rows.sort((a, b) => Number(b.kid) - Number(a.kid));
   } catch (e) {
     return [];
@@ -271,6 +329,10 @@ export async function listConversationKeys(conversationId) {
  */
 export async function getConversationKeyCandidates(conversationId, kid) {
   const rows = await listConversationKeys(conversationId);
+  const direct = await getConversationKey(conversationId, kid);
+  if (direct?.keyB64 && !rows.some((r) => r.keyB64 === direct.keyB64)) {
+    rows.unshift(direct);
+  }
   if (!rows.length) return [];
   const want = Number(kid);
   const matched = rows.filter((r) => Number(r.kid) === want && r.keyB64);
@@ -338,7 +400,7 @@ export async function getLatestConversationKey(conversationId) {
 
 /**
  * Conversation ids for which this device already holds at least one key.
- * Used so a sibling can redistribute history keys when Vuex list is empty/stale.
+ * Used so a sibling can redistribute history keys when the local list is empty/stale.
  */
 export async function listConversationIdsWithLocalKeys() {
   try {

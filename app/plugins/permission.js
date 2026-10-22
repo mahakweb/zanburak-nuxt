@@ -1,12 +1,10 @@
 import { hasAnyPermission, hasAllPermissions, getContentScope, hasContentScopeAny, hasContentScopeOwn, hasContentScope } from '@/utils/acl';
 import { canAccessRoute } from '@/utils/routePermissions';
-import { useStore } from '@/composables/useStore';
+import { useAuthStore } from '@/stores/auth';
 
 export default defineNuxtPlugin((nuxtApp) => {
-    // Capture store in plugin setup (Nuxt/Pinia context). Do not call useStore()
-    // later from $can / templates outside setup — that triggers PINIA_R1004 on SSR.
-    const store = useStore();
-    const getUser = () => store.state.auth.status.userInfo;
+    const auth = useAuthStore();
+    const getUser = () => auth.status.userInfo;
 
     nuxtApp.vueApp.config.globalProperties.$can = (required) => hasAnyPermission(getUser(), required);
     nuxtApp.vueApp.config.globalProperties.$canAll = (required) => hasAllPermissions(getUser(), required);

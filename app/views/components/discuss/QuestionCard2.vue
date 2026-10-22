@@ -27,14 +27,14 @@
 
 
     <article
-        class="group relative flex overflow-hidden rounded-2xl bg-white dark:bg-gray-900 ring-1 ring-transparent transition hover:ring-yellow-400/50"
+        class="group relative flex overflow-hidden rounded-2xl bg-white dark:bg-gray-900 ring-1 ring-transparent transition"
     >
         <router-link
             :to="{ name: 'question-show', params: { questionSlug: localQuestion.slug } }"
-            class="flex w-16 shrink-0 flex-col items-center justify-center gap-2 bg-gray-50 px-2 py-4 dark:bg-gray-800/80 sm:w-[4.75rem]"
+            class="flex w-16 shrink-0 flex-col items-center justify-center gap-2 bg-gray-50 px-2 py-4 dark:bg-gray-950/80 sm:w-[4.75rem]"
         >
             <span
-                class="flex h-11 w-11 flex-col items-center justify-center rounded-xl font-anjoman text-lg font-black leading-none sm:h-12 sm:w-12"
+                class="flex h-9 w-9 flex-col items-center justify-center rounded-xl font-anjoman text-base font-black leading-none sm:h-10 sm:w-10"
                 :class="localQuestion.best_answer
                     ? 'bg-emerald-500 text-white'
                     : localQuestion.total_answers > 0
@@ -315,6 +315,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import AddTagSheet from "@/views/components/tag/AddTagSheet.vue";
 import TagChip from "@/views/components/tag/TagChip.vue";
@@ -328,6 +329,7 @@ import moment from 'moment';
 import 'moment/locale/fa';
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         SeoImage,
         BottomSheetDrawer,
@@ -353,10 +355,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         }
     },
     methods: {

@@ -3,7 +3,7 @@
  * This composable integrates with the backend SeoController
  */
 
-import { useHead } from '@vueuse/head'
+import { useHead } from '#imports'
 
 const API_BASE_URL = process.env.VUE_APP_API_URL || '/api'
 
@@ -148,4 +148,3 @@ export async function getSeoHealthCheck() {
     return null
   }
 }
-

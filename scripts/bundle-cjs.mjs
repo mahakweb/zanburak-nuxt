@@ -12,6 +12,8 @@ const outDir = join(root, 'app/lib/cjs')
 mkdirSync(outDir, { recursive: true })
 
 const packages = [
+  // Browser build is UMD/CommonJS; Vite 8 serves it without an ESM default.
+  { name: 'pusher-js', entry: 'node_modules/pusher-js/dist/web/pusher.js' },
   { name: 'nprogress', entry: 'node_modules/nprogress/nprogress.js' },
   { name: 'vue3-smooth-scroll', entry: 'node_modules/vue3-smooth-scroll/dist/vue-smooth-scroll.min.js' },
   { name: 'highlight', entry: 'node_modules/highlight.js/lib/common.js' },

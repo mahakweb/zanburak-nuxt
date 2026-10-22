@@ -215,6 +215,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import ProfileMasterPage from "@/views/page/panel/profile/ProfileMasterPage.vue";
 import { ref } from "vue";
 import axiosInstance from "@/store/axiosInstance";
@@ -223,6 +224,7 @@ import "vue3-toastify/dist/index.css";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		ProfileMasterPage,
 		BottomSheetDrawer,
@@ -290,7 +292,7 @@ export default {
 		},
 		forgetPassword() {
 			this.forgetPasswordLoading = true
-			this.$store.dispatch("auth/logout").then(() => {
+			this.authStore.logout().then(() => {
 				this.forgetPasswordLoading = false
 				this.closeForgetPasswordModal();
 				this.$router.push({ name: "login", query: { step: "forgot_start" } });

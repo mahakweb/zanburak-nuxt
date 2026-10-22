@@ -170,7 +170,11 @@
 </template>
 
 <script>
-	import DarkMode from "@/views/components/DarkMode.vue";
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+import { useNotificationStore } from '@/stores/notification'
+import { useMessengerStore } from '@/stores/messenger'
+import DarkMode from "@/views/components/DarkMode.vue";
 	import ChangeLang from "@/views/components/ChangeLang.vue";
 	import SidebarMenu from "@/views/components/panel/SidebarMenu.vue";
 	import NotificationBell from "@/views/components/notification/NotificationBell.vue";
@@ -181,27 +185,12 @@
 	import moment from "moment-jalaali";
 	import { Popover, PopoverButton, PopoverPanel, PopoverOverlay } from "@headlessui/vue";
 	export default {
-		components: {
-			DarkMode,
-			ChangeLang,
-			SidebarMenu,
-			NotificationBell,
-			BottomSheetDrawer,
-			PanelAccountMenuContent,
-			SeoImage,
-			Popover,
-			PopoverButton,
-			PopoverPanel,
-			PopoverOverlay,
-		},
 		setup() {
 			moment().format("jYYYY/jM/jD");
 			const isRtl = computed(() => (import.meta.client && localStorage.getItem("direction") === "rtl"));
 			if (isRtl.value) moment.loadPersian();
 
-			return {
-				moment
-			};
+			return {moment, authStore: useAuthStore(), cartStore: useCartStore(), notificationStore: useNotificationStore(), messengerStore: useMessengerStore()};
 		},
 		data() {
 			return {
@@ -210,21 +199,21 @@
 		},
 		computed: {
 			loggedIn() {
-				return this.$store.state.auth.status.loggedIn;
+				return this.authStore.status.loggedIn;
 			},
 			currentUser() {
-				return this.$store.state.auth.status.userInfo;
+				return this.authStore.status.userInfo;
 			},
 			cartItems() {
-				return this.$store.state.cart.cartItems;
+				return this.cartStore.cartItems;
 			},
 			messengerUnread() {
-				return this.$store.getters["messenger/unreadCount"] || 0;
+				return this.messengerStore.unreadCount || 0;
 			}
 		},
 		mounted() {
-			this.$store.dispatch("notification/initForUser");
-			this.$store.dispatch("cart/loadCartItems");
+			this.notificationStore.initForUser();
+			this.cartStore.loadCartItems();
 		},
 		components: {
 			DarkMode,
@@ -233,6 +222,7 @@
 			NotificationBell,
 			BottomSheetDrawer,
 			PanelAccountMenuContent,
+			SeoImage,
 			Popover,
 			PopoverButton,
 			PopoverPanel,

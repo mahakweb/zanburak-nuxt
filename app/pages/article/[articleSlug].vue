@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 import { articleService } from '@/services/article.service'
 
 definePageMeta({
@@ -416,6 +417,7 @@ function applyArticleBootstrap(vm, payload) {
 }
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { MasterPage, MarkdownRenderer, CommentsList, ArticleShowSidebar, ArticleShowLoading, ArticleRating, BottomSheetDrawer, TagChip, SeoImage },
     data() {
         return {
@@ -451,10 +453,10 @@ export default {
             return this.$route.params.articleSlug;
         },
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         shareUrl() {
             if (typeof window === "undefined") return "";

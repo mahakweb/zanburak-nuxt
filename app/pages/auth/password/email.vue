@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "password-request",
 })
@@ -426,8 +427,11 @@ import config from '@/store/config';
 import VueRecaptcha from 'vue3-recaptcha2';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-document.documentElement.dir = localStorage.getItem("direction");
+if (import.meta.client) {
+	document.documentElement.dir = localStorage.getItem("direction") || "rtl";
+}
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		DarkMode,
 		LoadingComponent,
@@ -449,7 +453,7 @@ export default {
 	},
 	computed: {
 		loggedIn() {
-			return this.$store.state.auth.status.loggedIn;
+			return this.authStore.status.loggedIn;
 		},
 	},
 	created() {

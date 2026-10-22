@@ -507,6 +507,7 @@
     </MasterPage>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/discuss/layouts/MasterPage.vue";
 // import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import SideBar from "@/views/page/discuss/layouts/SideBar.vue";
@@ -521,6 +522,7 @@ import { ref } from "vue";
 import debounce from "lodash/debounce";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         MasterPage,
         // LoadingComponent,
@@ -553,10 +555,10 @@ export default {
 
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         metaKeywordsCount() {
             if (!this.meta_keywords) return 0;

@@ -299,10 +299,12 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import axiosInstance from "@/store/axiosInstance";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { SeoImage },
     props: {
         article: { type: Object, required: true },
@@ -321,7 +323,7 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         authorName() {
             const u = this.localArticle.user;

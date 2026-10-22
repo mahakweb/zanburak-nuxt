@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "admin-payments-list",
   middleware: ['auth'],
@@ -775,6 +776,7 @@ import { hasAnyPermission } from "@/utils/acl";
 import debounce from "lodash/debounce";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         AdminMasterPage,
         AdminBulkCheckbox,
@@ -852,10 +854,10 @@ export default {
             return this.selectedIds.length > 0 && !this.isAllSelected
         },
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         canSettle() {
             return hasAnyPermission(this.currentUser, ['settlements.change_status']);

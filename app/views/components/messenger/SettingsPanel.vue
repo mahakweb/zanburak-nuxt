@@ -232,7 +232,9 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useAuthStore } from '@/stores/auth'
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import BottomSheetDrawer from '@/views/components/common/BottomSheetDrawer.vue';
 import { getMyProfile, updateMyProfile, uploadProfilePic } from '@/services/messenger';
 import { toSingleLine, onHorizontalWheel } from './textHelpers';
@@ -241,6 +243,7 @@ import { avatarInitials } from './avatarInitials';
 import PrivacyRulePanel from './PrivacyRulePanel.vue';
 
 export default {
+		setup() { return { authStore: useAuthStore(), messengerStore: useMessengerStore() } },
   components: { BottomSheetDrawer, PrivacyRulePanel },
   props: {
     open: { type: Boolean, default: false },
@@ -275,8 +278,8 @@ export default {
   computed: {
     sheetPanelClass() { return MESSENGER_SHEET_PANEL; },
     sheetBackdropClass() { return MESSENGER_SHEET_BACKDROP; },
-    ...mapState('messenger', ['settings']),
-    ...mapState('auth', { userInfo: (s) => s.status.userInfo }),
+    ...mapState(useMessengerStore, ['settings']),
+    ...mapState(useAuthStore, { userInfo: (s) => s.status.userInfo }),
     avatar() {
       return this.userInfo?.profile_pic || null;
     },
@@ -330,7 +333,7 @@ export default {
         this.view = 'main';
         this.privacyKey = null;
         this.loadProfile();
-        this.$store.dispatch('messenger/fetchContacts').catch(() => {});
+        this.messengerStore.fetchContacts().catch(() => {});
       }
     },
   },
@@ -380,7 +383,7 @@ export default {
       this.savingProfile = true;
       try {
         await updateMyProfile({ ...this.form, bio: toSingleLine(this.form.bio) });
-        await this.$store.dispatch('auth/getUser');
+        await this.authStore.getUser();
       } catch (e) { /* noop */ } finally {
         this.savingProfile = false;
       }
@@ -391,7 +394,7 @@ export default {
       this.uploading = true;
       try {
         await uploadProfilePic(file);
-        await this.$store.dispatch('auth/getUser');
+        await this.authStore.getUser();
       } catch (err) { /* noop */ } finally {
         this.uploading = false;
         e.target.value = '';
@@ -410,7 +413,7 @@ export default {
       }
       localStorage.setItem('theme', value);
       document.documentElement.dispatchEvent(new Event('onChangeTheme'));
-      this.$store.dispatch('messenger/saveSettings', { theme: value });
+      this.messengerStore.saveSettings({ theme: value });
     },
     applyLocale(lang) {
       this.currentLocale = lang.locale;
@@ -420,11 +423,11 @@ export default {
       localStorage.setItem('direction', lang.dir);
       localStorage.setItem('locale', lang.locale);
       document.documentElement.dispatchEvent(new Event('onChangeLanguage'));
-      this.$store.commit('messenger/APPLY_FONT_DIRECTION', lang.dir);
-      this.$store.dispatch('messenger/saveSettings', { locale: lang.locale });
+      this.messengerStore.applyFontDirection(lang.dir);
+      this.messengerStore.saveSettings({ locale: lang.locale });
     },
     toggleSetting(key, value) {
-      this.$store.dispatch('messenger/saveSettings', { [key]: value });
+      this.messengerStore.saveSettings({ [key]: value });
     },
   },
 };

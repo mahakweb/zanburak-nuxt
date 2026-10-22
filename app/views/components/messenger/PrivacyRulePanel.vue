@@ -112,7 +112,8 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import MessengerAvatar from './MessengerAvatar.vue';
 
 const HINT_KEYS = {
@@ -124,6 +125,7 @@ const HINT_KEYS = {
 };
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   name: 'PrivacyRulePanel',
   components: { MessengerAvatar },
   props: {
@@ -142,7 +144,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['settings', 'contacts']),
+    ...mapState(useMessengerStore, ['settings', 'contacts']),
     slice() {
       return this.settings?.privacy?.[this.settingKey] || { rule: 'everybody', always_allow: [], never_allow: [] };
     },
@@ -199,7 +201,7 @@ export default {
       return [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || `#${u.id}`;
     },
     async setRule(rule) {
-      await this.$store.dispatch('messenger/savePrivacySetting', {
+      await this.messengerStore.savePrivacySetting({
         key: this.settingKey,
         rule,
         always_allow: this.alwaysAllow,
@@ -207,7 +209,7 @@ export default {
       });
     },
     async persist(always, never) {
-      await this.$store.dispatch('messenger/savePrivacySetting', {
+      await this.messengerStore.savePrivacySetting({
         key: this.settingKey,
         rule: this.currentRule,
         always_allow: always,

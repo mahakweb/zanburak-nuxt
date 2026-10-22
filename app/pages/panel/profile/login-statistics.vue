@@ -65,7 +65,10 @@ definePageMeta({
 				</span>
 				<h2 class="text-gray-800 dark:text-white font-bold text-base md:text-lg">{{ $t('profile.nav.loginStatistics') }}</h2>
 			</div>
-			<div>
+			<div v-if="loadError" class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300">
+				امکان بارگذاری آمار ورود وجود نداشت. لطفاً صفحه را دوباره بارگذاری کنید.
+			</div>
+			<div v-else>
 				<div class="flex flex-col w-full">
 					<div class="divider divider-start text-xs font-semibold text-amber-400">{{ $t('profile.login.thisDevice') }}</div>
 				</div>
@@ -105,7 +108,7 @@ definePageMeta({
 							</div>
 						</div>
 					</div>
-					<div v-if="access_tokens.length - 1 > 0" class="flex flex-col justify-between p-2 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+					<div v-if="otherSessions.length > 0" class="flex flex-col justify-between p-2 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
 						<div class="">
 							<button @click.prevent="terminateAllSessions" class="flex items-center w-full text-start justify-center text-rose-600 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-2 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-xs px-2 py-2.5">
 								<svg v-if="deleteAllLoading" class="w-6 h-6" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="25 25 50 50">
@@ -130,12 +133,12 @@ definePageMeta({
 				</div>
 
 				<!-- other session -->
-				<div v-if="access_tokens.length - 1 > 0" class="">
+				<div v-if="otherSessions.length > 0" class="">
 					<div class="flex flex-col w-full">
 						<div class="divider divider-start text-xs font-semibold text-amber-400">{{ $t('profile.login.activeSessions') }}</div>
 					</div>
 					<div class="grid gap-3 md:grid-cols-2 lg:gap-4">
-						<div v-for="(access_token, index) in access_tokens" :key="index" v-show="current_token.id !== access_token.id" class="">
+						<div v-for="(access_token, index) in otherSessions" :key="access_token.id" class="">
 							<div class="flex flex-col bg-white rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm dark:bg-gray-900">
 								<div class="flex flex-col md:flex-row p-4 md:p-5">
 									<div class="me-2 mb-3 md:mb-0">
@@ -232,8 +235,14 @@ definePageMeta({
 				deleteLoading: ref([]),
 				deleteAllLoading: ref(false),
 				access_tokens: ref(null),
-				current_token: ref(null)
+				current_token: ref(null),
+				loadError: false,
 			};
+		},
+		computed: {
+			otherSessions() {
+				return (this.access_tokens || []).filter((token) => token.id !== this.current_token?.id);
+			},
 		},
 		setup() {
 			moment().format("jYYYY/jM/jD");
@@ -410,6 +419,11 @@ definePageMeta({
 						device: info
 					};
 				});
+			}).catch((error) => {
+				this.loadError = true;
+				console.error("Error loading login statistics:", error);
+				toast.error("بارگذاری آمار ورود ناموفق بود.");
+			}).finally(() => {
 				this.loading = false;
 			});
 		}

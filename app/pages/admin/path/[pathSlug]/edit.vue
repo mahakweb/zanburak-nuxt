@@ -2,6 +2,7 @@
 definePageMeta({
   name: "admin-path-edit",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 

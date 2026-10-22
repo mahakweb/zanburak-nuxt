@@ -572,6 +572,8 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import MessengerAvatar from './MessengerAvatar.vue';
 import LocationMapPreview from './LocationMapPreview.vue';
 import MediaMessageCard from './MediaMessageCard.vue';
@@ -587,7 +589,6 @@ import { openLocationInMaps } from './geolocation';
 import { isMediaType } from './mediaHelpers';
 import { splitHighlight } from './textHelpers';
 import { isAutoDownloadEnabled, isAutoPlayEnabled } from './autoDownloadSettings';
-import { mapState, mapGetters } from "@/composables/useStore";
 import { peerDisplayName } from '@/utils/messengerPeerName';
 import {
   LONG_PRESS_MS,
@@ -684,8 +685,8 @@ export default {
     }
   },
   computed: {
-    ...mapState('messenger', ['settings']),
-    ...mapGetters('messenger', ['contactNameByUserId']),
+    ...mapState(useMessengerStore, ['settings']),
+    ...mapState(useMessengerStore, ['contactNameByUserId']),
     /** Pending longer than ~20s unlocks retry menu (still shows clock until failed). */
     stalePending() {
       if (!this.message?.pending && this.message?.send_status !== 'queued' && this.message?.send_status !== 'sending') {

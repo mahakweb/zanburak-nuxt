@@ -356,10 +356,9 @@ export async function enableIdentityRecovery(passphrase) {
   return true;
 }
 
-export async function restoreIdentityFromRecovery(passphrase) {
+export async function restoreIdentityFromRecovery(passphrase, identityArg = null) {
   if (!passphrase) throw new Error('recovery-required');
-  const res = await getUserIdentity();
-  const identity = res?.identity;
+  const identity = identityArg || unwrapIdentityPayload(await getUserIdentity());
   if (!identity?.encrypted_backup || !identity?.backup_salt) {
     throw new Error('recovery-missing');
   }
@@ -497,15 +496,12 @@ async function runSeamlessBackup() {
     mds = b64Encode(randomBytes(32));
   }
   try {
-    if (!identity?.hasBackup) {
-      await enableIdentityRecovery(mds);
-    }
-    await uploadSeamlessUnlock(mds).catch((e) => {
-      console.warn('[e2e] seamless unlock upload failed', e?.message || e);
-    });
+    // Always rewrite the backup with THIS mds. A leftover user-typed recovery
+    // phrase must not stay as the only unwrap secret (new device would stay locked).
+    await enableIdentityRecovery(mds);
+    await uploadSeamlessUnlock(mds);
     await patchUserIdentityRecord({ seamlessMds: mds, hasBackup: true });
     writeLocalMds(mds);
-    // Don't nag the user with setup/restore modals — this path is automatic.
     try { localStorage.setItem(SETUP_DISMISS_KEY, '1'); } catch { /* ignore */ }
     try { localStorage.setItem(RESTORE_DISMISS_KEY, '1'); } catch { /* ignore */ }
     return true;
@@ -515,7 +511,11 @@ async function runSeamlessBackup() {
   }
 }
 
-export function ensureSeamlessMultiDeviceBackup() {
+export function ensureSeamlessMultiDeviceBackup({ force = false } = {}) {
+  if (force) {
+    seamlessBackupDone = false;
+    seamlessBackupRetryAt = 0;
+  }
   if (seamlessBackupDone) return Promise.resolve(true);
   if (seamlessBackupInflight) return seamlessBackupInflight;
   if (Date.now() < seamlessBackupRetryAt) return Promise.resolve(false);
@@ -531,33 +531,44 @@ export function ensureSeamlessMultiDeviceBackup() {
   return seamlessBackupInflight;
 }
 
+function unwrapIdentityPayload(res) {
+  if (!res || typeof res !== 'object') return null;
+  const nested = res.identity || res.data?.identity || null;
+  if (nested && typeof nested === 'object') return nested;
+  if (res.signing_public || res.encrypted_backup || res.seamless_unlock) return res;
+  if (res.data && typeof res.data === 'object' && (res.data.signing_public || res.data.encrypted_backup)) {
+    return res.data;
+  }
+  return null;
+}
+
 async function loadMdsFromServer() {
   try {
-    const res = await getUserIdentity();
-    const mds = res?.identity?.seamless_unlock;
+    const identity = unwrapIdentityPayload(await getUserIdentity());
+    const mds = identity?.seamless_unlock;
     if (mds && String(mds).length >= 16) return String(mds);
   } catch { /* ignore */ }
   return null;
 }
 
 /**
- * New device: restore User Identity without a typed passphrase when possible.
- * Order: local/credential MDS → authenticated server unlock → (caller also tries sibling).
+ * New device / cleared cache: restore User Identity from owner-only server MDS.
+ * After this, conversation keys come from the identity vault — no old device needed.
  */
 export async function trySeamlessIdentityRestore() {
   if (await hasLocalUserIdentityPrivates()) return true;
-  const status = await getIdentityRecoveryStatus().catch(() => ({ hasBackup: false, pending: true }));
-  if (!status.pending) return true;
-  if (!status.hasBackup) return false;
-
-  const mds = (await loadMdsCredential()) || (await loadMdsFromServer());
+  const res = await getUserIdentity().catch(() => null);
+  const identity = unwrapIdentityPayload(res);
+  if (!identity?.encrypted_backup || !identity?.backup_salt) {
+    return false;
+  }
+  const mds = identity.seamless_unlock || (await loadMdsCredential()) || (await loadMdsFromServer());
   if (!mds) return false;
   try {
-    await restoreIdentityFromRecovery(mds);
+    await restoreIdentityFromRecovery(mds, identity);
     await patchUserIdentityRecord({ seamlessMds: mds, hasBackup: true });
     writeLocalMds(mds);
-    // Keep server envelope warm for the next device.
-    uploadSeamlessUnlock(mds).catch(() => {});
+    await uploadSeamlessUnlock(mds).catch(() => {});
     identityPending = false;
     return true;
   } catch (e) {
@@ -607,8 +618,7 @@ export async function getIdentityRecoveryStatus() {
   const hasLocalPrivates = !!(local?.signingPriv && local?.agreementPriv);
   let hasBackup = !!(local?.hasBackup || hasRecoveryHint());
   try {
-    const res = await getUserIdentity();
-    const id = res?.identity;
+    const id = unwrapIdentityPayload(await getUserIdentity());
     if (id?.has_backup || id?.encrypted_backup) hasBackup = true;
   } catch { /* ignore */ }
   return {
@@ -653,11 +663,13 @@ export function ensureUserIdentity({ force = false } = {}) {
           local = null;
         } else {
           identityPending = false;
+          ensureSeamlessMultiDeviceBackup({ force: true }).catch(() => false);
           transferUserIdentityToSiblings().catch(() => {});
           return published || local;
         }
       } else {
         identityPending = false;
+        ensureSeamlessMultiDeviceBackup().catch(() => false);
         transferUserIdentityToSiblings().catch(() => {});
         return local;
       }
@@ -666,11 +678,12 @@ export function ensureUserIdentity({ force = false } = {}) {
     const got = await pullAndConsumeIdentityPackages().catch(() => false);
     if (got) {
       identityPending = false;
+      ensureSeamlessMultiDeviceBackup({ force: true }).catch(() => false);
       return getUserIdentityRecord();
     }
 
     const remote = await getUserIdentity().catch(() => null);
-    const serverId = remote?.identity || null;
+    const serverId = unwrapIdentityPayload(remote);
 
     if (serverId?.signing_public && serverId?.agreement_public) {
       // Prefer silent restore (server MDS / password manager) before sibling wait.
@@ -726,8 +739,8 @@ export function ensureUserIdentity({ force = false } = {}) {
         return getUserIdentityRecord();
       }
       identityPending = false;
-      // First holder: seed seamless backup so future devices unlock without a peer message.
-      ensureSeamlessMultiDeviceBackup().catch(() => {});
+      // First holder: seed seamless backup off the send path.
+      ensureSeamlessMultiDeviceBackup({ force: true }).catch(() => false);
       return published || local;
     } catch (e) {
       if (e?.response?.status === 422) {

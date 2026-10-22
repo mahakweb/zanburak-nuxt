@@ -648,12 +648,12 @@ export default {
 }
 
 :global(.dark) .paths-nav-btn {
-    background: #1f2937;
+    background: transparent;
     color: #f3f4f6;
 }
 
 :global(.dark) .paths-nav-btn:hover {
-    background: #fbbf24;
+    background: transparent;
     color: #111827;
 }
 

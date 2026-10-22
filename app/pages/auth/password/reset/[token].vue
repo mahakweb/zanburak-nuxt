@@ -1,6 +1,8 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "password-reset",
+  props: true,
 })
 </script>
 
@@ -292,8 +294,11 @@ import axiosInstance from "@/store/axiosInstance";
 // import config from '@/store/config';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-document.documentElement.dir = localStorage.getItem("direction");
+if (import.meta.client) {
+    document.documentElement.dir = localStorage.getItem("direction") || "rtl";
+}
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         DarkMode,
         LoadingComponent,
@@ -315,7 +320,7 @@ export default {
     },
     computed: {
         loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         hasLowercase() {
             return /[a-z]/.test(this.password);
@@ -337,6 +342,7 @@ export default {
         },
     },
     created() {
+        this.localEmail = this.email || this.$route?.query?.email || "";
         if (this.loggedIn) {
             this.$router.push("/");
         }
@@ -351,9 +357,9 @@ export default {
             this.errors = null;
 
             try {
-                const response = await axiosInstance.post("auth/password/reset", {
-                    email: this.email,
-                    token: this.token,
+                const response = await axiosInstance.post("/auth/password/reset-link", {
+                    email: this.localEmail,
+                    token: this.token || this.$route?.params?.token,
                     password: this.password,
                     password_confirmation: this.password_confirmation,
                 });
@@ -376,7 +382,7 @@ export default {
                 this.message = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
 
                 this.errors = error.response?.data?.errors;
-                if (error.response.status === 400) {
+                if (error.response?.status === 400) {
                     toast.error(error.response.data.message, {
                         theme: "colored",
                         hideProgressBar: false,

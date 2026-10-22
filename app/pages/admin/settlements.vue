@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "admin-settlements",
   middleware: ['auth'],
@@ -319,6 +320,7 @@ import debounce from "lodash/debounce";
 import { hasAnyPermission } from "@/utils/acl";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     name: "AdminSettlements",
     components: {
         AdminMasterPage,
@@ -360,7 +362,7 @@ export default {
     },
     computed: {
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         shareTotal() {
             return Number(this.stats?.settled_amount || 0) + Number(this.stats?.unsettled_amount || 0);

@@ -2,6 +2,7 @@
 definePageMeta({
   name: "admin-question-details",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 

@@ -419,6 +419,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import LoadingComponent from '@/views/components/LoadingComponent.vue';
 import QuizExamSidebar from '@/views/components/quiz/QuizExamSidebar.vue';
 import QuizThemeToggle from '@/views/components/quiz/QuizThemeToggle.vue';
@@ -430,6 +431,7 @@ import { parseFillBlankText, blankCountFromQuestion } from '@/utils/quizFillBlan
 import '@/assets/css/quiz-exam.css';
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: { LoadingComponent, QuizExamSidebar, QuizThemeToggle },
     props: { uuid: { type: String, default: null }, attemptUuid: { type: String, default: null } },
     data() {
@@ -485,7 +487,7 @@ export default {
             return this.$i18n.locale === 'en' ? 'en-US' : 'fa-IR';
         },
         currentUser() {
-            return this.$store.state.auth?.status?.userInfo || null;
+            return this.authStore?.status?.userInfo || null;
         },
         quizSettings() {
             return this.attempt?.quiz?.settings || {};

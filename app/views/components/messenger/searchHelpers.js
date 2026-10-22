@@ -51,7 +51,7 @@ export function messageMatchesQuery(m, query, t = null) {
 }
 
 /**
- * Search decrypted/local messages already in the Vuex cache.
+ * Search decrypted/local messages already in the Pinia cache.
  * @returns {Array} newest-first hits shaped like API rows (with conversation attached when possible)
  */
 export function searchCachedMessages({

@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "admin-settlement-settings",
   middleware: ['auth'],
@@ -165,6 +166,7 @@ import axiosInstance from "@/store/axiosInstance";
 import { isSuperUser } from "@/utils/acl";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
   name: "AdminSettlementSettings",
   components: { AdminMasterPage, SettlementShareCard },
   data() {
@@ -188,7 +190,7 @@ export default {
   },
   computed: {
     currentUser() {
-      return this.$store.state.auth.status.userInfo;
+      return this.authStore.status.userInfo;
     },
     canSave() {
       return isSuperUser(this.currentUser)

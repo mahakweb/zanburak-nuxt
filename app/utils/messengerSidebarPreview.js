@@ -11,7 +11,8 @@ const PREVIEW_CACHE_KEY = 'zanburak_messenger_sidebar_preview_v1';
 function looksLikeCiphertextBody(body) {
   const b = String(body || '').trim();
   if (!b || b === LOCKED_PLACEHOLDER) return false;
-  return b.length >= 24 && /^[A-Za-z0-9+/=\s]+$/.test(b);
+  if (/\s/.test(b)) return false;
+  return b.length >= 32 && /^[A-Za-z0-9+/=]+$/.test(b);
 }
 
 function isMediaType(type) {

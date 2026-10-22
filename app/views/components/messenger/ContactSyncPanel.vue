@@ -136,7 +136,8 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import MessengerAvatar from './MessengerAvatar.vue';
 import MessengerSkeleton from './MessengerSkeleton.vue';
 import { formatPresenceText } from '@/utils/messengerPresence';
@@ -151,6 +152,7 @@ import {
 } from '@/utils/contactSync';
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   name: 'ContactSyncPanel',
   components: { MessengerAvatar, MessengerSkeleton },
   emits: ['open-user'],
@@ -165,7 +167,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['syncedContacts', 'syncedContactsLoading']),
+    ...mapState(useMessengerStore, ['syncedContacts', 'syncedContactsLoading']),
     loading() {
       return this.syncedContactsLoading || this.busy;
     },
@@ -195,7 +197,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('messenger/fetchSyncedContacts').catch(() => {});
+    this.messengerStore.fetchSyncedContacts().catch(() => {});
   },
   methods: {
     filterRows(list) {
@@ -269,7 +271,7 @@ export default {
       }
     },
     async upload(contacts) {
-      const res = await this.$store.dispatch('messenger/syncContactsAction', contacts);
+      const res = await this.messengerStore.syncContactsAction(contacts);
       saveSyncCache({ contacts });
       clearContactOnboardingSkip();
       this.statusError = false;
@@ -286,7 +288,7 @@ export default {
         if (cached.length) {
           await this.upload(cached);
         } else {
-          await this.$store.dispatch('messenger/refreshContactSyncAction');
+          await this.messengerStore.refreshContactSyncAction();
           this.statusError = false;
           this.statusMsg = this.$t('messenger.contactStatusRefreshed');
         }
@@ -300,7 +302,7 @@ export default {
     async invite(row) {
       this.invitingPhone = row.phone;
       try {
-        const res = await this.$store.dispatch('messenger/inviteContactAction', row.phone);
+        const res = await this.messengerStore.inviteContactAction(row.phone);
         if (res?.throttled) {
           this.statusError = false;
           this.statusMsg = this.$t('messenger.inviteThrottled');
@@ -310,7 +312,7 @@ export default {
         } else if (res?.status === 'added') {
           this.statusError = false;
           this.statusMsg = this.$t('messenger.contactAdded');
-          await this.$store.dispatch('messenger/fetchSyncedContacts');
+          await this.messengerStore.fetchSyncedContacts();
         } else {
           this.statusError = true;
           this.statusMsg = this.$t('messenger.inviteFailed');

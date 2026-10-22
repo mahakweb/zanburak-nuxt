@@ -2,12 +2,19 @@
  * Authenticated blob fetch for private messenger media.
  */
 import config from '@/store/config';
+import { getAuthTokenSync } from '@/utils/authToken';
 
 function getAuthToken() {
+  return getAuthTokenSync();
+}
+
+function getXsrfToken() {
+  const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+  if (!match) return null;
   try {
-    return JSON.parse(localStorage.getItem('token'));
-  } catch (e) {
-    return null;
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
   }
 }
 
@@ -16,6 +23,15 @@ function resolveUrl(url) {
   if (/^https?:\/\//i.test(raw) || raw.startsWith('blob:') || raw.startsWith('data:')) return raw;
   const base = String(config.apiBaseUrl || '').replace(/\/$/, '');
   return `${base}/${raw.replace(/^\//, '')}`;
+}
+
+function usesApiCredentials(url) {
+  try {
+    const apiOrigin = new URL(config.apiBaseUrl, window.location.href).origin;
+    return new URL(url, window.location.href).origin === apiOrigin;
+  } catch {
+    return false;
+  }
 }
 
 export function isMessengerMediaProxyUrl(url) {
@@ -58,9 +74,13 @@ export async function fetchAuthenticatedBlob(url, onProgress = null, options = {
     const res = await fetch(resolved, { signal });
     return res.blob();
   }
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const xsrfToken = getXsrfToken();
+  if (xsrfToken) headers['X-XSRF-TOKEN'] = xsrfToken;
   const res = await fetch(resolved, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    credentials: 'omit',
+    headers,
+    credentials: usesApiCredentials(resolved) ? 'include' : 'omit',
     signal,
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);

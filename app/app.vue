@@ -8,20 +8,24 @@
 </template>
 
 <script setup>
-import { computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useMessengerStore } from '@/stores/messenger'
+import { computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useStore } from '@/composables/useStore'
-import { useSEO, generateOrganizationSchema } from '@/composables/useSEO'
-import { applyRouteRobots, isPrivateSeoPath } from '@/composables/usePrivateSeo'
+import { generateOrganizationSchema } from '@/composables/useSEO'
+import { getRouteRobotsMeta, isPrivateSeoPath } from '@/composables/usePrivateSeo'
 import { cleanupStuckOverlays } from '@/utils/cleanupOverlays'
 import { getLanguageByLocale } from '@/config/languages'
 import PwaInstallBanner from '@/views/components/pwa/PwaInstallBanner.vue'
 
+const authStore = useAuthStore()
+const messengerStore = useMessengerStore()
+let streamUserId = null
+let recoverGateAt = 0
+
 const route = useRoute()
 const { t, locale } = useI18n()
-const store = useStore()
-
 const langMeta = computed(() => {
   const lang = getLanguageByLocale(locale.value) || { locale: 'fa', dir: 'rtl' }
   return lang
@@ -38,41 +42,36 @@ useHead({
 })
 
 
-async function syncRouteSeo() {
-  applyRouteRobots(route.path)
-  if (route.path === '/' && !isPrivateSeoPath(route.path)) {
-    useSEO({
-      title: '',
-      description: t('app.seoDescription'),
-      url: '/',
-      keywords: t('app.seoKeywords').split('|'),
-      schema: generateOrganizationSchema(),
-    })
+useHead(computed(() => {
+  const isHome = route.path === '/' && !isPrivateSeoPath(route.path)
+  return {
+    title: isHome ? 'زنبورک' : undefined,
+    meta: [
+      ...getRouteRobotsMeta(route.path),
+      ...(isHome
+        ? [
+            { name: 'description', content: t('app.seoDescription') },
+            { name: 'keywords', content: t('app.seoKeywords').split('|').join(', ') },
+          ]
+        : []),
+    ],
+    script: isHome
+      ? [{ type: 'application/ld+json', innerHTML: JSON.stringify(generateOrganizationSchema()) }]
+      : [],
   }
-  if (isPrivateSeoPath(route.path)) {
-    await nextTick()
-    applyRouteRobots(route.path)
-    if (import.meta.client) {
-      setTimeout(() => applyRouteRobots(route.path), 0)
-    }
-  }
-}
-
-watch(() => route.fullPath, () => {
-  syncRouteSeo()
-}, { immediate: true })
+}))
 
 function isMessengerPath(path) {
   return String(path || '').startsWith('/messenger')
 }
 
 function messengerUserId() {
-  const userInfo = store.state.auth.status.userInfo
+  const userInfo = authStore.status.userInfo
   return userInfo?.id || userInfo?.value?.id || null
 }
 
 function isMessengerSession() {
-  return !!(store.state.auth.status.loggedIn && messengerUserId() && isMessengerPath(route.path))
+  return !!(authStore.status.loggedIn && messengerUserId() && isMessengerPath(route.path))
 }
 
 async function loadMessengerTransport() {
@@ -85,35 +84,49 @@ async function loadMessengerTransport() {
 
 watch(
   () => [
-    store.state.auth.status.loggedIn,
+    authStore.status.loggedIn,
     messengerUserId(),
     isMessengerPath(route.path),
   ],
-  ([loggedIn, userId, onMessenger]) => {
+  async ([loggedIn, userId, onMessenger]) => {
     if (!import.meta.client) return
-    if (loggedIn && userId && onMessenger) {
-      store.dispatch('messenger/startStream')
+    const { connectionManager } = await import('@/services/connectionManager')
+    connectionManager.setAuthenticated(loggedIn)
+    if (!loggedIn || !userId) {
+      if (streamUserId) messengerStore.forgetSession()
+      else messengerStore.stopStream()
+      streamUserId = null
       return
     }
-    if (!loggedIn || (loggedIn && !onMessenger)) {
-      store.dispatch('messenger/stopStream')
+    if (streamUserId && String(streamUserId) !== String(userId)) {
+      messengerStore.forgetSession()
     }
+    streamUserId = userId
+    if (onMessenger) {
+      messengerStore.startStream()
+      return
+    }
+    messengerStore.stopStream()
   },
   { immediate: true },
 )
 
 async function onStorageChange(e) {
   if (e.key === 'token' && !e.newValue) {
-    store.dispatch('messenger/stopStream')
+    messengerStore.forgetSession()
+    streamUserId = null
   } else if (e.key === 'token' && e.newValue && isMessengerSession()) {
     const { refreshEchoAuth } = await loadMessengerTransport()
     await refreshEchoAuth()
-    store.dispatch('messenger/startStream')
+    messengerStore.startStream()
   }
 }
 
 async function recoverMessenger() {
   if (!isMessengerSession()) return
+  const now = Date.now()
+  if (now - recoverGateAt < 2000) return
+  recoverGateAt = now
   try {
     const { connectionManager } = await loadMessengerTransport()
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
@@ -121,9 +134,9 @@ async function recoverMessenger() {
       return
     }
     await connectionManager.ensureConnected()
-    store.dispatch('messenger/startStream')
-    await store.dispatch('messenger/recoverStream').catch(() => {})
-    store.dispatch('messenger/hydrateAndFlushOutbox').catch(() => {})
+    messengerStore.startStream()
+    await messengerStore.recoverStream().catch(() => {})
+    messengerStore.hydrateAndFlushOutbox().catch(() => {})
   } catch (e) {
     console.warn('[messenger] recover failed', e)
   }
@@ -131,7 +144,7 @@ async function recoverMessenger() {
 
 function onVisibilityChange() {
   if (!isMessengerSession()) return
-  store.dispatch('messenger/presenceVisibility', !!document.hidden)
+  messengerStore.presenceVisibility(!!document.hidden)
   if (!document.hidden) recoverMessenger()
 }
 
@@ -150,7 +163,7 @@ onUnmounted(() => {
   window.removeEventListener('online', recoverMessenger)
   window.removeEventListener('pageshow', recoverMessenger)
   document.removeEventListener('visibilitychange', onVisibilityChange)
-  store.dispatch('messenger/stopStream')
+  messengerStore.stopStream()
 })
 
 watch(() => route.path, (newPath, oldPath) => {

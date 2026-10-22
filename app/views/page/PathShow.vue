@@ -836,10 +836,10 @@
                     <h3 class="lg:xl sm:text-2xl text-lg font-bold px-3 text-gray-700 dark:bg-dark-890 dark:text-white">
                         {{ $t('path.show.path_description_title') }}</h3>
                 </div>
-                <p :class="expandDescription ? 'h-max' : 'max-h-72'"
+                <div :class="expandDescription ? 'h-max' : 'max-h-72'"
                     class="mb-5 overflow-hidden transition-all duration-300 text-gray-500 dark:text-gray-400 font-medium leading-8">
                     <MarkdownRenderer class="" startClass="desc" :source="path.description" />
-                </p>
+                </div>
                 <div class="absolute bottom-0 -mb-7 flex items-center h-12">
                     <div class="px-5 mx-auto bg-gray-100 dark:bg-gray-800">
                         <button @click.prevent="expandDescription = !expandDescription"
@@ -901,13 +901,15 @@
             </div>
             <div id="comments-list"
                 class="md:ms-20 lg:ms-32 border-2 border-white dark:border-gray-900 rounded-xl md:p-5 p-3 mb-8">
-                <CommentsList v-if="path && path.id" :type="'path'" :id="path.id"></CommentsList>
+                <CommentsList v-if="path && path.id" :type="'path'" :id="path.id" :per-page="10"></CommentsList>
             </div>
         </section>
     </MasterPage>
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import CourseCard4 from "@/views/components/course/CourseCard4.vue";
 import CourseCard4Loading from "@/views/components/course/CourseCard4Loading.vue";
@@ -920,6 +922,7 @@ import axiosInstance from "@/store/axiosInstance";
 import { useSEO, generatePathSchema, generateBreadcrumbSchema } from "@/composables/useSEO";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 export default {
+		setup() { return { authStore: useAuthStore(), cartStore: useCartStore() } },
     components: {
         MasterPage,
         CourseCard4,
@@ -944,11 +947,11 @@ export default {
     },
     computed: {
         loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
 
         isPathInCart() {
-            return this.$store.getters["cart/isItemInCart"]("path", this.path.id);
+            return this.cartStore.isItemInCart("path", this.path.id);
         },
     },
     watch: {
@@ -962,7 +965,7 @@ export default {
         async addToCart(type, itemId) {
             this.addToCartLoading = true;
             try {
-                await this.$store.dispatch("cart/addToCart", { type, itemId });
+                await this.cartStore.addToCart({ type, itemId });
             } catch (error) {
                 console.error("Error adding to cart:", error);
             } finally {
@@ -1058,11 +1061,11 @@ export default {
                         });
                     },
                     (error) => {
-                        console.error(error.response.status);
-                        if (error.response.status === 404) {
-                            this.$route.push({ name: "NotFound" });
+                        const status = error?.response?.status
+                        console.error(error)
+                        if (status === 404) {
+                            this.$router.push({ name: 'NotFound' })
                         }
-                        console.error(error.response.statusText);
                     }
                 )
                 .finally(() => {
@@ -1071,8 +1074,8 @@ export default {
         },
     },
     mounted() {
-        document.title = this.pathSlug;
-        this.getPathDetails();
+        document.title = this.pathSlug || 'مسیر';
+        if (this.pathSlug) this.getPathDetails();
     },
     created() { },
 };

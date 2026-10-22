@@ -2,6 +2,7 @@
 definePageMeta({
   name: "admin-certificate-template-edit",
   middleware: ['auth'],
+  props: true,
 })
 </script>
 

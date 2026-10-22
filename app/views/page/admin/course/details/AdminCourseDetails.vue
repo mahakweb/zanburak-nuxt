@@ -165,6 +165,7 @@
     </AdminMasterPage>
 </template>
 <script>
+import { useAdminCommentsStore } from '@/stores/adminComments'
 import AdminMasterPage from "@/views/page/admin/layouts/AdminMasterPage.vue";
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import axiosInstance from "@/store/axiosInstance";
@@ -183,6 +184,7 @@ import AdminCourseAttachments from "@/views/page/admin/course/details/AdminCours
 import AdminCourseLikes from "@/views/page/admin/course/details/AdminCourseLikes.vue";
 import AdminCourseBookmarks from "@/views/page/admin/course/details/AdminCourseBookmarks.vue";
 export default {
+		setup() { return { adminCommentsStore: useAdminCommentsStore() } },
     components: {
         AdminMasterPage,
         LoadingComponent,
@@ -297,8 +299,8 @@ export default {
             if (this.unapprovedCommentsCount > 0) {
                 this.unapprovedCommentsCount -= 1;
             }
-            // Also decrease from Vuex
-            this.$store.dispatch('adminComments/decreaseUnapprovedComments');
+            // Also decrease the Pinia count
+            this.adminCommentsStore.decreaseUnapprovedComments();
         },
     },
 

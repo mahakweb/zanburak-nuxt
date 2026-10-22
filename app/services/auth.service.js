@@ -1,5 +1,4 @@
 import axiosInstance from '@/store/axiosInstance'
-import { clearAuthToken, persistAuthToken } from '@/utils/authToken'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
@@ -11,24 +10,12 @@ class AuthService {
         password: user.password,
         recaptchaToken: user.recaptchaToken,
       })
-      .then((response) => {
-        if (response.data.token) {
-          persistAuthToken(response.data.token)
-          axiosInstance.addHeaders({ Authorization: 'Bearer ' + response.data.token })
-        }
-        return Promise.resolve(response)
-      })
-      .catch((error) => Promise.reject(error))
   }
 
   logout() {
     return axiosInstance
       .post('/auth/logout')
       .then((response) => {
-        clearAuthToken()
-        if (axiosInstance.defaults?.headers?.common) {
-          delete axiosInstance.defaults.headers.common.Authorization
-        }
         if (import.meta.client) {
           toast.warning('با موفقیت خارج شدید!', {
             theme: 'colored',
@@ -42,13 +29,6 @@ class AuthService {
         }
         return response.data
       })
-      .catch((error) => {
-        clearAuthToken()
-        if (axiosInstance.defaults?.headers?.common) {
-          delete axiosInstance.defaults.headers.common.Authorization
-        }
-        return Promise.reject(error)
-      })
   }
 
   register(user) {
@@ -61,14 +41,6 @@ class AuthService {
         password: user.password,
         password_confirmation: user.password_confirmation,
       })
-      .then((response) => {
-        if (response.data.token) {
-          persistAuthToken(response.data.token)
-          axiosInstance.addHeaders({ Authorization: 'Bearer ' + response.data.token })
-        }
-        return Promise.resolve(response)
-      })
-      .catch((error) => Promise.reject(error))
   }
 }
 

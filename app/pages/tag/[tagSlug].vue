@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 import { tagService } from '@/services/tag.service'
 
 definePageMeta({
@@ -348,6 +349,7 @@ function emptyTabState() {
 }
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
 	components: {
 		MasterPage,
 		TagTabContent,
@@ -383,7 +385,7 @@ export default {
 			return this.$route.params.tagSlug;
 		},
 		isLoggedin() {
-			return this.$store.state.auth.status.loggedIn;
+			return this.authStore.status.loggedIn;
 		},
 		activeType() {
 			return this.tabs[this.selectedTabIndex]?.slug || "questions";

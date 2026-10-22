@@ -1,4 +1,5 @@
 <script setup>
+import { useAdminCommentsStore } from '@/stores/adminComments'
 definePageMeta({
   name: "admin-comments",
   middleware: ['auth'],
@@ -1122,6 +1123,7 @@ import { Popover, PopoverButton, PopoverPanel, PopoverOverlay, Disclosure, Discl
 import moment from "moment";
 import "moment/locale/fa";
 export default {
+		setup() { return { adminCommentsStore: useAdminCommentsStore() } },
     components: {
         AdminMasterPage,
         AdminReportStatCard,
@@ -1494,13 +1496,13 @@ export default {
                 });
                 comment.approved = !comment.approved;
 
-                // Update Vuex if comment was unapproved and now is approved
+                // Update the Pinia count if comment was unapproved and now is approved
                 if (wasUnapproved && comment.approved) {
-                    this.$store.dispatch('adminComments/decreaseUnapprovedComments');
+                    this.adminCommentsStore.decreaseUnapprovedComments();
                 }
                 // If comment was approved and now is unapproved, increment
                 if (!wasUnapproved && !comment.approved) {
-                    this.$store.dispatch('adminComments/incrementUnapprovedComments');
+                    this.adminCommentsStore.incrementUnapprovedComments();
                 }
 
                 showToastSuccess(comment.approved ? "کامنت تایید شد." : "کامنت عدم تایید شد.");

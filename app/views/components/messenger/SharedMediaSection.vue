@@ -324,8 +324,9 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import { getSharedMedia } from '@/services/messenger';
-import { mapState } from "@/composables/useStore";
 import { decryptMessageList } from '@/crypto/messenger';
 import MediaViewerOverlay from './MediaViewerOverlay.vue';
 import MessengerSkeleton from './MessengerSkeleton.vue';
@@ -374,7 +375,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['messages']),
+    ...mapState(useMessengerStore, ['messages']),
     tabs() {
       const mediaTabs = [
         { id: 'media', label: this.$t('messenger.media') },
@@ -560,7 +561,7 @@ export default {
         let rows = Array.isArray(res?.data) ? res.data : [];
         rows = this.enrichFromStore(rows);
         try {
-          rows = await decryptMessageList(rows);
+          rows = await decryptMessageList(rows, this.conversationId);
         } catch (e) {
           console.warn('[shared-media] decrypt failed', e);
         }

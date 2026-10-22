@@ -183,11 +183,13 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import axiosInstance from "@/store/axiosInstance";
 import AnswerCard2 from "@/views/components/discuss/AnswerCard2.vue";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
 import { useSEO } from "@/composables/useSEO";
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         AnswerCard2,
         PaginationComponent,
@@ -208,10 +210,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     methods: {

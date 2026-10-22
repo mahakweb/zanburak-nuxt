@@ -129,7 +129,9 @@
 </template>
 
 <script>
-import { mapState } from "@/composables/useStore";
+import { useAuthStore } from '@/stores/auth'
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import MessengerAvatar from './MessengerAvatar.vue';
 import MessengerToggle from './MessengerToggle.vue';
 import { ICONS as TG_ICONS } from './messengerIcons';
@@ -156,6 +158,7 @@ const ICONS = {
 const MOBILE_MQ = '(max-width: 767px)';
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   components: { MessengerAvatar, MessengerToggle },
   props: {
     visible: { type: Boolean, default: false },
@@ -173,7 +176,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('auth', { user: (s) => s.status.userInfo }),
+    ...mapState(useAuthStore, { user: (s) => s.status.userInfo }),
     menuIcons() {
       return ICONS;
     },
@@ -325,7 +328,7 @@ export default {
       else document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', val ? 'dark' : 'light');
       document.documentElement.dispatchEvent(new Event('onChangeTheme'));
-      this.$store.dispatch('messenger/saveSettings', { theme: val ? 'dark' : 'light' });
+      this.messengerStore.saveSettings({ theme: val ? 'dark' : 'light' });
     },
     toggleAnimations() {
       this.setAnimations(!this.animations);

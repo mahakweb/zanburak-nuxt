@@ -422,6 +422,7 @@
     </AdminMasterPage>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import AdminMasterPage from "@/views/page/admin/layouts/AdminMasterPage.vue";
 import AdminBulkCheckbox from "@/views/components/admin/AdminBulkCheckbox.vue";
 import AdminBulkActionBar from "@/views/components/admin/AdminBulkActionBar.vue";
@@ -436,6 +437,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         AdminMasterPage,
         AdminBulkCheckbox,
@@ -489,10 +491,10 @@ export default {
             return this.selectedIds.length > 0 && !this.isAllSelected
         },
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     methods: {

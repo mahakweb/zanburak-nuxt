@@ -139,6 +139,7 @@
                                                 img-class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                                                 :src="person.profilePic"
                                                 :alt="person.name"
+                                                :auto-webp="false"
                                                 width="96"
                                                 height="96"
                                             />

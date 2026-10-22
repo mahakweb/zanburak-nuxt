@@ -539,6 +539,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import ProfileMasterPage from "@/views/page/panel/profile/ProfileMasterPage.vue";
 import ProfileImageCropModal from "@/views/components/profile/ProfileImageCropModal.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
@@ -552,6 +553,7 @@ const DEFAULT_PROFILE_PIC = "https://static.zanburak.ir/images/avatar/default.pn
 const DEFAULT_COVER_PIC = "https://static.zanburak.ir/images/cover/default.png";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         ProfileMasterPage,
         ProfileImageCropModal,
@@ -706,7 +708,7 @@ export default {
                         transition: toast.TRANSITIONS.BOUNCE,
                         position: toast.POSITION.BOTTOM_RIGHT,
                     });
-                    this.$store.dispatch("auth/getUser");
+                    this.authStore.getUser();
                 })
                 .catch((error) => {
                     if (error.response.status === 422) {
@@ -846,7 +848,7 @@ export default {
                     this.userData.user.cover_pic = response.data.coverPic;
                     this.bumpImageVersion("cover");
                 }
-                await this.$store.dispatch("auth/getUser");
+                await this.authStore.getUser();
                 this.getUserData();
                 this.showUploadToast("cover", this.$t("profile.account.coverUpdateSuccess"));
                 this.closeCropModal();
@@ -884,7 +886,7 @@ export default {
                     this.userData.user.profile_pic = response.data.profilePic;
                     this.bumpImageVersion("profile");
                 }
-                await this.$store.dispatch("auth/getUser");
+                await this.authStore.getUser();
                 this.getUserData();
                 this.showUploadToast("profile", this.$t("profile.account.profilePicUpdateSuccess"));
                 this.closeCropModal();

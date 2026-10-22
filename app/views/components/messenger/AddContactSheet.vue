@@ -117,11 +117,13 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
 import BottomSheetDrawer from '@/views/components/common/BottomSheetDrawer.vue';
 import { MESSENGER_SHEET_PANEL, MESSENGER_SHEET_BACKDROP } from './sheetStyles';
 import { avatarInitials } from './avatarInitials';
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   components: { BottomSheetDrawer },
   props: { open: { type: Boolean, default: false } },
   emits: ['close', 'added'],
@@ -177,7 +179,7 @@ export default {
       this.message = '';
       this.error = false;
       try {
-        const res = await this.$store.dispatch('messenger/lookupContactAction', id);
+        const res = await this.messengerStore.lookupContactAction(id);
         if (res.status === 'found') {
           this.foundUser = res.user;
           this.customName = '';
@@ -203,7 +205,7 @@ export default {
       if (!this.foundUser || this.busy) return;
       this.busy = true;
       try {
-        await this.$store.dispatch('messenger/addContactAction', {
+        await this.messengerStore.addContactAction({
           contactUserId: this.foundUser.id,
           name: this.customName.trim() || null,
         });
@@ -222,7 +224,7 @@ export default {
       this.message = '';
       this.error = false;
       try {
-        const res = await this.$store.dispatch('messenger/inviteContactAction', this.identifier.trim());
+        const res = await this.messengerStore.inviteContactAction(this.identifier.trim());
         if (res.status === 'invited' && res.invited) {
           this.error = false;
           this.message = this.$t('messenger.inviteSent', { channel: this.$t('messenger.channel_' + (res.channel || this.inviteChannel)) });

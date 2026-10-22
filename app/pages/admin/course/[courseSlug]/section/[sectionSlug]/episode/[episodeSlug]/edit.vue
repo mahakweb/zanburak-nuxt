@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "admin-episode-edit",
   middleware: ['auth'],
@@ -782,6 +783,7 @@ const FORM_STEPS = [
 const stepperMixin = createStepperMixin();
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     mixins: [stepperMixin],
     components: {
         AdminMasterPage,
@@ -1036,10 +1038,10 @@ export default {
             return this.price ? PN.convert(parseInt(this.price.replace(/,/g, ""))) : "";
         },
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
     },
     methods: {

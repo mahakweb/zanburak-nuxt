@@ -296,6 +296,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import ProfilePageLoading from "@/views/page/profile/ProfilePageLoading.vue";
 import { ref } from "vue";
@@ -313,6 +314,7 @@ import "moment/locale/fa";
 import { useSEO } from "@/composables/useSEO";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         MasterPage,
         ProfilePageLoading,
@@ -349,10 +351,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         },
         authorDisplayName() {
             if (!this.user) return "";

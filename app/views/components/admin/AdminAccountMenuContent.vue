@@ -1,6 +1,9 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+import { useAdminCommentsStore } from '@/stores/adminComments'
+const authStore = useAuthStore()
+const adminCommentsStore = useAdminCommentsStore()
 import { computed, ref } from 'vue';
-import { useStore } from "@/composables/useStore";
 import { useRouter } from 'vue-router';
 import { ADMIN_MENU_ITEMS } from '@/config/adminMenuItems';
 import { getAccessibleAdminQuickLinks } from '@/utils/adminMenu';
@@ -10,14 +13,13 @@ import AccountMenuViewSwap from '@/views/components/common/AccountMenuViewSwap.v
 
 const emit = defineEmits(['close']);
 
-const store = useStore();
 const router = useRouter();
 
 // 'main' | 'lang' | 'theme'
 const view = ref('main');
 
-const currentUser = computed(() => store.state.auth.status.userInfo);
-const unapprovedCommentsCount = computed(() => store.getters['adminComments/unapprovedCommentsCount']);
+const currentUser = computed(() => authStore.status.userInfo);
+const unapprovedCommentsCount = computed(() => adminCommentsStore.unapprovedCommentsCount);
 
 const roleLabels = computed(() => {
     const roles = currentUser.value?.roles;
@@ -41,7 +43,7 @@ function close() {
 
 function logout() {
     close();
-    store.dispatch('auth/logout');
+    authStore.logout();
     router.push('/');
 }
 </script>

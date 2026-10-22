@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 import axiosInstance from '@/store/axiosInstance'
 
 definePageMeta({
@@ -977,6 +978,7 @@ import { useSEO, generateQuestionSchema, generateBreadcrumbSchema } from "@/comp
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 
 export default {
+		setup() { return { authStore: useAuthStore() } },
     components: {
         MasterPage,
         SideBar,
@@ -1019,10 +1021,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.$store.state.auth.status.loggedIn;
+            return this.authStore.status.loggedIn;
         },
         currentUser() {
-            return this.$store.state.auth.status.userInfo;
+            return this.authStore.status.userInfo;
         }
     },
     methods: {

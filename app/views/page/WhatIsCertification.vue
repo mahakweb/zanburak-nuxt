@@ -334,10 +334,11 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { mapState } from 'pinia'
 import certificate_template from '@/assets/image/certificate/certificate-template.svg'
 import MasterPage from '@/views/page/layouts/MasterPage.vue';
 import { useSEO } from '@/composables/useSEO';
-import { mapState } from "@/composables/useStore";
 import SeoImage from '@/views/components/seo/SeoImage.vue';
 
 const STEP_STYLES = [
@@ -381,8 +382,8 @@ export default {
         SeoImage,
     },
     computed: {
-        ...mapState({
-            isLoggedIn: (state) => state.auth.status.loggedIn,
+        ...mapState(useAuthStore, {
+            isLoggedIn: (state) => state.status.loggedIn,
         }),
         features() {
             return [

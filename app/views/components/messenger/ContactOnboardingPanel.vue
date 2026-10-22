@@ -59,6 +59,7 @@
 </template>
 
 <script>
+import { useMessengerStore } from '@/stores/messenger'
 import {
   contactPickerSupported,
   pickDeviceContacts,
@@ -69,6 +70,7 @@ import {
 } from '@/utils/contactSync';
 
 export default {
+		setup() { return { messengerStore: useMessengerStore() } },
   name: 'ContactOnboardingPanel',
   emits: ['skip', 'synced'],
   data() {
@@ -145,7 +147,7 @@ export default {
       }
     },
     async upload(contacts) {
-      const res = await this.$store.dispatch('messenger/syncContactsAction', contacts);
+      const res = await this.messengerStore.syncContactsAction(contacts);
       saveSyncCache({ contacts });
       clearContactOnboardingSkip();
       this.statusError = false;

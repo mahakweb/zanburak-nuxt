@@ -15,9 +15,13 @@ export function b64Encode(bytes) {
   return btoa(binary);
 }
 
-/** Decode a standard base64 string into a Uint8Array. */
+/** Decode a standard or URL-safe base64 string into a Uint8Array. */
 export function b64Decode(b64) {
-  const binary = atob(b64 || '');
+  let s = String(b64 || '').trim().replace(/[\r\n\s]/g, '');
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = s.length % 4;
+  if (pad) s += '='.repeat(4 - pad);
+  const binary = atob(s);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) {
     bytes[i] = binary.charCodeAt(i);

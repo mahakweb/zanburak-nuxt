@@ -1249,7 +1249,9 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "@/composables/useStore";
+import { useAuthStore } from '@/stores/auth'
+import { useMessengerStore } from '@/stores/messenger'
+import { mapState } from 'pinia'
 import UAParser from 'ua-parser-js';
 import axiosInstance from '@/store/axiosInstance';
 import { getMyProfile, updateMyProfile, uploadProfilePic, deleteProfilePic, checkUserUsername, joinByUsername, joinByInvite } from '@/services/messenger';
@@ -1304,6 +1306,7 @@ function readNotif() {
 }
 
 export default {
+		setup() { return { authStore: useAuthStore(), messengerStore: useMessengerStore() } },
   components: { WallpaperPicker, MessengerAvatar, MessengerToggle, ContextMenu, AvatarCropEditor, MediaViewerOverlay, ActionSheet, MessengerSkeleton, SessionDeviceIcon, CreateCommunityForm, PasscodePad, ContactSyncPanel, PrivacyRulePanel },
   props: {
     contacts: { type: Array, default: () => [] },
@@ -1384,8 +1387,8 @@ export default {
     };
   },
   computed: {
-    ...mapState('messenger', ['settings', 'blockedContacts', 'font', 'fontSlots', 'conversations', 'contactsLoading', 'blockedLoading', 'loading', 'contacts', 'contactsSort', 'e2eRecovery']),
-    ...mapGetters('messenger', ['canMessengerFeature']),
+    ...mapState(useMessengerStore, ['settings', 'blockedContacts', 'font', 'fontSlots', 'conversations', 'contactsLoading', 'blockedLoading', 'loading', 'contactsSort', 'e2eRecovery']),
+    ...mapState(useMessengerStore, ['canMessengerFeature']),
     themeSelectOptions() {
       return this.themeOptions.map((o) => ({ value: o.value, label: this.$t('messenger.theme_' + o.value) }));
     },
@@ -1426,7 +1429,7 @@ export default {
       const t = this.$t(slot.labelKey);
       return t !== slot.labelKey ? t : slot.id;
     },
-    ...mapState('auth', { userInfo: (s) => s.status.userInfo }),
+    ...mapState(useAuthStore, { userInfo: (s) => s.status.userInfo }),
     meId() {
       const u = this.userInfo;
       if (!u) return null;
@@ -1935,7 +1938,7 @@ export default {
       const order = ['name_asc', 'name_desc', 'last_seen'];
       const i = order.indexOf(this.contactSort);
       const next = order[(i < 0 ? 0 : i + 1) % order.length];
-      this.$store.commit('messenger/SET_CONTACTS_SORT', next);
+      this.messengerStore.setContactsSort(next);
       this.indexDragging = false;
       this.indexBubbleLetter = '';
       this.indexBubbleIndex = -1;
@@ -2063,14 +2066,14 @@ export default {
     },
     go(view) {
       if (view === 'contacts') {
-        this.$store.dispatch('messenger/fetchContacts').catch(() => {});
+        this.messengerStore.fetchContacts().catch(() => {});
         this.maybePeriodicContactSync();
       }
       if (view === 'contactSync') {
-        this.$store.dispatch('messenger/fetchSyncedContacts').catch(() => {});
+        this.messengerStore.fetchSyncedContacts().catch(() => {});
       }
       if (view === 'privacy' || view === 'privacyDetail') {
-        this.$store.dispatch('messenger/fetchContacts').catch(() => {});
+        this.messengerStore.fetchContacts().catch(() => {});
       }
       if (view === 'joinCommunity') {
         this.join = { identifier: '', busy: false, message: '', error: false };
@@ -2085,7 +2088,7 @@ export default {
       this.view = view;
       if (view === 'profile' || view === 'settings') this.loadProfile();
       if (view === 'devices') this.loadSessions();
-      if (view === 'blocked') this.$store.dispatch('messenger/fetchBlocked');
+      if (view === 'blocked') this.messengerStore.fetchBlocked();
       if (view === 'passcode') {
         this.resetPasscodeFlow();
         this.refreshBiometricAvailability();
@@ -2232,11 +2235,11 @@ export default {
         }
         this.join.message = this.$t('messenger.joinedCommunity');
         if (conv?.id) {
-          this.$store.commit('messenger/UPSERT_CONVERSATION', conv);
+          this.messengerStore.upsertConversation(conv);
           this.$emit('select-conversation', conv);
           this.$emit('close');
         } else if (conv?.conversation_id) {
-          await this.$store.dispatch('messenger/ingestNewConversation', conv.conversation_id);
+          await this.messengerStore.ingestNewConversation(conv.conversation_id);
           this.$emit('close');
         }
       } catch (e) {
@@ -2415,7 +2418,7 @@ export default {
         });
         this.originalUsername = username;
         this.usernameStatus = '';
-        await this.$store.dispatch('auth/getUser');
+        await this.authStore.getUser();
       } catch (e) { /* noop */ } finally {
         this.savingProfile = false;
       }
@@ -2453,10 +2456,10 @@ export default {
           },
         });
         this.avatarUploadPct = 100;
-        await this.$store.dispatch('auth/getUser');
+        await this.authStore.getUser();
         const me = this.userInfo;
         if (me?.id) {
-          this.$store.commit('messenger/APPLY_PRESENCE', {
+          this.messengerStore.applyPresence({
             userId: me.id,
             profilePic: me.profile_pic,
             firstName: me.first_name,
@@ -2482,7 +2485,7 @@ export default {
       this.ac.message = '';
       this.ac.error = false;
       try {
-        const res = await this.$store.dispatch('messenger/lookupContactAction', id);
+        const res = await this.messengerStore.lookupContactAction(id);
         if (res.status === 'found') {
           this.ac.foundUser = res.user;
           this.ac.customName = '';
@@ -2509,11 +2512,11 @@ export default {
       this.ac.busy = true;
       try {
         const user = this.ac.foundUser;
-        await this.$store.dispatch('messenger/addContactAction', {
+        await this.messengerStore.addContactAction({
           contactUserId: user.id,
           name: this.ac.customName.trim() || null,
         });
-        await this.$store.dispatch('messenger/fetchContacts');
+        await this.messengerStore.fetchContacts();
         this.view = 'contacts';
         this.acReset();
       } catch (e) {
@@ -2529,7 +2532,7 @@ export default {
       this.ac.message = '';
       this.ac.error = false;
       try {
-        const res = await this.$store.dispatch('messenger/inviteContactAction', this.ac.identifier.trim());
+        const res = await this.messengerStore.inviteContactAction(this.ac.identifier.trim());
         if (res.status === 'invited' && res.invited) {
           this.ac.error = false;
           this.ac.message = this.$t('messenger.inviteSent', { channel: this.$t('messenger.channel_' + (res.channel || this.ac.inviteChannel)) });
@@ -2547,13 +2550,13 @@ export default {
     unblock(b) {
       const id = b.contact_user?.id;
       if (!id) return;
-      this.$store.dispatch('messenger/unblockUserAction', id)
-        .then(() => this.$store.dispatch('messenger/fetchBlocked'))
+      this.messengerStore.unblockUserAction(id)
+        .then(() => this.messengerStore.fetchBlocked())
         .catch(() => {});
     },
     applyTheme(value) {
       this.theme = applyThemePreference(value);
-      this.$store.dispatch('messenger/saveSettings', { theme: this.theme });
+      this.messengerStore.saveSettings({ theme: this.theme });
     },
     setAnimations(val) {
       this.animations = !!val;
@@ -2569,7 +2572,7 @@ export default {
       this.$router.push({ name: 'contact' }).catch(() => {});
     },
     applyFont(id) {
-      this.$store.commit('messenger/SET_FONT', id);
+      this.messengerStore.setFont(id);
     },
     describeFontSlot(s) {
       if (!s) {
@@ -2595,12 +2598,12 @@ export default {
       this.view = 'fontSlot';
     },
     applyFontSlot(slot, id) {
-      this.$store.commit('messenger/SET_FONT_SLOT', { slot, id });
+      this.messengerStore.setFontSlot({ slot, id });
       // Stay on picker so user can compare; back button returns to slot list.
     },
     resetAllFonts() {
       const dir = typeof document !== 'undefined' ? document.documentElement.dir : undefined;
-      this.$store.commit('messenger/RESET_FONT_SLOTS', dir);
+      this.messengerStore.resetFontSlots(dir);
     },
     saveNotif() {
       try { localStorage.setItem(NOTIF_KEY, JSON.stringify(this.notif)); } catch (e) { /* noop */ }
@@ -2617,11 +2620,11 @@ export default {
       localStorage.setItem('direction', lang.dir);
       localStorage.setItem('locale', lang.locale);
       document.documentElement.dispatchEvent(new Event('onChangeLanguage'));
-      this.$store.commit('messenger/APPLY_FONT_DIRECTION', lang.dir);
-      this.$store.dispatch('messenger/saveSettings', { locale: lang.locale });
+      this.messengerStore.applyFontDirection(lang.dir);
+      this.messengerStore.saveSettings({ locale: lang.locale });
     },
     toggleSetting(key, value) {
-      this.$store.dispatch('messenger/saveSettings', { [key]: value });
+      this.messengerStore.saveSettings({ [key]: value });
     },
     privacyRuleLabel(key) {
       const rule = this.settings?.privacy?.[key]?.rule || 'everybody';
@@ -2651,10 +2654,10 @@ export default {
       if (!shouldPeriodicSync()) return;
       const cached = contactsFromCache();
       if (!cached.length) {
-        this.$store.dispatch('messenger/refreshContactSyncAction').catch(() => {});
+        this.messengerStore.refreshContactSyncAction().catch(() => {});
         return;
       }
-      this.$store.dispatch('messenger/syncContactsAction', cached).catch(() => {});
+      this.messengerStore.syncContactsAction(cached).catch(() => {});
     },
     autoDlSummary(context) {
       return autoDownloadContextSummary(this.settings, context, (k) => this.$t(k));
@@ -2667,18 +2670,18 @@ export default {
     toggleAutoDl(mediaKey, value) {
       const ctx = this.dataContextKey;
       if (!ctx) return;
-      this.$store.dispatch('messenger/saveSettings', {
+      this.messengerStore.saveSettings({
         auto_download: { [ctx]: { [mediaKey]: !!value } },
       });
     },
     toggleAutoPlay(kind, value) {
-      this.$store.dispatch('messenger/saveSettings', {
+      this.messengerStore.saveSettings({
         auto_play: { [kind]: !!value },
       });
     },
     async openE2eRecoveryPage() {
       this.e2eRecoveryForm = { phrase: '', confirm: '', error: '', ok: '', busy: false, mode: 'setup' };
-      const status = await this.$store.dispatch('messenger/fetchE2eRecoveryStatus').catch(() => this.e2eRecovery);
+      const status = await this.messengerStore.fetchE2eRecoveryStatus().catch(() => this.e2eRecovery);
       if (status?.pending && status?.hasBackup) this.e2eRecoveryForm.mode = 'restore';
       else if (status?.pending && !status?.hasBackup) this.e2eRecoveryForm.mode = 'locked';
       else this.e2eRecoveryForm.mode = 'setup';
@@ -2707,11 +2710,11 @@ export default {
       this.e2eRecoveryForm.busy = true;
       try {
         if (this.e2eRecoveryForm.mode === 'restore') {
-          await this.$store.dispatch('messenger/restoreE2eFromRecovery', phrase);
+          await this.messengerStore.restoreE2eFromRecovery(phrase);
           this.e2eRecoveryForm.ok = this.$t('messenger.e2eRecoveryUnlocked');
           this.e2eRecoveryForm.mode = 'setup';
         } else {
-          await this.$store.dispatch('messenger/enableE2eRecovery', phrase);
+          await this.messengerStore.enableE2eRecovery(phrase);
           this.e2eRecoveryForm.ok = this.$t('messenger.e2eRecoverySaved');
         }
         this.e2eRecoveryForm.phrase = '';
@@ -2890,7 +2893,7 @@ export default {
       this.uploading = true;
       try {
         await deleteProfilePic();
-        await this.$store.dispatch('auth/getUser');
+        await this.authStore.getUser();
         this.avatarViewer.open = false;
       } catch (e) { /* noop */ } finally {
         this.uploading = false;
