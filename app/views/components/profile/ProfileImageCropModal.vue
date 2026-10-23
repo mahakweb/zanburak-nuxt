@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <BottomSheetDrawer
         v-model="isOpen"
         :initial-height="0.88"

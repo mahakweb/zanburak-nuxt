@@ -85,7 +85,7 @@
                     </div>
                     <div class="pt-4">
                         <form @submit.prevent="addComment">
-                            <EditorComponent :submitButton="true" :cancelButton="true" :cancelCallback="hideCommentForm" :errors="errors && errors.comment ? errors.comment[0] : ''" v-model="content"> </EditorComponent>
+                            <EditorComponent ref="commentEditor" :submitButton="true" :cancelButton="true" :cancelCallback="hideCommentForm" :errors="errors && errors.comment ? errors.comment[0] : ''" v-model="content"> </EditorComponent>
                         </form>
                     </div>
                 </div>
@@ -339,6 +339,7 @@ export default {
             message: null,
             currentButtonFormShownId: null,
             showCommentForm: false,
+            submitting: false,
             expandedChilds: {},
             loadingChilds: {},
         };
@@ -439,6 +440,13 @@ export default {
             this.showCommentForm = false;
             this.parent_id = null;
         },
+        resetCommentEditor() {
+            this.content = "";
+            this.errors = null;
+            this.$nextTick(() => {
+                this.$refs.commentEditor?.reset?.();
+            });
+        },
         commentForm(id, event) {
             if (this.currentButtonFormShownId === id && this.showCommentForm === true) {
                 this.hideCommentForm();
@@ -475,27 +483,38 @@ export default {
             }, 10);
         },
         addComment() {
-            if (this.content.trim() !== "") {
-                this.errors = null;
-                axiosInstance
-                    .post("/comments/store", { type: this.type, id: this.id, comment: this.content, parent_id: this.parent_id })
-                    .then(() => {
-                        toast.success(this.$t("comments.submitSuccess"), {
-                            theme: "colored",
-                            hideProgressBar: false,
-                            rtl: localStorage.getItem("direction") === "rtl",
-                            bodyClassName: "font-YekanBakh",
-                            toastClassName: "rounded-xl text-sm font-semibold mb-4 mx-3 md:mx-0",
-                            transition: toast.TRANSITIONS.BOUNCE,
-                            position: toast.POSITION.BOTTOM_RIGHT,
-                        });
-                    })
-                    .catch((error) => {
-                        this.message = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
-
-                        this.errors = error.response.data.errors;
-                    });
+            const editorValue = this.$refs.commentEditor?.markdownEditor?.easymde?.value?.();
+            if (typeof editorValue === "string") {
+                this.content = editorValue;
             }
+            if (this.content.trim() === "" || this.submitting) {
+                return;
+            }
+            this.errors = null;
+            this.submitting = true;
+            axiosInstance
+                .post("/comments/store", { type: this.type, id: this.id, comment: this.content, parent_id: this.parent_id })
+                .then(() => {
+                    toast.success(this.$t("comments.submitSuccess"), {
+                        theme: "colored",
+                        hideProgressBar: false,
+                        rtl: localStorage.getItem("direction") === "rtl",
+                        bodyClassName: "font-YekanBakh",
+                        toastClassName: "rounded-xl text-sm font-semibold mb-4 mx-3 md:mx-0",
+                        transition: toast.TRANSITIONS.BOUNCE,
+                        position: toast.POSITION.BOTTOM_RIGHT,
+                    });
+                    this.resetCommentEditor();
+                    this.hideCommentForm();
+                })
+                .catch((error) => {
+                    this.message = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+
+                    this.errors = error.response?.data?.errors || null;
+                })
+                .finally(() => {
+                    this.submitting = false;
+                });
         },
 
         async toggleLike(comment) {

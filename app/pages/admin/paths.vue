@@ -85,7 +85,7 @@ definePageMeta({
 
                                     <div class="min-w-0 flex-1 pt-0.5">
                                         <div class="flex items-start justify-between gap-2">
-                                            <router-link :to="{ name: 'admin-path-edit', params: { pathSlug: path.slug } }" class="min-w-0 hover:opacity-80 transition-opacity">
+                                            <router-link :to="{ name: 'admin-path-details', params: { pathSlug: path.slug } }" class="min-w-0 hover:opacity-80 transition-opacity">
                                                 <h3 class="text-[13px] font-bold leading-5 text-gray-900 line-clamp-2 dark:text-white" :title="path.title">{{ path.title }}</h3>
                                             </router-link>
                                             <div class="shrink-0" @click.stop>
@@ -106,6 +106,9 @@ definePageMeta({
                                                     >
                                                         <PopoverPanel class="absolute top-full end-0 z-30 mt-2 flex w-max min-w-[8.5rem] flex-col rounded-lg bg-white p-2 text-start shadow-lg dark:bg-gray-900">
                                                             <ul class="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                                                <li>
+                                                                    <router-link :to="{ name: 'admin-path-details', params: { pathSlug: path.slug } }" class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">مشخصات مسیر</router-link>
+                                                                </li>
                                                                 <li>
                                                                     <router-link :to="{ name: 'path.show', params: { pathSlug: path.slug } }" class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">نمایش عمومی</router-link>
                                                                 </li>
@@ -172,7 +175,7 @@ definePageMeta({
                                 <div class="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
                                     <span class="text-[10px] text-gray-400 font-anjoman" dir="ltr">{{ formatDate(path.created_at) }}</span>
                                     <div class="flex shrink-0 items-center gap-1">
-                                        <router-link :to="{ name: 'path.show', params: { pathSlug: path.slug } }" class="inline-flex h-8 items-center justify-center rounded-lg bg-amber-400 px-2.5 text-[11px] font-bold text-gray-900 transition hover:bg-amber-500">مشاهده</router-link>
+                                        <router-link :to="{ name: 'admin-path-details', params: { pathSlug: path.slug } }" class="inline-flex h-8 items-center justify-center rounded-lg bg-amber-400 px-2.5 text-[11px] font-bold text-gray-900 transition hover:bg-amber-500">مشخصات</router-link>
                                         <router-link :to="{ name: 'admin-path-edit', params: { pathSlug: path.slug } }" class="inline-flex h-8 items-center justify-center rounded-lg bg-gray-100 px-2.5 text-[11px] font-bold text-gray-700 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">ویرایش</router-link>
                                     </div>
                                 </div>
@@ -206,10 +209,10 @@ definePageMeta({
                                             <div class="shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700">
                                                 <img v-if="path.icon" :src="path.icon" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'" />
                                             </div>
-                                            <div class="min-w-0">
+                                            <router-link :to="{ name: 'admin-path-details', params: { pathSlug: path.slug } }" class="min-w-0 hover:opacity-80 transition-opacity">
                                                 <div class="text-xs font-bold text-gray-900 dark:text-white line-clamp-1">{{ path.title }}</div>
                                                 <div v-if="path.english_title" class="text-[10px] text-gray-500 line-clamp-1 font-sans" dir="ltr">{{ path.english_title }}</div>
-                                            </div>
+                                            </router-link>
                                         </div>
                                     </td>
                                     <td class="px-1 py-3 text-start">
@@ -237,6 +240,7 @@ definePageMeta({
                                             <transition enter-active-class="transition duration-200 ease-out" enter-from-class="translate-y-1 opacity-0" enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-1 opacity-0">
                                                 <PopoverPanel class="absolute top-full end-0 z-30 mt-2 flex w-max min-w-[8.5rem] flex-col rounded-lg bg-white p-2 text-start shadow-lg dark:bg-gray-900">
                                                     <ul class="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                                        <li><router-link :to="{ name: 'admin-path-details', params: { pathSlug: path.slug } }" class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">مشخصات مسیر</router-link></li>
                                                         <li><router-link :to="{ name: 'path.show', params: { pathSlug: path.slug } }" class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">نمایش عمومی</router-link></li>
                                                         <li><router-link :to="{ name: 'admin-path-edit', params: { pathSlug: path.slug } }" class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">ویرایش مسیر</router-link></li>
                                                         <li v-can="'paths.delete'"><button type="button" class="block w-full px-4 py-2 text-start text-red-500 hover:rounded-lg hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-600" @click="openDeletePathModal(path.slug)">حذف مسیر</button></li>

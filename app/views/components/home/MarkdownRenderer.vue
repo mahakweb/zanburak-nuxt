@@ -24,6 +24,7 @@ import { setupCodeBlockChrome } from '@/utils/codeBlockChrome';
 import { extractLineHeight, stripContentMeta } from '@/utils/articleContentMeta';
 import { enhanceMarkdownAttachments } from '@/utils/markdownEnhancements';
 import { extractVideoSegments, parseTimeToSeconds } from '@/utils/videoSegments';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
 
 const props = defineProps({
     source: { type: String, default: '' },
@@ -84,7 +85,7 @@ const processedSource = computed(() => {
     const stripped = stripContentMeta(props.source || '');
     return preprocessLineHeightSyntax(preprocessColorSyntax(preprocessGfmTables(linkifyTimestamps(stripped))));
 });
-const renderedHtml = computed(() => markdown.render(processedSource.value));
+const renderedHtml = computed(() => sanitizeHtml(markdown.render(processedSource.value)));
 
 let clickHandlerBound = false;
 function bindTimestampClickHandler() {

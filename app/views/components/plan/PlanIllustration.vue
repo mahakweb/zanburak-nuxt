@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="plan-illustration w-full max-w-sm mx-auto">
                                 <svg class="w-full h-auto max-h-[260px] lg:max-h-[300px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 156" fill="none">
                             <path

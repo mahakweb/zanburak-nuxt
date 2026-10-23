@@ -6,7 +6,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         
         <template #breadcrumb-actions>

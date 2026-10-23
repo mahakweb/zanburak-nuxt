@@ -10,18 +10,16 @@ definePageMeta({
 <template>
     <MasterPage>
         <div class="relative overflow-hidden">
-            <!-- Decorative background glow -->
-            <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-                <div class="absolute -top-40 start-1/2 -translate-x-1/2 h-[36rem] w-[36rem] rounded-full bg-amber-300/25 dark:bg-amber-500/10 blur-3xl"></div>
-                <div class="absolute top-1/3 -end-40 h-96 w-96 rounded-full bg-yellow-200/40 dark:bg-yellow-500/5 blur-3xl"></div>
-                <div class="absolute bottom-0 -start-40 h-96 w-96 rounded-full bg-orange-200/30 dark:bg-orange-500/5 blur-3xl"></div>
+            <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden dark:hidden">
+                <div class="absolute top-1/3 -end-40 h-80 w-80 rounded-full bg-yellow-200/30 blur-3xl"></div>
+                <div class="absolute bottom-0 -start-40 h-80 w-80 rounded-full bg-orange-200/20 blur-3xl"></div>
             </div>
 
             <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
                 <!-- ===================== HERO ===================== -->
-                <section class="mx-auto max-w-3xl text-center pt-16 md:pt-24 pb-10">
-                    <span class="inline-flex items-center gap-2 rounded-full border border-amber-300/60 dark:border-amber-500/30 bg-amber-100/70 dark:bg-amber-500/10 px-4 py-1.5 text-sm font-bold text-amber-700 dark:text-amber-300">
+                <section class="mx-auto max-w-2xl text-center pt-12 md:pt-16 pb-8">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-amber-100/80 px-4 py-1.5 text-sm font-bold text-amber-700 dark:bg-white/5 dark:text-amber-300">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                             <path fill-rule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5z" clip-rule="evenodd"></path>
                         </svg>
@@ -36,7 +34,7 @@ definePageMeta({
                         </span>
                     </h1>
 
-                    <p class="mx-auto mt-8 max-w-2xl text-base font-medium leading-8 text-gray-500 dark:text-gray-400">{{ $t('req.intro') }}</p>
+                    <p class="mx-auto mt-5 max-w-xl text-sm font-medium leading-7 text-gray-500 dark:text-gray-400 sm:text-base sm:leading-8">{{ $t('req.intro') }}</p>
                 </section>
 
                 <!-- ===================== FORM ===================== -->
@@ -77,174 +75,153 @@ definePageMeta({
                     </div>
                 </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="mx-auto max-w-3xl">
+                        <ol class="mb-8 flex items-center justify-center gap-2 sm:gap-3">
+                            <li v-for="(item, index) in wizardSteps" :key="item.id" class="flex items-center gap-2 sm:gap-3">
+                                <button type="button" @click="goToStep(item.id)" class="group flex items-center gap-2">
+                                    <span
+                                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition"
+                                        :class="step > item.id
+                                            ? 'bg-amber-400 text-gray-900'
+                                            : step === item.id
+                                                ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                                                : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'"
+                                    >
+                                        <svg v-if="step > item.id" class="h-4 w-4" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        <span v-else>{{ item.id }}</span>
+                                    </span>
+                                    <span class="hidden text-xs font-bold sm:block" :class="step === item.id ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'">{{ item.label }}</span>
+                                </button>
+                                <span v-if="index < wizardSteps.length - 1" class="h-px w-8 bg-gray-200 sm:w-12 dark:bg-gray-700"></span>
+                            </li>
+                        </ol>
 
-                        <!-- ===== MAIN COLUMN ===== -->
-                        <div class="lg:col-span-8 space-y-6">
-
-                            <!-- Card: basics -->
-                            <div class="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 md:p-8 shadow-sm">
-                                <div class="flex items-center gap-3 mb-6">
-                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500">
-                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2M9 20h6M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </span>
-                                    <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.formHeading') }}</h2>
+                        <div class="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 md:p-8">
+                            <div v-show="step === 1" class="space-y-7">
+                                <div class="text-center">
+                                    <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.chooseType') }}</h2>
+                                    <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">{{ $t('req.projectType') }}</p>
                                 </div>
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                    <button
+                                        v-for="option in typeOptions"
+                                        :key="option.value"
+                                        type="button"
+                                        @click="type = option.value; stepError = ''"
+                                        class="flex flex-col items-center gap-3 rounded-2xl border px-4 py-5 text-center transition"
+                                        :class="type === option.value
+                                            ? 'border-amber-400 bg-amber-50 shadow-sm dark:border-amber-400 dark:bg-amber-400/10'
+                                            : errors && errors.type
+                                                ? 'border-rose-300 dark:border-rose-500/40'
+                                                : 'border-gray-200 hover:border-amber-300 dark:border-gray-700 dark:hover:border-amber-500/50'"
+                                    >
+                                        <span
+                                            class="flex h-12 w-12 items-center justify-center rounded-2xl"
+                                            :class="type === option.value ? 'bg-amber-400 text-gray-900' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-300'"
+                                            v-html="option.icon"
+                                        ></span>
+                                        <span class="text-sm font-extrabold text-gray-800 dark:text-white">{{ option.title }}</span>
+                                        <span class="text-xs font-medium leading-5 text-gray-500 dark:text-gray-400">{{ option.desc }}</span>
+                                    </button>
+                                </div>
+                                <div v-if="errors && errors.type" class="text-center text-xs font-semibold text-rose-500">{{ errors.type[0] }}</div>
 
-                                <!-- Title -->
-                                <div>
-                                    <label for="title" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.projectTitle') }}</label>
+                                <div class="mx-auto max-w-md">
+                                    <label for="title" class="mb-2 block text-center text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.projectTitle') }}</label>
                                     <input v-model="title" id="title" type="text"
-                                        class="h-11 w-full rounded-xl border bg-gray-50 dark:bg-gray-800/60 px-4 text-sm font-semibold text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30"
+                                        class="h-11 w-full rounded-xl border bg-gray-50 px-4 text-sm font-semibold text-gray-700 outline-none transition placeholder-gray-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:bg-gray-800/60 dark:text-gray-200 dark:placeholder-gray-500"
                                         :class="errors && errors.title ? 'border-rose-400 text-rose-500 focus:border-rose-400 focus:ring-rose-400/30' : 'border-gray-200 dark:border-gray-700'" />
                                     <span v-if="errors && errors.title" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.title[0] }}</span>
                                 </div>
+                                <p v-if="stepError" class="text-center text-xs font-semibold text-rose-500">{{ stepError }}</p>
+                            </div>
 
-                                <!-- Type -->
-                                <div class="mt-6">
-                                    <label class="mb-3 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.projectType') }}</label>
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                        <label class="relative cursor-pointer">
-                                            <input v-model="type" value="website" name="type" type="radio" class="peer sr-only" />
-                                            <div class="flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 transition hover:border-amber-300 peer-checked:border-amber-400 peer-checked:bg-amber-50 peer-checked:text-amber-600 dark:peer-checked:bg-amber-400/10 dark:peer-checked:text-amber-400"
-                                                :class="errors && errors.type ? 'border-rose-300 dark:border-rose-500/40' : 'border-gray-200 dark:border-gray-700'">
-                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 8h18M8 21h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                                    {{ $t('req.typeWebsite') }}
-                                            </div>
-                                </label>
-                                        <label class="relative cursor-pointer">
-                                            <input v-model="type" value="app" name="type" type="radio" class="peer sr-only" />
-                                            <div class="flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 transition hover:border-amber-300 peer-checked:border-amber-400 peer-checked:bg-amber-50 peer-checked:text-amber-600 dark:peer-checked:bg-amber-400/10 dark:peer-checked:text-amber-400"
-                                                :class="errors && errors.type ? 'border-rose-300 dark:border-rose-500/40' : 'border-gray-200 dark:border-gray-700'">
-                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="7" y="2" width="10" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                                    {{ $t('req.typeApp') }}
-                                            </div>
-                                </label>
-                                        <label class="relative cursor-pointer">
-                                            <input v-model="type" value="websiteAndApp" name="type" type="radio" class="peer sr-only" />
-                                            <div class="flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 transition hover:border-amber-300 peer-checked:border-amber-400 peer-checked:bg-amber-50 peer-checked:text-amber-600 dark:peer-checked:bg-amber-400/10 dark:peer-checked:text-amber-400"
-                                                :class="errors && errors.type ? 'border-rose-300 dark:border-rose-500/40' : 'border-gray-200 dark:border-gray-700'">
-                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 3 2 8.5 12 14l10-5.5L12 3ZM2 15.5 12 21l10-5.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-                                    {{ $t('req.typeBoth') }}
-                                            </div>
-                                </label>
+                            <div v-show="step === 2" class="space-y-8">
+                                <div>
+                                    <div class="mb-4 flex items-center gap-3">
+                                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500">
+                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                        </span>
+                                        <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.description') }}</h2>
                                     </div>
-                                    <div v-if="errors && errors.type" class="mt-3 text-xs font-semibold text-rose-500">{{ errors.type[0] }}</div>
+                                    <EditorComponent ref="editor" :focusedBorder="'1px #fbbf24 solid'" :errorBorder="'1px #f43f5e solid'" :submitButton="false" :cancelButton="false" :errors="errors && errors.description ? errors.description[0] : ''" v-model="description"></EditorComponent>
+                                </div>
+                                <div>
+                                    <div class="mb-4 flex items-center gap-3">
+                                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500">
+                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </span>
+                                        <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.attachFile') }}</h2>
+                                    </div>
+                                    <DropzoneComponent ref="dropzone" :errors="errors && errors.attach_file ? errors.attach_file[0] : ''" @uploaded-files="handleUploadedFiles" :headers="dropzoneHeader" :uploadUrl="`${apiBaseUrl}/request-project/upload-file`" :xhrTimeout="60000" :withCredentials="true" :maxSize="10485760" :allowedFormats="['jpg', 'jpeg', 'png', 'pdf', 'txt', 'rar', 'zip']" :maxFiles="1" :parallelUpload="false" :maxParallelUploads="3" :retryOnError="false" :bulkUpload="false" />
                                 </div>
                             </div>
 
-                            <!-- Card: description -->
-                            <div class="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 md:p-8 shadow-sm">
-                                <div class="flex items-center gap-3 mb-5">
-                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500">
-                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                                    </span>
-                                    <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.description') }}</h2>
+                            <div v-show="step === 3" class="space-y-6">
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="min_price" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.minBudget') }}</label>
+                                        <div class="relative">
+                                            <input v-model="formattedMinPrice" @input="onInputMinPrice" id="min_price" type="text" dir="ltr"
+                                                class="h-11 w-full rounded-xl border bg-gray-50 px-4 pe-16 text-center text-sm font-bold tracking-wider text-gray-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:bg-gray-800/60 dark:text-gray-200"
+                                                :class="errors && errors.min_price ? 'border-rose-400 text-rose-500' : 'border-gray-200 dark:border-gray-700'" />
+                                            <span class="pointer-events-none absolute inset-y-0 end-4 flex items-center text-xs font-bold text-gray-400">{{ $t('req.toman') }}</span>
+                                        </div>
+                                        <div v-if="minPriceInWords" class="mt-1.5 text-[0.68rem] font-medium text-gray-500 dark:text-gray-400">{{ minPriceInWords }} {{ $t('req.toman') }}</div>
+                                        <span v-if="errors && errors.min_price" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.min_price[0] }}</span>
+                                    </div>
+                                    <div>
+                                        <label for="max_price" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.maxBudget') }}</label>
+                                        <div class="relative">
+                                            <input v-model="formattedMaxPrice" @input="onInputMaxPrice" id="max_price" type="text" dir="ltr"
+                                                class="h-11 w-full rounded-xl border bg-gray-50 px-4 pe-16 text-center text-sm font-bold tracking-wider text-gray-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:bg-gray-800/60 dark:text-gray-200"
+                                                :class="errors && errors.max_price ? 'border-rose-400 text-rose-500' : 'border-gray-200 dark:border-gray-700'" />
+                                            <span class="pointer-events-none absolute inset-y-0 end-4 flex items-center text-xs font-bold text-gray-400">{{ $t('req.toman') }}</span>
+                                        </div>
+                                        <div v-if="maxPriceInWords" class="mt-1.5 text-[0.68rem] font-medium text-gray-500 dark:text-gray-400">{{ maxPriceInWords }} {{ $t('req.toman') }}</div>
+                                        <span v-if="errors && errors.max_price" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.max_price[0] }}</span>
+                                    </div>
                                 </div>
-                                <EditorComponent ref="editor" :focusedBorder="'1px #fbbf24 solid'" :errorBorder="'1px #f43f5e solid'" :submitButton="false" :cancelButton="false" :errors="errors && errors.description ? errors.description[0] : ''" v-model="description"></EditorComponent>
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="deadline" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.deadline') }}</label>
+                                        <input v-model="deadline" id="deadline" type="number" min="1" dir="ltr"
+                                            class="h-11 w-full rounded-xl border bg-gray-50 px-4 text-center text-sm font-bold tracking-wider text-gray-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:bg-gray-800/60 dark:text-gray-200"
+                                            :class="errors && errors.deadline ? 'border-rose-400 text-rose-500' : 'border-gray-200 dark:border-gray-700'" />
+                                        <span v-if="errors && errors.deadline" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.deadline[0] }}</span>
+                                    </div>
+                                    <div>
+                                        <label for="sample" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.sample') }}</label>
+                                        <input v-model="sample" id="sample" dir="ltr" type="url" placeholder="https://zanburak.ir"
+                                            class="h-11 w-full rounded-xl border bg-gray-50 px-4 text-sm font-semibold text-gray-700 outline-none transition placeholder-gray-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:bg-gray-800/60 dark:text-gray-200 dark:placeholder-gray-500"
+                                            :class="errors && errors.sample ? 'border-rose-400 text-rose-500' : 'border-gray-200 dark:border-gray-700'" />
+                                        <span v-if="errors && errors.sample" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.sample[0] }}</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Card: attachment -->
-                            <div class="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 md:p-8 shadow-sm">
-                                <div class="flex items-center gap-3 mb-5">
-                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500">
-                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                    </span>
-                                    <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.attachFile') }}</h2>
-                                </div>
-                                <DropzoneComponent ref="dropzone" :errors="errors && errors.attach_file ? errors.attach_file[0] : ''" @uploaded-files="handleUploadedFiles" :headers="dropzoneHeader" :uploadUrl="`${apiBaseUrl}/request-project/upload-file`" :xhrTimeout="60000" :withCredentials="true" :maxSize="10485760" :allowedFormats="['jpg', 'jpeg', 'png', 'pdf', 'txt', 'rar', 'zip']" :maxFiles="1" :parallelUpload="false" :maxParallelUploads="3" :retryOnError="false" :bulkUpload="false" />
-                            </div>
-                        </div>
-
-                        <!-- ===== SIDEBAR ===== -->
-                        <div class="lg:col-span-4 space-y-6">
-
-                            <!-- Card: budget -->
-                            <div class="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 md:p-7 shadow-sm">
-                                <div class="flex items-center gap-3 mb-6">
-                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-500">
-                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                    </span>
-                                    <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.minBudget') }} / {{ $t('req.maxBudget') }}</h2>
-                                </div>
-
-                                <!-- Min -->
-                                <label for="min_price" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.minBudget') }}</label>
-                                <div class="relative">
-                                    <input v-model="formattedMinPrice" @input="onInputMinPrice" id="min_price" type="text" dir="ltr"
-                                        class="h-11 w-full rounded-xl border bg-gray-50 dark:bg-gray-800/60 px-4 pe-16 text-center tracking-wider text-sm font-bold text-gray-700 dark:text-gray-200 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30"
-                                        :class="errors && errors.min_price ? 'border-rose-400 text-rose-500 focus:border-rose-400 focus:ring-rose-400/30' : 'border-gray-200 dark:border-gray-700'" />
-                                    <span class="pointer-events-none absolute inset-y-0 end-4 flex items-center text-xs font-bold text-gray-400 dark:text-gray-500">{{ $t('req.toman') }}</span>
-                                </div>
-                                <div v-if="minPriceInWords" class="mt-1.5 text-[0.68rem] font-medium text-gray-500 dark:text-gray-400">{{ minPriceInWords }} {{ $t('req.toman') }}</div>
-                                <span v-if="errors && errors.min_price" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.min_price[0] }}</span>
-
-                                <div class="my-5 flex items-center gap-3">
-                                    <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></span>
-                                    <span class="text-xs font-bold text-gray-400 dark:text-gray-500">{{ $t('req.to') }}</span>
-                                    <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></span>
-                                </div>
-
-                                <!-- Max -->
-                                <label for="max_price" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.maxBudget') }}</label>
-                                <div class="relative">
-                                    <input v-model="formattedMaxPrice" @input="onInputMaxPrice" id="max_price" type="text" dir="ltr"
-                                        class="h-11 w-full rounded-xl border bg-gray-50 dark:bg-gray-800/60 px-4 pe-16 text-center tracking-wider text-sm font-bold text-gray-700 dark:text-gray-200 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30"
-                                        :class="errors && errors.max_price ? 'border-rose-400 text-rose-500 focus:border-rose-400 focus:ring-rose-400/30' : 'border-gray-200 dark:border-gray-700'" />
-                                    <span class="pointer-events-none absolute inset-y-0 end-4 flex items-center text-xs font-bold text-gray-400 dark:text-gray-500">{{ $t('req.toman') }}</span>
-                                </div>
-                                <div v-if="maxPriceInWords" class="mt-1.5 text-[0.68rem] font-medium text-gray-500 dark:text-gray-400">{{ maxPriceInWords }} {{ $t('req.toman') }}</div>
-                                <span v-if="errors && errors.max_price" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.max_price[0] }}</span>
-                            </div>
-
-                            <!-- Card: deadline + sample -->
-                            <div class="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 md:p-7 shadow-sm">
-                                <div class="flex items-center gap-3 mb-6">
-                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-400/15 text-sky-500">
-                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </span>
-                                    <h2 class="text-lg font-extrabold text-gray-800 dark:text-white">{{ $t('req.deadline') }}</h2>
-                                </div>
-
-                                <label for="deadline" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.deadline') }}</label>
-                                <input v-model="deadline" id="deadline" type="number" min="1" dir="ltr"
-                                    class="h-11 w-full rounded-xl border bg-gray-50 dark:bg-gray-800/60 px-4 text-center tracking-wider text-sm font-bold text-gray-700 dark:text-gray-200 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30"
-                                    :class="errors && errors.deadline ? 'border-rose-400 text-rose-500 focus:border-rose-400 focus:ring-rose-400/30' : 'border-gray-200 dark:border-gray-700'" />
-                                <span v-if="errors && errors.deadline" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.deadline[0] }}</span>
-
-                                <div class="my-5 h-px bg-gray-100 dark:bg-gray-800"></div>
-
-                                <label for="sample" class="mb-2 block text-sm font-bold text-gray-600 dark:text-gray-300">{{ $t('req.sample') }}</label>
-                                <input v-model="sample" id="sample" dir="ltr" type="url" placeholder="https://zanburak.ir"
-                                    class="h-11 w-full rounded-xl border bg-gray-50 dark:bg-gray-800/60 px-4 text-sm font-semibold text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30"
-                                    :class="errors && errors.sample ? 'border-rose-400 text-rose-500 focus:border-rose-400 focus:ring-rose-400/30' : 'border-gray-200 dark:border-gray-700'" />
-                                <span v-if="errors && errors.sample" class="mt-2 block text-xs font-semibold text-rose-500">{{ errors.sample[0] }}</span>
-                            </div>
-
-                            <!-- Card: actions -->
-                            <div class="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 md:p-7 shadow-sm lg:sticky lg:top-6">
-                                <div class="flex flex-col gap-3">
-                                    <button @click="sendRequest" :disabled="loading || !isEmailVerified || !isMobileVerified"
-                                        class="group flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 px-5 text-sm font-bold text-gray-900 shadow-lg shadow-amber-500/30 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-lg">
-                                        <svg v-if="loading" class="w-5 h-5" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="25 25 50 50">
-                                            <circle class="stroke-current text-gray-900/30" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="200, 300"></circle>
-                                            <circle class="stroke-current text-gray-900" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="100, 200">
-                                                <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 50 50" to="360 50 50" dur="2.5s" repeatCount="indefinite"></animateTransform>
-                                                <animate attributeName="stroke-dashoffset" values="0;-30;-124" dur="1.25s" repeatCount="indefinite"></animate>
-                                                <animate attributeName="stroke-dasharray" values="0,200;110,200;110,200" dur="1.25s" repeatCount="indefinite"></animate>
-                                            </circle>
+                            <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <button v-if="step > 1" type="button" @click="prevStep" class="flex h-11 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-5 text-sm font-bold text-gray-600 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                                    {{ $t('req.prev') }}
+                                </button>
+                                <button v-else type="button" @click.prevent="resetForm" class="flex h-11 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-5 text-sm font-bold text-gray-600 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                                    {{ $t('req.resetForm') }}
+                                </button>
+                                <button v-if="step < 3" type="button" @click="nextStep" class="flex h-11 items-center justify-center gap-2 rounded-2xl bg-amber-400 px-6 text-sm font-bold text-gray-900 shadow-md shadow-amber-400/30 transition hover:bg-amber-300">
+                                    {{ $t('req.next') }}
+                                    <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </button>
+                                <button v-else type="button" @click="sendRequest" :disabled="loading || !isEmailVerified || !isMobileVerified" class="flex h-11 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 px-6 text-sm font-bold text-gray-900 shadow-md shadow-amber-400/30 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
+                                    <svg v-if="loading" class="h-5 w-5" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="25 25 50 50">
+                                        <circle class="stroke-current text-gray-900/30" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="200, 300"></circle>
+                                        <circle class="stroke-current text-gray-900" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="100, 200">
+                                            <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 50 50" to="360 50 50" dur="2.5s" repeatCount="indefinite"></animateTransform>
+                                            <animate attributeName="stroke-dashoffset" values="0;-30;-124" dur="1.25s" repeatCount="indefinite"></animate>
+                                            <animate attributeName="stroke-dasharray" values="0,200;110,200;110,200" dur="1.25s" repeatCount="indefinite"></animate>
+                                        </circle>
                                     </svg>
-                                        <template v-else>
-                                            {{ $t('req.submit') }}
-                                            <svg class="w-4 h-4 rtl:rotate-180 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                        </template>
-                                    </button>
-                                    <button @click.prevent="resetForm"
-                                        class="flex h-12 items-center justify-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-5 text-sm font-bold text-gray-600 dark:text-gray-300 transition hover:bg-gray-100 dark:hover:bg-gray-700">
-                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                        {{ $t('req.resetForm') }}
-                                    </button>
-                                </div>
+                                    <template v-else>{{ $t('req.submit') }}</template>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -285,23 +262,10 @@ apiBaseUrl: config.apiBaseUrl,
             attach_file: "",
             loading: false,
             errors: null,
-            
+            step: 1,
+            stepError: "",
             sendVerificationEmailLoading: false,
         };
-    },
-    computed: {
-        dropzoneHeader() {
-            const token = this.authStore.status.loggedIn ? getAuthTokenSync() : null;
-            const headers = {};
-            if (token) headers.Authorization = 'Bearer ' + token;
-            if (typeof document !== 'undefined') {
-                const xsrf = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
-                if (xsrf) {
-                    try { headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]); } catch { headers['X-XSRF-TOKEN'] = xsrf[1]; }
-                }
-            }
-            return headers;
-        },
     },
     methods: {
         async sendVerificationEmail() {
@@ -351,8 +315,38 @@ apiBaseUrl: config.apiBaseUrl,
             this.attach_file = "";
             this.loading = false;
             this.errors = null;
-            this.$refs.dropzone.reset();
-            this.$refs.editor.reset();
+            this.step = 1;
+            this.stepError = "";
+            this.$refs.dropzone?.reset();
+            this.$refs.editor?.reset();
+        },
+        goToStep(id) {
+            if (id === this.step) return;
+            if (id > 1 && (!this.title.trim() || !this.type)) {
+                this.stepError = this.$t("req.step1Required");
+                this.step = 1;
+                return;
+            }
+            this.stepError = "";
+            this.step = id;
+        },
+        nextStep() {
+            if (this.step === 1 && (!this.title.trim() || !this.type)) {
+                this.stepError = this.$t("req.step1Required");
+                return;
+            }
+            this.stepError = "";
+            if (this.step < 3) this.step += 1;
+        },
+        prevStep() {
+            this.stepError = "";
+            if (this.step > 1) this.step -= 1;
+        },
+        jumpToErrorStep(errors) {
+            if (!errors) return;
+            if (errors.title || errors.type) this.step = 1;
+            else if (errors.description || errors.attach_file) this.step = 2;
+            else this.step = 3;
         },
         async sendRequest() {
             this.loading = true;
@@ -411,8 +405,9 @@ apiBaseUrl: config.apiBaseUrl,
                         console.log(response.data);
                     },
                     (error) => {
-                        this.errors = error.response.data.errors;
-                        console.error(error.response.data.errors);
+                        this.errors = error.response?.data?.errors;
+                        this.jumpToErrorStep(this.errors);
+                        console.error(error.response?.data?.errors);
                     }
                 );
             } finally {
@@ -421,6 +416,18 @@ apiBaseUrl: config.apiBaseUrl,
         },
     },
     computed: {
+        dropzoneHeader() {
+            const token = this.authStore.status.loggedIn ? getAuthTokenSync() : null;
+            const headers = {};
+            if (token) headers.Authorization = 'Bearer ' + token;
+            if (typeof document !== 'undefined') {
+                const xsrf = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+                if (xsrf) {
+                    try { headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]); } catch { headers['X-XSRF-TOKEN'] = xsrf[1]; }
+                }
+            }
+            return headers;
+        },
         currentUser() {
             const info = this.authStore?.status?.userInfo;
             return info && info.value ? info.value : info;
@@ -438,6 +445,35 @@ apiBaseUrl: config.apiBaseUrl,
         },
         minPriceInWords() {
             return this.min_price ? PN.convert(parseInt(this.min_price.replace(/,/g, ""))) : "";
+        },
+        wizardSteps() {
+            return [
+                { id: 1, label: this.$t('req.stepBasics') },
+                { id: 2, label: this.$t('req.stepDetails') },
+                { id: 3, label: this.$t('req.stepBudget') },
+            ];
+        },
+        typeOptions() {
+            return [
+                {
+                    value: 'website',
+                    title: this.$t('req.typeWebsite'),
+                    desc: this.$t('req.typeWebsiteDesc'),
+                    icon: '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+                },
+                {
+                    value: 'app',
+                    title: this.$t('req.typeApp'),
+                    desc: this.$t('req.typeAppDesc'),
+                    icon: '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"><rect x="7" y="2" width="10" height="20" rx="2.2" stroke="currentColor" stroke-width="2"/><path d="M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+                },
+                {
+                    value: 'websiteAndApp',
+                    title: this.$t('req.typeBoth'),
+                    desc: this.$t('req.typeBothDesc'),
+                    icon: '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="14" height="11" rx="1.8" stroke="currentColor" stroke-width="2"/><path d="M7 19h4M9 15v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="15" y="9" width="7" height="12" rx="1.6" stroke="currentColor" stroke-width="2"/><path d="M18 18.5h1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+                },
+            ];
         },
     },
     mounted() {

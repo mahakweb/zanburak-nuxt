@@ -6,7 +6,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         
         <template #breadcrumb-actions>
@@ -21,10 +21,11 @@ definePageMeta({
         </template>
         <div class="min-w-0">
             <!-- Stats -->
-            <div v-if="!statsLoading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 mb-4">
+            <div v-if="!statsLoading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3 mb-4">
                 <AdminReportStatCard title="کل کامنت‌ها" :value="formatNumber(stats.total)" accent="blue" />
-                <AdminReportStatCard title="در انتظار تایید" :value="formatNumber(stats.pending)" accent="amber" subtitle="کامنت والد" />
+                <AdminReportStatCard title="در انتظار بررسی" :value="formatNumber(stats.pending)" accent="amber" />
                 <AdminReportStatCard title="تایید شده" :value="formatNumber(stats.approved)" accent="emerald" />
+                <AdminReportStatCard title="رد شده" :value="formatNumber(stats.rejected)" accent="rose" />
                 <AdminReportStatCard title="امروز" :value="formatNumber(stats.today)" accent="cyan" />
                 <AdminReportStatCard title="دوره‌ها" :value="formatNumber(stats.by_type?.course)" accent="violet" />
                 <AdminReportStatCard title="جلسات" :value="formatNumber(stats.by_type?.episode)" accent="rose" />
@@ -61,7 +62,7 @@ definePageMeta({
                             </select>
                         </div>
                         <div class="w-max">
-                            <div class="text-xs font-light text-gray-400 px-1 mb-1">وضعیت تایید:</div>
+                            <div class="text-xs font-light text-gray-400 px-1 mb-1">وضعیت:</div>
                             <select :value="selectedStatus.slug" @change="selectStatus($event.target.value)"
                                 class="w-full px-2 py-1 h-8 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-100 rounded-lg text-xs border-gray-300 dark:border-gray-700 focus:ring-0 focus:outline-none">
                                 <option v-for="(sta, key) in status" :key="key" :value="sta.slug">
@@ -134,12 +135,16 @@ definePageMeta({
                     <div v-else class="flex-1"></div>
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-2">
-                            <div class="w-4 h-1 rounded bg-gray-400 dark:bg-gray-600"></div>
-                            <span class="text-xs font-medium text-gray-400">در انتظار تایید</span>
+                            <div class="w-4 h-1 rounded bg-amber-400 dark:bg-amber-500"></div>
+                            <span class="text-xs font-medium text-gray-400">در انتظار بررسی</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-1 rounded bg-green-400 dark:bg-green-600"></div>
                             <span class="text-xs font-medium text-gray-400">تایید شده</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-1 rounded bg-rose-400 dark:bg-rose-600"></div>
+                            <span class="text-xs font-medium text-gray-400">رد شده</span>
                         </div>
                     </div>
                 </div>
@@ -149,7 +154,8 @@ definePageMeta({
                         class="h-8 px-2 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 rounded-lg text-xs focus:ring-0 focus:outline-none min-w-[9rem]">
                         <option value="">انتخاب عملیات...</option>
                         <option value="approve">تایید</option>
-                        <option value="unapprove">عدم تایید</option>
+                        <option value="pending">در انتظار بررسی</option>
+                        <option value="reject">رد</option>
                         <option value="delete">حذف</option>
                     </select>
                     <button type="button" @click="executeBulkAction" :disabled="!bulkAction || bulkLoading"
@@ -193,13 +199,11 @@ definePageMeta({
                                 <thead class="bg-amber-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                                     <tr class="text-xs font-semibold text-center">
                                         <th class="px-1 py-3 w-10"></th>
-                                        <th class="px-1 py-3 whitespace-nowrap text-center">کاربر</th>
-                                        <th class="px-1 py-3 whitespace-nowrap text-center">پوستر</th>
-                                        <th class="px-1 py-3 whitespace-nowrap text-center w-40"></th>
-                                        <th class="px-1 py-3 whitespace-nowrap text-start w-48">عنوان محتوا</th>
-                                        <th class="px-1 py-3 whitespace-nowrap text-start w-80">پیش‌نمایش کامنت</th>
-                                        <th class="px-1 py-3 whitespace-nowrap text-center">تاریخ ارسال</th>
-                                        <th class="px-1 py-3 whitespace-nowrap text-center">عملیات</th>
+                                        <th class="px-1 py-3 whitespace-nowrap text-start w-px">کاربر</th>
+                                        <th class="px-1 py-3 whitespace-nowrap text-start">محتوا</th>
+                                        <th class="px-1 py-3 whitespace-nowrap text-start w-64">پیش‌نمایش کامنت</th>
+                                        <th class="px-1 py-3 whitespace-nowrap text-center w-px">تاریخ ارسال</th>
+                                        <th class="px-1 py-3 whitespace-nowrap text-center w-px">عملیات</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y-4 divide-gray-100 dark:divide-gray-800">
@@ -207,11 +211,11 @@ definePageMeta({
                                         class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
                                         <td class="relative ps-2 pe-2 py-3 text-center" @click.stop>
                                             <div class="absolute start-0 top-[25%] w-1 h-[50%] rounded-e-lg"
-                                                :class="[item.approved ? 'bg-green-400 dark:bg-green-600' : 'bg-gray-400 dark:bg-gray-600']">
+                                                :class="commentStatusBarClass(item)">
                                             </div>
                                             <AdminBulkCheckbox v-model="selectedIds" :value="item.id" />
                                         </td>
-                                        <td class="px-1 py-3 whitespace-nowrap text-start">
+                                        <td class="px-1 py-3 whitespace-nowrap text-start w-px">
                                             <router-link v-if="item.user"
                                                 :to="{ name: 'admin-user-details', params: { username: item.user.username } }"
                                                 class="flex items-center gap-2 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
@@ -231,234 +235,92 @@ definePageMeta({
                                                         </svg>
                                                     </div>
                                                 </div>
-                                                <div class="flex flex-col">
-                                                    <span class="text-xs font-semibold">{{ item.user.first_name }} {{
+                                                <div class="flex flex-col min-w-0 max-w-[7.5rem]">
+                                                    <span class="text-xs font-semibold truncate">{{ item.user.first_name }} {{
                                                         item.user.last_name }}</span>
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400">@{{
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400 truncate">@{{
                                                         item.user.username }}</span>
                                                 </div>
                                             </router-link>
                                             <span v-else class="text-xs text-gray-500">کاربر حذف شده</span>
                                         </td>
-                                        <td class="px-1 py-3 whitespace-nowrap text-start">
-                                            <router-link v-if="getCommentableRoute(item)"
-                                                :to="getCommentableRoute(item)" class="flex items-center">
-                                                <div
-                                                    class="flex-shrink-0 w-20 h-12 bg-gray-100 dark:bg-opacity-10 rounded-lg border-2 border-gray-100 dark:border-opacity-10 overflow-hidden cursor-pointer hover:scale-105 duration-150">
+                                        <td class="px-1 py-3 text-start">
+                                            <div class="flex items-center gap-2 min-w-0 max-w-[18rem]">
+                                                <router-link v-if="getCommentableRoute(item)"
+                                                    :to="getCommentableRoute(item)"
+                                                    class="flex-shrink-0 w-16 h-10 bg-gray-100 dark:bg-opacity-10 rounded-lg border-2 border-gray-100 dark:border-opacity-10 overflow-hidden cursor-pointer hover:scale-105 duration-150">
+                                                    <img onerror="this.style.display='none'"
+                                                        v-if="getCommentablePoster(item)"
+                                                        class="w-full h-full object-cover"
+                                                        :src="getCommentablePoster(item)"
+                                                        :alt="getCommentableTitle(item)" />
+                                                </router-link>
+                                                <div v-else
+                                                    class="flex-shrink-0 w-16 h-10 bg-gray-100 dark:bg-opacity-10 rounded-lg border-2 border-gray-100 dark:border-opacity-10 overflow-hidden">
                                                     <img onerror="this.style.display='none'"
                                                         v-if="getCommentablePoster(item)"
                                                         class="w-full h-full object-cover"
                                                         :src="getCommentablePoster(item)"
                                                         :alt="getCommentableTitle(item)" />
                                                 </div>
-                                            </router-link>
-                                            <div v-else class="flex items-center">
-                                                <div
-                                                    class="flex-shrink-0 w-20 h-12 bg-gray-100 dark:bg-opacity-10 rounded-lg border-2 border-gray-100 dark:border-opacity-10 overflow-hidden">
-                                                    <img onerror="this.style.display='none'"
-                                                        v-if="getCommentablePoster(item)"
-                                                        class="w-full h-full object-cover hover:scale-105 duration-150"
-                                                        :src="getCommentablePoster(item)"
-                                                        :alt="getCommentableTitle(item)" />
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-1 py-3 text-start w-40">
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                <span
-                                                    class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-0.5 rounded-lg">
-                                                    {{ getCommentTypeTitle(item.type) }}
-                                                </span>
-                                                <span
-                                                    v-if="item.type === 'Episode' && item.commentable && item.commentable.course"
-                                                    class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
-                                                    دوره: {{ item.commentable.course.title }}
-                                                </span>
-                                                <span v-if="item.parent"
-                                                    class="text-xs text-amber-600 dark:text-amber-400 bg-amber-100/70 dark:bg-amber-800/50 px-2 py-0.5 rounded-lg">
-                                                    پاسخ
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td class="px-1 py-3 text-start w-48">
-                                            <div class="flex flex-col">
-                                                <router-link v-if="getCommentableRoute(item)"
-                                                    :to="getCommentableRoute(item)"
-                                                    class="text-sm text-gray-900 dark:text-white font-medium line-clamp-1 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors cursor-pointer"
-                                                    :title="getCommentableTitle(item)">
-                                                    {{ getCommentableTitle(item) }}
-                                                </router-link>
-                                                <div v-else
-                                                    class="mb-1 text-gray-900 dark:text-white font-bold line-clamp-1"
-                                                    :title="getCommentableTitle(item)">
-                                                    {{ getCommentableTitle(item) }}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-1 py-3 text-start w-80">
-                                            <Popover class="group relative">
-                                                <PopoverOverlay class="fixed inset-0 z-20 bg-black opacity-50" />
-                                                <PopoverButton
-                                                    class="w-full text-start focus:outline-none group-focus-within:z-30">
-                                                    <div
-                                                        class="text-xs font-medium text-gray-700 dark:text-gray-300 line-clamp-1 cursor-pointer transition-colors">
-                                                        <MarkdownRenderer :source="item.comment" />
+                                                <div class="min-w-0 flex flex-col gap-0.5">
+                                                    <router-link v-if="getCommentableRoute(item)"
+                                                        :to="getCommentableRoute(item)"
+                                                        class="text-xs text-gray-900 dark:text-white font-medium line-clamp-1 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
+                                                        :title="getCommentableTitle(item)">
+                                                        {{ getCommentableTitle(item) }}
+                                                    </router-link>
+                                                    <div v-else
+                                                        class="text-xs text-gray-900 dark:text-white font-medium line-clamp-1"
+                                                        :title="getCommentableTitle(item)">
+                                                        {{ getCommentableTitle(item) }}
                                                     </div>
-                                                </PopoverButton>
-                                                <transition enter-active-class="transition duration-200 ease-out"
-                                                    enter-from-class="translate-y-1 opacity-0"
-                                                    enter-to-class="translate-y-0 opacity-100"
-                                                    leave-active-class="transition duration-150 ease-in"
-                                                    leave-from-class="translate-y-0 opacity-100"
-                                                    leave-to-class="translate-y-1 opacity-0">
-                                                    <PopoverPanel
-                                                        class="absolute z-30 start-0 -mt-8 p-1.5 bg-white rounded-lg shadow-lg w-80 max-w-[90vw] dark:bg-gray-900 border-gray-200 dark:border-gray-700">
-                                                        <div
-                                                            class="text-xs font-medium text-gray-700 dark:text-gray-300 line-clamp-3">
-                                                            <MarkdownRenderer :source="item.comment" />
-                                                        </div>
-                                                    </PopoverPanel>
-                                                </transition>
-                                            </Popover>
-                                        </td>
-                                        <td class="px-1 py-3 whitespace-nowrap text-start">
-                                            <div dir="ltr"
-                                                class="whitespace-nowrap text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
-                                                {{ formatDateTime(item.created_at) }}
+                                                    <div class="flex items-center gap-1 flex-wrap">
+                                                        <span
+                                                            class="text-[10px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100/70 dark:bg-gray-800/50 px-1.5 py-0.5 rounded-md">
+                                                            {{ getCommentTypeTitle(item.type) }}
+                                                        </span>
+                                                        <span
+                                                            v-if="item.type === 'Episode' && item.commentable && item.commentable.course"
+                                                            class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-1">
+                                                            {{ item.commentable.course.title }}
+                                                        </span>
+                                                        <span v-if="item.parent"
+                                                            class="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-100/70 dark:bg-amber-800/50 px-1.5 py-0.5 rounded-md">
+                                                            پاسخ
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td class="px-1 py-3 whitespace-nowrap text-center">
-                                            <Popover class="group relative flex items-center justify-center">
-                                                <PopoverOverlay class="fixed inset-0 z-20 bg-black opacity-50" />
-                                                <PopoverButton
-                                                    class="text-gray-900 dark:text-white relative group-focus-within:z-30 focus:outline-none flex items-center justify-center">
-                                                    <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M8 12C9.10457 12 10 12.8954 10 14C10 15.1046 9.10457 16 8 16C6.89543 16 6 15.1046 6 14C6 12.8954 6.89543 12 8 12Z"
-                                                            fill="currentColor"></path>
-                                                        <path
-                                                            d="M8 6C9.10457 6 10 6.89543 10 8C10 9.10457 9.10457 10 8 10C6.89543 10 6 9.10457 6 8C6 6.89543 6.89543 6 8 6Z"
-                                                            fill="currentColor"></path>
-                                                        <path
-                                                            d="M10 2C10 0.89543 9.10457 -4.82823e-08 8 0C6.89543 4.82823e-08 6 0.895431 6 2C6 3.10457 6.89543 4 8 4C9.10457 4 10 3.10457 10 2Z"
-                                                            fill="currentColor"></path>
-                                                    </svg>
-                                                </PopoverButton>
-                                                <transition enter-active-class="transition duration-200 ease-out"
-                                                    enter-from-class="translate-y-1 opacity-0"
-                                                    enter-to-class="translate-y-0 opacity-100"
-                                                    leave-active-class="transition duration-150 ease-in"
-                                                    leave-from-class="translate-y-0 opacity-100"
-                                                    leave-to-class="translate-y-1 opacity-0">
-                                                    <PopoverPanel
-                                                        class="text-start flex flex-col z-30 end-10 absolute p-2 bg-white rounded-lg shadow w-max min-w-[10rem] dark:bg-gray-900 dark:divide-gray-800">
-                                                        <ul
-                                                            class="text-xs font-semibold text-gray-700 dark:text-gray-200 space-y-1">
-                                                            <li>
-                                                                <button
-                                                                    @click.prevent="openCommentModal(item, 'preview')"
-                                                                    class="flex items-center gap-2 w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors">
-                                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            d="M1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12Z"
-                                                                            stroke="currentColor" stroke-width="2">
-                                                                        </path>
-                                                                        <path
-                                                                            d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
-                                                                            stroke="currentColor" stroke-width="2">
-                                                                        </path>
-                                                                    </svg>
-                                                                    مشاهده
-                                                                </button>
-                                                            </li>
-                                                            <li>
-                                                                <button @click.prevent="openCommentModal(item, 'edit')"
-                                                                    class="flex items-center gap-2 w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors">
-                                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
-                                                                            stroke="currentColor" stroke-width="2"
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"></path>
-                                                                        <path
-                                                                            d="M18.5 2.5C18.8978 2.10218 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10218 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10218 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z"
-                                                                            stroke="currentColor" stroke-width="2"
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"></path>
-                                                                    </svg>
-                                                                    ویرایش
-                                                                </button>
-                                                            </li>
-                                                            <li>
-                                                                <button @click.prevent="openCommentModal(item, 'reply')"
-                                                                    class="flex items-center gap-2 w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors">
-                                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            d="M3 20L4.3 16.1C2.97643 14.1829 2.41421 11.8342 2.70827 9.52615C3.00233 7.21807 4.13228 5.09298 5.86763 3.55219C7.60299 2.01139 9.82179 1.15132 12.1388 1.12093C14.4558 1.09054 16.6996 1.89158 18.4798 3.37835C20.26 4.86512 21.4642 6.93647 21.8804 9.22764C22.2966 11.5188 21.8992 13.8871 20.7557 15.9139C19.6122 17.9407 17.7992 19.4988 15.6441 20.3077C13.489 21.1166 11.1218 21.1252 8.96 20.3317L3 20Z"
-                                                                            stroke="currentColor" stroke-width="2"
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"></path>
-                                                                        <path d="M9 9H15M9 13H12" stroke="currentColor"
-                                                                            stroke-width="2" stroke-linecap="round">
-                                                                        </path>
-                                                                    </svg>
-                                                                    پاسخ
-                                                                </button>
-                                                            </li>
-                                                            <li v-if="!item.approved">
-                                                                <button :disabled="loadingComments[item.id]"
-                                                                    @click.prevent="commentToggleApproval(item)"
-                                                                    class="flex items-center gap-2 w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors">
-                                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M20 6L9 17L4 12" stroke="currentColor"
-                                                                            stroke-width="2" stroke-linecap="round"
-                                                                            stroke-linejoin="round"></path>
-                                                                    </svg>
-                                                                    تایید
-                                                                </button>
-                                                            </li>
-                                                            <li v-else>
-                                                                <button :disabled="loadingComments[item.id]"
-                                                                    @click.prevent="commentToggleApproval(item)"
-                                                                    class="flex items-center gap-2 w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors">
-                                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M18 6L6 18M6 6L18 18"
-                                                                            stroke="currentColor" stroke-width="2"
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"></path>
-                                                                    </svg>
-                                                                    عدم تایید
-                                                                </button>
-                                                            </li>
-                                                            <li>
-                                                                <button :disabled="deleteLoading[item.id]"
-                                                                    @click.prevent="openDeleteCommentModal(item)"
-                                                                    class="flex items-center gap-2 w-full text-start p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 disabled:opacity-60 transition-colors text-rose-600 dark:text-rose-400">
-                                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            d="M3 6H5H21M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
-                                                                            stroke="currentColor" stroke-width="2"
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"></path>
-                                                                    </svg>
-                                                                    حذف
-                                                                </button>
-                                                            </li>
-                                                        </ul>
-                                                    </PopoverPanel>
-                                                </transition>
-                                            </Popover>
+                                        <td class="px-1 py-3 text-start w-64">
+                                            <AdminCommentPreview :text="item.comment"
+                                                @open="openCommentModal(item, 'preview')" />
+                                        </td>
+                                        <td class="px-1 py-3 w-px whitespace-nowrap text-center">
+                                            <div class="inline-flex flex-col items-center gap-1">
+                                                <CommentStatusBadge :comment="item" />
+                                                <div dir="ltr"
+                                                    class="whitespace-nowrap text-[11px] font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-1.5 py-0.5 rounded-md">
+                                                    {{ formatDateTime(item.created_at) }}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-1 py-3 w-px whitespace-nowrap text-center">
+                                            <AdminCommentRowActions
+                                                :item="item"
+                                                :approving="!!loadingComments[item.id]"
+                                                :deleting="!!deleteLoading[item.id]"
+                                                @view="openCommentModal($event, 'preview')"
+                                                @edit="openCommentModal($event, 'edit')"
+                                                @reply="openCommentModal($event, 'reply')"
+                                                @set-status="setCommentStatus"
+                                                @delete="openDeleteCommentModal"
+                                            />
                                         </td>
                                     </tr>
                                     <tr v-if="comments.length === 0" class="bg-white dark:bg-gray-900">
-                                        <td colspan="8" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                        <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                             کامنتی یافت نشد
                                         </td>
                                     </tr>
@@ -575,109 +437,22 @@ definePageMeta({
                                             <div class="text-xs text-gray-400 dark:text-gray-500">
                                                 {{ formatDateTime(comment.created_at) }}
                                             </div>
-                                            <div v-if="comment.approved"
-                                                class="whitespace-nowrap flex items-center text-xs font-medium text-green-800 dark:text-green-100 bg-green-100/70 dark:bg-green-800/50 px-2 py-0.5 rounded-lg">
-                                                <svg class="w-3 h-3 me-1" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round"></path>
-                                                </svg>
-                                                تایید شده
-                                            </div>
-                                            <div v-else
-                                                class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-200/70 dark:bg-gray-700/50 px-2 py-0.5 rounded-lg">
-                                                در انتظار تایید
-                                            </div>
+                                            <CommentStatusBadge :comment="comment" />
                                         </div>
-                                        <div class="hidden md:flex items-center gap-1">
-                                            <button @click.prevent="openCommentModal(comment, 'preview')"
-                                                class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                                مشاهده
-                                            </button>
-                                            <button @click.prevent="openCommentModal(comment, 'edit')"
-                                                class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800  transition-colors">
-                                                ویرایش
-                                            </button>
-                                            <button @click.prevent="openCommentModal(comment, 'reply')"
-                                                class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                                پاسخ
-                                            </button>
-                                            <button v-if="!comment.approved" :disabled="loadingComments[comment.id]"
-                                                @click.prevent="commentToggleApproval(comment)"
-                                                class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-                                                تایید
-                                            </button>
-                                            <button v-else :disabled="loadingComments[comment.id]"
-                                                @click.prevent="commentToggleApproval(comment)"
-                                                class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-orange-50 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300 transition-colors">
-                                                عدم تایید
-                                            </button>
-                                            <button :disabled="deleteLoading[comment.id]"
-                                                @click.prevent="openDeleteCommentModal(comment)"
-                                                class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors">
-                                                حذف
-                                            </button>
-                                        </div>
-                                        <Popover class="md:hidden group relative">
-                                            <PopoverOverlay class="fixed inset-0 z-20 bg-black opacity-30" />
-                                            <PopoverButton
-                                                class="p-1 text-gray-900 dark:text-white hover:bg-white dark:hover:bg-gray-900 rounded-md relative group-focus-within:z-30 focus:outline-none flex items-center justify-center">
-                                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg"
-                                                    fill="currentColor" viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0">
-                                                    </path>
-                                                </svg>
-                                            </PopoverButton>
-                                            <transition enter-active-class="transition duration-200 ease-out"
-                                                enter-from-class="translate-y-1 opacity-0"
-                                                enter-to-class="translate-y-0 opacity-100"
-                                                leave-active-class="transition duration-150 ease-in"
-                                                leave-from-class="translate-y-0 opacity-100"
-                                                leave-to-class="translate-y-1 opacity-0">
-                                                <PopoverPanel
-                                                    class="text-start flex flex-col z-30 mt-3 end-0 absolute p-2 bg-white rounded-lg shadow w-max min-w-[8rem] dark:bg-gray-700 dark:divide-gray-800">
-                                                    <ul class="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                                        <li>
-                                                            <button type="button"
-                                                                @click.prevent="openCommentModal(comment, 'preview')"
-                                                                class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">مشاهده</button>
-                                                        </li>
-                                                        <li>
-                                                            <button @click.prevent="openCommentModal(comment, 'edit')"
-                                                                class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">ویرایش</button>
-                                                        </li>
-                                                        <li>
-                                                            <button @click.prevent="openCommentModal(comment, 'reply')"
-                                                                class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">پاسخ</button>
-                                                        </li>
-                                                        <li>
-                                                            <button v-if="!comment.approved"
-                                                                :disabled="loadingComments[comment.id]"
-                                                                @click.prevent="commentToggleApproval(comment)"
-                                                                class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">تایید</button>
-                                                            <button v-else :disabled="loadingComments[comment.id]"
-                                                                @click.prevent="commentToggleApproval(comment)"
-                                                                class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">عدم
-                                                                تایید</button>
-                                                        </li>
-                                                        <li>
-                                                            <button :disabled="deleteLoading[comment.id]"
-                                                                @click.prevent="openDeleteCommentModal(comment)"
-                                                                class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-rose-600">حذف</button>
-                                                        </li>
-                                                    </ul>
-                                                </PopoverPanel>
-                                            </transition>
-                                        </Popover>
+                                        <AdminCommentRowActions
+                                            :item="comment"
+                                            :approving="!!loadingComments[comment.id]"
+                                            :deleting="!!deleteLoading[comment.id]"
+                                            @view="openCommentModal($event, 'preview')"
+                                            @edit="openCommentModal($event, 'edit')"
+                                            @reply="openCommentModal($event, 'reply')"
+                                            @set-status="setCommentStatus"
+                                            @delete="openDeleteCommentModal"
+                                        />
                                     </div>
                                     <hr class="border-t border-gray-200 dark:border-opacity-10 mx-1 my-2">
-                                    <div
-                                        class="rounded-lg text-xs font-medium leading-6 px-2 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300">
-                                        <p class="line-clamp-3">
-                                            <MarkdownRenderer :source="comment.comment"></MarkdownRenderer>
-                                        </p>
-                                    </div>
+                                    <AdminCommentPreview :text="comment.comment" wide
+                                        @open="openCommentModal(comment, 'preview')" />
                                     <DisclosureButton
                                         class="absolute end-3 -mb-10 mx-auto px-3 py-1 text-yellow-400 bg-gray-100 dark:bg-gray-800 text-xs font-semibold rounded-md"
                                         :class="{ 'hidden': !comment.children || comment.children.length == 0 }">{{
@@ -699,113 +474,22 @@ definePageMeta({
                                                     <div class="text-xs text-gray-400 dark:text-gray-500">
                                                         {{ formatDateTime(child.created_at) }}
                                                     </div>
-                                                    <div v-if="child.approved"
-                                                        class="whitespace-nowrap flex items-center text-xs font-medium text-green-800 dark:text-green-100 bg-green-100/70 dark:bg-green-800/50 px-2 py-0.5 rounded-lg">
-                                                        <svg class="w-3 h-3 me-1" viewBox="0 0 24 24" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M20 6L9 17L4 12" stroke="currentColor"
-                                                                stroke-width="2" stroke-linecap="round"
-                                                                stroke-linejoin="round"></path>
-                                                        </svg>
-                                                        تایید شده
-                                                    </div>
-                                                    <div v-else
-                                                        class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-200/70 dark:bg-gray-700/50 px-2 py-0.5 rounded-lg">
-                                                        در انتظار تایید
-                                                    </div>
+                                                    <CommentStatusBadge :comment="child" />
                                                 </div>
-                                                <div class="hidden md:flex items-center gap-1">
-                                                    <button @click.prevent="openCommentModal(child, 'preview')"
-                                                        class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                                        مشاهده
-                                                    </button>
-                                                    <button @click.prevent="openCommentModal(child, 'edit')"
-                                                        class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800  transition-colors">
-                                                        ویرایش
-                                                    </button>
-                                                    <button @click.prevent="openCommentModal(child, 'reply')"
-                                                        class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                                        پاسخ
-                                                    </button>
-                                                    <button v-if="!child.approved" :disabled="loadingComments[child.id]"
-                                                        @click.prevent="commentToggleApproval(child)"
-                                                        class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-                                                        تایید
-                                                    </button>
-                                                    <button v-else :disabled="loadingComments[child.id]"
-                                                        @click.prevent="commentToggleApproval(child)"
-                                                        class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-orange-50 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300 transition-colors">
-                                                        عدم تایید
-                                                    </button>
-                                                    <button :disabled="deleteLoading[child.id]"
-                                                        @click.prevent="openDeleteCommentModal(child)"
-                                                        class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors">
-                                                        حذف
-                                                    </button>
-                                                </div>
-                                                <Popover class="md:hidden group relative">
-                                                    <PopoverOverlay class="fixed inset-0 z-20 bg-black opacity-30" />
-                                                    <PopoverButton
-                                                        class="p-1 text-gray-900 dark:text-white hover:bg-white dark:hover:bg-gray-900 rounded-md relative group-focus-within:z-30 focus:outline-none flex items-center justify-center">
-                                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg"
-                                                            fill="currentColor" viewBox="0 0 16 16">
-                                                            <path
-                                                                d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0">
-                                                            </path>
-                                                        </svg>
-                                                    </PopoverButton>
-                                                    <transition enter-active-class="transition duration-200 ease-out"
-                                                        enter-from-class="translate-y-1 opacity-0"
-                                                        enter-to-class="translate-y-0 opacity-100"
-                                                        leave-active-class="transition duration-150 ease-in"
-                                                        leave-from-class="translate-y-0 opacity-100"
-                                                        leave-to-class="translate-y-1 opacity-0">
-                                                        <PopoverPanel
-                                                            class="text-start flex flex-col z-30 mt-3 end-0 absolute p-2 bg-white rounded-lg shadow w-max min-w-[8rem] dark:bg-gray-700 dark:divide-gray-800">
-                                                            <ul
-                                                                class="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                                                <li>
-                                                                    <button type="button"
-                                                                        @click.prevent="openCommentModal(child, 'preview')"
-                                                                        class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">مشاهده</button>
-                                                                </li>
-                                                                <li>
-                                                                    <button
-                                                                        @click.prevent="openCommentModal(child, 'edit')"
-                                                                        class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">ویرایش</button>
-                                                                </li>
-                                                                <li>
-                                                                    <button
-                                                                        @click.prevent="openCommentModal(child, 'reply')"
-                                                                        class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">پاسخ</button>
-                                                                </li>
-                                                                <li>
-                                                                    <button v-if="!child.approved"
-                                                                        :disabled="loadingComments[child.id]"
-                                                                        @click.prevent="commentToggleApproval(child)"
-                                                                        class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">تایید</button>
-                                                                    <button v-else :disabled="loadingComments[child.id]"
-                                                                        @click.prevent="commentToggleApproval(child)"
-                                                                        class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">عدم
-                                                                        تایید</button>
-                                                                </li>
-                                                                <li>
-                                                                    <button :disabled="deleteLoading[child.id]"
-                                                                        @click.prevent="openDeleteCommentModal(child)"
-                                                                        class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-rose-600">حذف</button>
-                                                                </li>
-                                                            </ul>
-                                                        </PopoverPanel>
-                                                    </transition>
-                                                </Popover>
+                                                <AdminCommentRowActions
+                                                    :item="child"
+                                                    :approving="!!loadingComments[child.id]"
+                                                    :deleting="!!deleteLoading[child.id]"
+                                                    @view="openCommentModal($event, 'preview')"
+                                                    @edit="openCommentModal($event, 'edit')"
+                                                    @reply="openCommentModal($event, 'reply')"
+                                                    @set-status="setCommentStatus"
+                                                    @delete="openDeleteCommentModal"
+                                                />
                                             </div>
                                             <hr class="border-t border-gray-200 dark:border-opacity-10 mx-1 my-2">
-                                            <div
-                                                class="rounded-lg text-sm font-light leading-6 p-2 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300">
-                                                <p class="line-clamp-3">
-                                                    <MarkdownRenderer :source="child.comment"></MarkdownRenderer>
-                                                </p>
-                                            </div>
+                                            <AdminCommentPreview :text="child.comment" wide
+                                                @open="openCommentModal(child, 'preview')" />
                                         </div>
                                     </DisclosurePanel>
                                 </transition>
@@ -1119,11 +803,17 @@ import PaginationComponent from "@/views/components/home/PaginationComponent.vue
 import EditorComponent from "@/views/components/editor/EditorComponent.vue";
 import MarkdownRenderer from "@/views/components/home/MarkdownRenderer.vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
-import { Popover, PopoverButton, PopoverPanel, PopoverOverlay, Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
+import AdminCommentRowActions from "@/views/components/admin/comment/AdminCommentRowActions.vue";
+import AdminCommentPreview from "@/views/components/admin/comment/AdminCommentPreview.vue";
+import CommentStatusBadge from "@/views/components/comment/CommentStatusBadge.vue";
+import commentModerationMixin from "@/utils/commentModerationMixin";
+import { applyCommentStatus, commentStatusBarClass, commentStatusFilterOptions, resolveStatusFilter } from "@/utils/commentStatus";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import moment from "moment";
 import "moment/locale/fa";
 export default {
 		setup() { return { adminCommentsStore: useAdminCommentsStore() } },
+    mixins: [commentModerationMixin],
     components: {
         AdminMasterPage,
         AdminReportStatCard,
@@ -1132,10 +822,9 @@ export default {
         PaginationComponent,
         EditorComponent,
         MarkdownRenderer,
-        Popover,
-        PopoverButton,
-        PopoverPanel,
-        PopoverOverlay,
+        AdminCommentRowActions,
+        AdminCommentPreview,
+        CommentStatusBadge,
         Disclosure,
         DisclosureButton,
         DisclosurePanel,
@@ -1145,7 +834,7 @@ export default {
         const urlParams = new URLSearchParams(window.location.search);
         const filterFromUrl = urlParams.get("filter") || "all";
         const sortFromUrl = urlParams.get("sort") || "newest";
-        const statusFromUrl = urlParams.get("status") || "all";
+        const statusFromUrl = resolveStatusFilter(urlParams.get("status") || "all");
         const pageFromUrl = parseInt(urlParams.get("page") || "1", 10);
         const viewModeFromUrl = urlParams.get("viewMode") || "table";
 
@@ -1160,11 +849,10 @@ export default {
             newest: { title: "جدیدترین", slug: "newest" },
             oldest: { title: "قدیمی‌ترین", slug: "oldest" },
         };
-        const status = {
-            all: { title: "همه", slug: "all" },
-            published: { title: "منتشر شده", slug: "published" },
-            unpublished: { title: "منتشر نشده", slug: "unpublished" },
-        };
+        const status = commentStatusFilterOptions().reduce((acc, item) => {
+            acc[item.slug] = { title: item.title, slug: item.slug };
+            return acc;
+        }, {});
 
         return {
             filters,
@@ -1184,6 +872,7 @@ export default {
                 total: 0,
                 pending: 0,
                 approved: 0,
+                rejected: 0,
                 today: 0,
                 by_type: { course: 0, episode: 0, path: 0, article: 0 },
             },
@@ -1486,34 +1175,7 @@ export default {
             }
             return null;
         },
-        async commentToggleApproval(comment) {
-            if (!comment || !comment.id) return;
-            this.loadingComments[comment.id] = true;
-            const wasUnapproved = !comment.approved;
-            try {
-                await axiosInstance.post("admin/comments/toggle-approval", {
-                    comment_id: comment.id,
-                });
-                comment.approved = !comment.approved;
-
-                // Update the Pinia count if comment was unapproved and now is approved
-                if (wasUnapproved && comment.approved) {
-                    this.adminCommentsStore.decreaseUnapprovedComments();
-                }
-                // If comment was approved and now is unapproved, increment
-                if (!wasUnapproved && !comment.approved) {
-                    this.adminCommentsStore.incrementUnapprovedComments();
-                }
-
-                showToastSuccess(comment.approved ? "کامنت تایید شد." : "کامنت عدم تایید شد.");
-                this.fetchStats();
-            } catch (error) {
-                console.error(error.response?.data || error);
-                showToastError("تغییر وضعیت کامنت با خطا مواجه شد.");
-            } finally {
-                this.loadingComments[comment.id] = false;
-            }
-        },
+        commentStatusBarClass,
         openDeleteCommentModal(comment) {
             this.commentForDelete = comment;
             this.showDeleteCommentModal = true;
@@ -1613,7 +1275,7 @@ export default {
                 });
 
                 if (this.selectedCommentForReplyApprovedCheck) {
-                    this.selectedComment.approved = true;
+                    applyCommentStatus(this.selectedComment, "approved");
                 }
 
                 showToastSuccess("پاسخ کامنت با موفقیت ثبت شد.");

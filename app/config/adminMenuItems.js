@@ -83,6 +83,12 @@ export const ADMIN_MENU_ITEMS = [
                             link: "admin-course-create",
                             icon: ``,
                         },
+                        {
+                            key: "course-requests",
+                            title: "درخواست‌های دوره",
+                            link: "admin-course-requests",
+                            icon: ``,
+                        },
                     ],
                 },
                 {
@@ -367,7 +373,7 @@ export const ADMIN_MENU_ITEMS = [
                     submenu: [
                         {
                             key: "comments",
-                            title: "مدیریت نظرات دوره‌ها",
+                            title: "مدیریت نظرات",
                             link: "admin-comments",
                             icon: ``,
                         },

@@ -24,7 +24,7 @@
                         </select>
                     </div>
                     <div class="w-max">
-                        <div class="text-xs font-light text-gray-400 px-1 mb-1">وضعیت تایید:</div>
+                        <div class="text-xs font-light text-gray-400 px-1 mb-1">وضعیت:</div>
                         <select :value="selectedStatus.slug" @change="selectStatus($event.target.value)"
                             class="w-full px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-100 rounded-lg text-xs  border-gray-300 dark:border-gray-700 focus:ring-0 focus:outline-none">
                             <option v-for="(sta, key) in status" :key="key" :value="sta.slug">
@@ -81,6 +81,51 @@
                 </div>
             </div>
 
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                <label v-if="viewMode === 'grid' && !loading && comments.length" class="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none">
+                    <AdminBulkCheckbox :checked="isAllSelected" :indeterminate="isIndeterminate" @change="toggleSelectAll" />
+                    انتخاب همه
+                </label>
+                <div v-else class="flex-1"></div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-1 rounded bg-amber-400 dark:bg-amber-500"></div>
+                        <span class="text-xs font-medium text-gray-400">در انتظار بررسی</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-1 rounded bg-green-400 dark:bg-green-600"></div>
+                        <span class="text-xs font-medium text-gray-400">تایید شده</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-1 rounded bg-rose-400 dark:bg-rose-600"></div>
+                        <span class="text-xs font-medium text-gray-400">رد شده</span>
+                    </div>
+                </div>
+            </div>
+
+            <AdminBulkActionBar :count="selectedIds.length">
+                <button type="button" :disabled="bulkLoading" @click="executeBulkAction('approve')"
+                    class="h-8 px-3 text-xs font-semibold text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50 disabled:opacity-50">
+                    تایید
+                </button>
+                <button type="button" :disabled="bulkLoading" @click="executeBulkAction('reject')"
+                    class="h-8 px-3 text-xs font-semibold text-rose-700 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50 disabled:opacity-50">
+                    رد
+                </button>
+                <button type="button" :disabled="bulkLoading" @click="executeBulkAction('pending')"
+                    class="h-8 px-3 text-xs font-semibold text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 disabled:opacity-50">
+                    در انتظار بررسی
+                </button>
+                <button type="button" :disabled="bulkLoading" @click="executeBulkAction('delete')"
+                    class="h-8 px-3 text-xs font-semibold text-rose-700 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50 disabled:opacity-50">
+                    حذف
+                </button>
+                <button type="button" @click="clearBulkSelection"
+                    class="h-8 px-3 text-xs font-semibold text-gray-600 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">
+                    لغو انتخاب
+                </button>
+            </AdminBulkActionBar>
+
             <!-- Table View -->
             <div v-show="viewMode === 'table'">
                 <div id="data-list">
@@ -89,6 +134,9 @@
                             class="min-w-full text-sm text-gray-700 dark:text-gray-300 rounded-lg divide-y-4 divide-gray-100 dark:divide-gray-800">
                             <thead class="bg-amber-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                                 <tr class="text-xs font-semibold text-start">
+                                    <th class="px-1 py-2 whitespace-nowrap text-start">
+                                        <AdminBulkCheckbox :checked="isAllSelected" :indeterminate="isIndeterminate" @change="toggleSelectAll" />
+                                    </th>
                                     <th class="px-1 py-3 whitespace-nowrap text-start">پوستر</th>
                                     <th class="px-1 py-3 whitespace-nowrap text-start w-48">عنوان محتوا</th>
                                     <th class="px-1 py-3 whitespace-nowrap text-start w-80">پیش‌نمایش کامنت</th>
@@ -98,8 +146,13 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y-4 divide-gray-100 dark:divide-gray-800">
-                                <tr v-for="(item, i) in comments" v-show="!loading" :key="i"
+                                <tr v-for="item in comments" v-show="!loading" :key="item.id"
                                     class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+                                    <td class="relative ps-2 pe-2 py-3 text-center" @click.stop>
+                                        <div class="absolute start-0 top-[25%] w-1 h-[50%] rounded-e-lg"
+                                            :class="commentStatusBarClass(item)"></div>
+                                        <AdminBulkCheckbox v-model="selectedIds" :value="item.id" />
+                                    </td>
                                     <td class="px-1 py-3 whitespace-nowrap text-start">
                                         <router-link v-if="getCommentableRoute(item)" :to="getCommentableRoute(item)"
                                             class="flex items-center">
@@ -167,19 +220,7 @@
                                         </Popover>
                                     </td>
                                     <td class="px-1 py-3 whitespace-nowrap text-start">
-                                        <div v-if="item.approved"
-                                            class="whitespace-nowrap flex items-center text-xs font-medium text-green-800 dark:text-green-100 bg-green-100/70 dark:bg-green-800/50 px-2 py-1 rounded-lg">
-                                            <svg class="w-4 h-4 me-2" viewBox="0 0 24 24" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round"></path>
-                                            </svg>
-                                            تایید شده
-                                        </div>
-                                        <div v-else
-                                            class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
-                                            در انتظار تایید
-                                        </div>
+                                        <CommentStatusBadge :comment="item" />
                                     </td>
                                     <td class="px-1 py-3 whitespace-nowrap text-start">
                                         <div dir="ltr"
@@ -244,29 +285,12 @@
                                                                 پاسخ
                                                             </button>
                                                         </li>
-                                                        <li v-if="!item.approved">
-                                                            <button :disabled="loadingComments[item.id]"
-                                                                @click.prevent="commentToggleApproval(item)"
-                                                                class="flex items-center gap-2 w-full text-start p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300 disabled:opacity-60 transition-colors text-emerald-600 dark:text-emerald-400">
-                                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2"
-                                                                        stroke-linecap="round" stroke-linejoin="round"></path>
-                                                                </svg>
-                                                                تایید
-                                                            </button>
-                                                        </li>
-                                                        <li v-else>
-                                                            <button :disabled="loadingComments[item.id]"
-                                                                @click.prevent="commentToggleApproval(item)"
-                                                                class="flex items-center gap-2 w-full text-start p-2 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300 disabled:opacity-60 transition-colors text-orange-600 dark:text-orange-400">
-                                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2"
-                                                                        stroke-linecap="round" stroke-linejoin="round"></path>
-                                                                </svg>
-                                                                عدم تایید
-                                                            </button>
+                                                        <li>
+                                                            <AdminCommentStatusActions
+                                                                variant="menu"
+                                                                :comment="item"
+                                                                :disabled="!!loadingComments[item.id]"
+                                                                @set-status="setCommentStatus" />
                                                         </li>
                                                         <li>
                                                             <button :disabled="deleteLoading[item.id]"
@@ -289,7 +313,7 @@
                                     </td>
                                 </tr>
                                 <tr v-if="comments.length === 0" class="bg-white dark:bg-gray-900">
-                                    <td colspan="7" class="px-4 py-12 text-center">
+                                    <td colspan="8" class="px-4 py-12 text-center">
                                         <div class="flex flex-col items-center justify-center">
                                             <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
                                                 <svg class="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -329,6 +353,7 @@
                             <div class="text-start w-full rounded-xl bg-gray-100 dark:bg-gray-800 p-2 md:p-3">
                             <!-- Content Info -->
                             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-300 dark:border-opacity-10">
+                                <AdminBulkCheckbox v-model="selectedIds" :value="comment.id" class="shrink-0" />
                                 <router-link v-if="getCommentableRoute(comment)" :to="getCommentableRoute(comment)"
                                     class="flex-shrink-0 w-16 h-10 bg-gray-200 dark:bg-opacity-20 rounded-lg border-2 border-gray-200 dark:border-opacity-10 overflow-hidden cursor-pointer hover:scale-105 duration-150">
                                     <img onerror="this.style.display='none'" v-if="getCommentablePoster(comment)"
@@ -369,19 +394,7 @@
                                     <div class="text-xs text-gray-400 dark:text-gray-500">
                                         {{ formatDateTime(comment.created_at) }}
                                     </div>
-                                    <div v-if="comment.approved"
-                                        class="whitespace-nowrap flex items-center text-xs font-medium text-green-800 dark:text-green-100 bg-green-100/70 dark:bg-green-800/50 px-2 py-0.5 rounded-lg">
-                                        <svg class="w-3 h-3 me-1" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round"></path>
-                                        </svg>
-                                        تایید شده
-                                    </div>
-                                    <div v-else
-                                        class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-200/70 dark:bg-gray-700/50 px-2 py-0.5 rounded-lg">
-                                        در انتظار تایید
-                                    </div>
+                                    <CommentStatusBadge :comment="comment" />
                                 </div>
                                 <div class="hidden md:flex items-center gap-1">
                                     <button @click.prevent="openCommentModal(comment, 'preview')"
@@ -392,16 +405,10 @@
                                         class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                                         پاسخ
                                     </button>
-                                    <button v-if="!comment.approved" :disabled="loadingComments[comment.id]"
-                                        @click.prevent="commentToggleApproval(comment)"
-                                        class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-                                        تایید
-                                    </button>
-                                    <button v-else :disabled="loadingComments[comment.id]"
-                                        @click.prevent="commentToggleApproval(comment)"
-                                        class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-orange-50 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300 transition-colors">
-                                        عدم تایید
-                                    </button>
+                                    <AdminCommentStatusActions
+                                        :comment="comment"
+                                        :disabled="!!loadingComments[comment.id]"
+                                        @set-status="setCommentStatus" />
                                     <button :disabled="deleteLoading[comment.id]"
                                         @click.prevent="openDeleteCommentModal(comment)"
                                         class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors">
@@ -437,12 +444,11 @@
                                                         class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">پاسخ</button>
                                                 </li>
                                                 <li>
-                                                    <button v-if="!comment.approved" :disabled="loadingComments[comment.id]"
-                                                        @click.prevent="commentToggleApproval(comment)"
-                                                        class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">تایید</button>
-                                                    <button v-else :disabled="loadingComments[comment.id]"
-                                                        @click.prevent="commentToggleApproval(comment)"
-                                                        class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">عدم تایید</button>
+                                                    <AdminCommentStatusActions
+                                                        variant="menu"
+                                                        :comment="comment"
+                                                        :disabled="!!loadingComments[comment.id]"
+                                                        @set-status="setCommentStatus" />
                                                 </li>
                                                 <li>
                                                     <button :disabled="deleteLoading[comment.id]"
@@ -481,19 +487,7 @@
                                             <div class="text-xs text-gray-400 dark:text-gray-500">
                                                 {{ formatDateTime(child.created_at) }}
                                             </div>
-                                            <div v-if="child.approved"
-                                                class="whitespace-nowrap flex items-center text-xs font-medium text-green-800 dark:text-green-100 bg-green-100/70 dark:bg-green-800/50 px-2 py-0.5 rounded-lg">
-                                                <svg class="w-3 h-3 me-1" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round"></path>
-                                                </svg>
-                                                تایید شده
-                                            </div>
-                                            <div v-else
-                                                class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-200/70 dark:bg-gray-700/50 px-2 py-0.5 rounded-lg">
-                                                در انتظار تایید
-                                            </div>
+                                            <CommentStatusBadge :comment="child" />
                                         </div>
                                         <div class="hidden md:flex items-center gap-1">
                                             <button @click.prevent="openCommentModal(child, 'preview')"
@@ -504,16 +498,10 @@
                                                 class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                                                 پاسخ
                                             </button>
-                                            <button v-if="!child.approved" :disabled="loadingComments[child.id]"
-                                                @click.prevent="commentToggleApproval(child)"
-                                                class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-                                                تایید
-                                            </button>
-                                            <button v-else :disabled="loadingComments[child.id]"
-                                                @click.prevent="commentToggleApproval(child)"
-                                                class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-orange-50 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300 transition-colors">
-                                                عدم تایید
-                                            </button>
+                                            <AdminCommentStatusActions
+                                                :comment="child"
+                                                :disabled="!!loadingComments[child.id]"
+                                                @set-status="setCommentStatus" />
                                             <button :disabled="deleteLoading[child.id]"
                                                 @click.prevent="openDeleteCommentModal(child)"
                                                 class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors">
@@ -549,12 +537,11 @@
                                                                 class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">پاسخ</button>
                                                         </li>
                                                         <li>
-                                                            <button v-if="!child.approved" :disabled="loadingComments[child.id]"
-                                                                @click.prevent="commentToggleApproval(child)"
-                                                                class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">تایید</button>
-                                                            <button v-else :disabled="loadingComments[child.id]"
-                                                                @click.prevent="commentToggleApproval(child)"
-                                                                class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">عدم تایید</button>
+                                                            <AdminCommentStatusActions
+                                                                variant="menu"
+                                                                :comment="child"
+                                                                :disabled="!!loadingComments[child.id]"
+                                                                @set-status="setCommentStatus" />
                                                         </li>
                                                         <li>
                                                             <button :disabled="deleteLoading[child.id]"
@@ -756,8 +743,18 @@ import moment from "moment";
 import "moment/locale/fa";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import CommentStatusBadge from "@/views/components/comment/CommentStatusBadge.vue";
+import AdminCommentStatusActions from "@/views/components/admin/comment/AdminCommentStatusActions.vue";
+import AdminBulkCheckbox from "@/views/components/admin/AdminBulkCheckbox.vue";
+import AdminBulkActionBar from "@/views/components/admin/AdminBulkActionBar.vue";
+import commentModerationMixin from "@/utils/commentModerationMixin";
+import { applyCommentStatus, commentStatusBarClass, commentStatusFilterOptions, resolveStatusFilter } from "@/utils/commentStatus";
+import { showToastError, showToastSuccess } from "@/utils/toastConfig";
+import { useAdminCommentsStore } from "@/stores/adminComments";
 
 export default {
+    setup() { return { adminCommentsStore: useAdminCommentsStore() } },
+    mixins: [commentModerationMixin],
     components: {
         LoadingComponent,
         PaginationComponent,
@@ -773,6 +770,10 @@ export default {
         Disclosure,
         DisclosureButton,
         DisclosurePanel,
+        CommentStatusBadge,
+        AdminCommentStatusActions,
+        AdminBulkCheckbox,
+        AdminBulkActionBar,
     },
     props: {
         username: {
@@ -784,7 +785,7 @@ export default {
         const urlParams = new URLSearchParams(window.location.search);
         const filterFromUrl = urlParams.get("filter") || "all";
         const sortFromUrl = urlParams.get("sort") || "newest";
-        const statusFromUrl = urlParams.get("status") || "all";
+        const statusFromUrl = resolveStatusFilter(urlParams.get("status") || "all");
         const pageFromUrl = parseInt(urlParams.get("page") || "1", 10);
         const viewModeFromUrl = urlParams.get("viewMode") || "table";
 
@@ -798,11 +799,10 @@ export default {
             newest: { title: "جدیدترین", slug: "newest" },
             oldest: { title: "قدیمی‌ترین", slug: "oldest" },
         };
-        const status = {
-            all: { title: "همه", slug: "all" },
-            published: { title: "منتشر شده", slug: "published" },
-            unpublished: { title: "منتشر نشده", slug: "unpublished" },
-        };
+        const status = commentStatusFilterOptions().reduce((acc, item) => {
+            acc[item.slug] = { title: item.title, slug: item.slug };
+            return acc;
+        }, {});
 
         return {
             bs: adminBottomSheetStyles,
@@ -834,9 +834,52 @@ export default {
             commentForDelete: null,
             // view mode
             viewMode: (viewModeFromUrl === 'table' || viewModeFromUrl === 'grid') ? viewModeFromUrl : 'table', // 'table' or 'grid'
+            selectedIds: [],
+            bulkLoading: false,
         };
     },
+    computed: {
+        visibleCommentIds() {
+            return this.comments.map((c) => c.id);
+        },
+        isAllSelected() {
+            return this.visibleCommentIds.length > 0
+                && this.visibleCommentIds.every((id) => this.selectedIds.includes(id));
+        },
+        isIndeterminate() {
+            const selectedOnPage = this.visibleCommentIds.filter((id) => this.selectedIds.includes(id)).length;
+            return selectedOnPage > 0 && selectedOnPage < this.visibleCommentIds.length;
+        },
+    },
     methods: {
+        commentStatusBarClass,
+        toggleSelectAll(event) {
+            if (event.target.checked) {
+                this.selectedIds = [...new Set([...this.selectedIds, ...this.visibleCommentIds])];
+            } else {
+                this.selectedIds = this.selectedIds.filter((id) => !this.visibleCommentIds.includes(id));
+            }
+        },
+        clearBulkSelection() {
+            this.selectedIds = [];
+        },
+        async executeBulkAction(action) {
+            if (!this.selectedIds.length || this.bulkLoading) return;
+            this.bulkLoading = true;
+            try {
+                const response = await axiosInstance.post("/admin/comments/bulk", {
+                    ids: this.selectedIds,
+                    action,
+                });
+                showToastSuccess(`${Number(response.data?.affected ?? this.selectedIds.length).toLocaleString("fa-IR")} مورد پردازش شد`);
+                this.clearBulkSelection();
+                await this.getComments();
+            } catch (error) {
+                showToastError(error.response?.data?.message || "خطا در عملیات گروهی");
+            } finally {
+                this.bulkLoading = false;
+            }
+        },
         selectFilter(slug) {
             this.selectedFilter = this.filters[slug] || this.filters.all;
             this.currentPage = 1;
@@ -934,6 +977,7 @@ export default {
                 this.comments = response.data.comments || [];
                 this.pagination = response.data.pagination || {};
                 this.currentPage = this.pagination.current_page || 1;
+                this.selectedIds = this.selectedIds.filter((id) => this.comments.some((c) => c.id === id));
 
                 if (this.mountedOnce) {
                     setTimeout(() => {
@@ -1025,20 +1069,6 @@ export default {
             }
             return null;
         },
-        async commentToggleApproval(comment) {
-            if (!comment || !comment.id) return;
-            this.loadingComments[comment.id] = true;
-            try {
-                await axiosInstance.post("admin/comments/toggle-approval", {
-                    comment_id: comment.id,
-                });
-                comment.approved = !comment.approved;
-            } catch (error) {
-                console.error(error.response?.data || error);
-            } finally {
-                this.loadingComments[comment.id] = false;
-            }
-        },
         openDeleteCommentModal(comment) {
             this.commentForDelete = comment;
             this.showDeleteCommentModal = true;
@@ -1113,7 +1143,7 @@ export default {
                 });
 
                 if (this.selectedCommentForReplyApprovedCheck) {
-                    this.selectedComment.approved = true;
+                    applyCommentStatus(this.selectedComment, "approved");
                 }
 
                 if (toast) {

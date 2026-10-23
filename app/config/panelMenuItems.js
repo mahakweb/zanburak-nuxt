@@ -47,7 +47,7 @@ export const PANEL_MENU_SECTIONS = [
 		key: "activity",
 		labelKey: "panel.menuActivity",
 		collapsible: true,
-		defaultOpen: false,
+		defaultOpen: true,
 		items: [
 			{
 				key: "financial",

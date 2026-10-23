@@ -227,6 +227,7 @@ import debounce from "lodash/debounce";
 import axiosInstance from "@/store/axiosInstance";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import { episodeShowRoute } from "@/utils/episodeRoute";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 export default {
     components: {
 
@@ -330,7 +331,7 @@ export default {
         highlightText(item, field) {
             const highlighted = item?._highlight?.[field];
             if (highlighted) {
-                return highlighted.replace(/<mark>/g, '<mark class="bg-yellow-300 text-gray-900 rounded px-0.5">');
+                return sanitizeHtml(highlighted.replace(/<mark>/g, '<mark class="bg-yellow-300 text-gray-900 rounded px-0.5">'));
             }
 
             const fallback = item?.[field] || "";

@@ -1,5 +1,4 @@
 <script setup>
-import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "profile-page",
   props: true,
@@ -72,7 +71,7 @@ definePageMeta({
                     <!-- Actions -->
                     <div class="flex flex-col items-center md:items-end gap-3 shrink-0">
                         <button
-                            v-if="!isLoggedin || user.id !== currentUser.id"
+                            v-if="!isLoggedin || user.id !== currentUser?.id"
                             @click="toggleFollow"
                             :disabled="followLoading"
                             type="button"
@@ -304,6 +303,7 @@ definePageMeta({
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
 import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import ProfilePageLoading from "@/views/page/profile/ProfilePageLoading.vue";
 import { ref } from "vue";
@@ -321,7 +321,6 @@ import "moment/locale/fa";
 import { useSEO } from "@/composables/useSEO";
 
 export default {
-		setup() { return { authStore: useAuthStore() } },
     components: {
         MasterPage,
         ProfilePageLoading,
@@ -358,10 +357,10 @@ export default {
     },
     computed: {
         isLoggedin() {
-            return this.authStore.status.loggedIn;
+            return useAuthStore().status?.loggedIn ?? false;
         },
         currentUser() {
-            return this.authStore.status.userInfo;
+            return useAuthStore().status?.userInfo ?? null;
         },
         authorDisplayName() {
             if (!this.user) return "";

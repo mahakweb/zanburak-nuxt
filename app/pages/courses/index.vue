@@ -186,8 +186,8 @@ provide('ssrCoursesBootstrap', ssrCoursesBootstrap)
                     </button>
                 </div>
 
-                <div class="mb-8 grid items-start gap-5 lg:grid-cols-12 lg:gap-6">
-                    <div id="courses-list" class="lg:col-span-9">
+                <div class="mb-8 grid gap-5 lg:grid-cols-12 lg:gap-6">
+                    <div id="courses-list" class="lg:col-span-9 lg:self-start">
                         <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div v-for="index in 6" :key="index">
                                 <CourseCard2Loading />
@@ -216,35 +216,43 @@ provide('ssrCoursesBootstrap', ssrCoursesBootstrap)
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div v-if="courses.length != 0" class="my-12 flex items-center justify-center">
-                            <PaginationComponent dir="ltr" :pagination="pagination" @updatePage="updatePage" />
+                            <div v-if="loadingMore" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <div v-for="index in 3" :key="`more-${index}`">
+                                    <CourseCard2Loading />
+                                </div>
+                            </div>
+                            <div v-if="hasMore" ref="loadMoreSentinel" class="h-10 w-full" aria-hidden="true"></div>
                         </div>
                     </div>
 
-                    <aside class="order-last space-y-4 lg:order-first lg:col-span-3">
-                        <div class="hidden lg:block">
-                            <CourseListFilters
-                                id-prefix="desktop"
-                                :sidebar-data="sidebarData"
-                                :filters="filters"
-                                :categories-expanded="categoriesExpanded"
-                                :category-preview-count="categoryPreviewCount"
-                                @change="getCourses()"
-                                @update:categories-expanded="categoriesExpanded = $event" />
-                        </div>
-                        <div class="rounded-2xl bg-white p-5 text-center ring-1 ring-slate-200/80 dark:bg-gray-900 dark:ring-white/10">
-                            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-500">
-                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 3l2.1 1.4 2.5-.3 1.3 2.2 2.2 1.3-.3 2.5L21 12l-1.2 2.1.3 2.5-2.2 1.3-1.3 2.2-2.5-.3L12 21l-2.1-1.2-2.5.3-1.3-2.2-2.2-1.3.3-2.5L3 12l1.2-2.1-.3-2.5 2.2-1.3 1.3-2.2 2.5.3L12 3z" stroke="currentColor" stroke-width="1.6" />
-                                    <path d="M9 12.2l1.8 1.8L15.2 9.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
+                    <aside class="courses-sidebar-col order-last lg:order-first lg:col-span-3">
+                        <div
+                            ref="sidebarPanel"
+                            class="courses-sidebar-panel space-y-4"
+                            :class="sidebarPinned ? 'is-pinned bg-white dark:bg-gray-900' : ''">
+                            <div class="hidden lg:block">
+                                <CourseListFilters
+                                    id-prefix="desktop"
+                                    :sidebar-data="sidebarData"
+                                    :filters="filters"
+                                    :categories-expanded="categoriesExpanded"
+                                    :category-preview-count="categoryPreviewCount"
+                                    @change="getCourses()"
+                                    @update:categories-expanded="categoriesExpanded = $event" />
                             </div>
-                            <h3 class="text-base font-extrabold text-gray-800 dark:text-gray-50">{{ $t('course.list.certificateTitle') }}</h3>
-                            <p class="mt-2 text-sm font-normal leading-7 text-gray-500 dark:text-gray-400">{{ $t('course.list.certificateDescription') }}</p>
-                            <NuxtLink :to="{ name: 'what-is-certification' }" class="mt-4 inline-flex text-sm font-bold text-amber-600 transition hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300">
-                                {{ $t('course.list.whatIsCertificate') }}
-                            </NuxtLink>
+                            <div class="rounded-2xl bg-white p-5 text-center ring-1 ring-slate-200/80 dark:bg-gray-900 dark:ring-white/10">
+                                <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-500">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 3l2.1 1.4 2.5-.3 1.3 2.2 2.2 1.3-.3 2.5L21 12l-1.2 2.1.3 2.5-2.2 1.3-1.3 2.2-2.5-.3L12 21l-2.1-1.2-2.5.3-1.3-2.2-2.2-1.3.3-2.5L3 12l1.2-2.1-.3-2.5 2.2-1.3 1.3-2.2 2.5.3L12 3z" stroke="currentColor" stroke-width="1.6" />
+                                        <path d="M9 12.2l1.8 1.8L15.2 9.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-base font-extrabold text-gray-800 dark:text-gray-50">{{ $t('course.list.certificateTitle') }}</h3>
+                                <p class="mt-2 text-sm font-normal leading-7 text-gray-500 dark:text-gray-400">{{ $t('course.list.certificateDescription') }}</p>
+                                <NuxtLink :to="{ name: 'what-is-certification' }" class="mt-4 inline-flex text-sm font-bold text-amber-600 transition hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300">
+                                    {{ $t('course.list.whatIsCertificate') }}
+                                </NuxtLink>
+                            </div>
                         </div>
                     </aside>
                 </div>
@@ -303,7 +311,6 @@ import MasterPage from "@/views/page/layouts/MasterPage.vue";
 import CourseCard2 from "@/views/components/course/CourseCard2.vue";
 import CourseCard2Loading from "@/views/components/course/CourseCard2Loading.vue";
 import CourseListFilters from "@/views/components/course/CourseListFilters.vue";
-import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import InstallmentImageBadge from "@/views/components/payment/InstallmentImageBadge.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
@@ -318,7 +325,6 @@ export default {
         CourseCard2,
         CourseCard2Loading,
         CourseListFilters,
-        PaginationComponent,
         BottomSheetDrawer,
         InstallmentImageBadge,
         SeoImage,
@@ -332,13 +338,16 @@ export default {
                 ? (localStorage.getItem("direction") || "rtl")
                 : "rtl",
             loading: true,
+            loadingMore: false,
             pathLoading: true,
             pagination: {},
             mounted: false,
+            sidebarPinned: false,
+            loadMoreObserver: null,
             sidebarData: null,
             courses: [],
             paths: [],
-            currentPage: this.$route.query.page ?? 1,
+            currentPage: 1,
             filters: {
                 type: [],
                 order: 'newest',
@@ -354,6 +363,11 @@ export default {
         activeFilterCount() {
             const orderExtra = this.filters.order && this.filters.order !== 'newest' ? 1 : 0;
             return this.filters.type.length + this.filters.cat.length + this.filters.status.length + orderExtra;
+        },
+        hasMore() {
+            const last = Number(this.pagination?.last_page) || 1;
+            const current = Number(this.pagination?.current_page) || Number(this.currentPage) || 1;
+            return current < last;
         },
         activeFilterChips() {
             const typeLabels = {
@@ -433,10 +447,6 @@ export default {
                 parts.push(`order=${this.filters.order}`);
             }
 
-            if (this.currentPage && Number(this.currentPage) !== 1) {
-                parts.push(`page=${this.currentPage}`);
-            }
-
             return parts.join('&');
         },
         syncBrowserUrl() {
@@ -493,12 +503,14 @@ export default {
         },
         async getCourses(resetPage = true) {
             this.loading = true;
+            this.loadingMore = false;
             this.createUrlWithParams(resetPage);
             await axiosInstance
                 .get('/courses', { params: this.getCourseApiParams() })
                 .then((response) => {
-                    this.courses = response.data.courses;
-                    this.pagination = response.data.pagination;
+                    this.courses = response.data.courses || [];
+                    this.pagination = response.data.pagination || {};
+                    this.currentPage = Number(this.pagination.current_page) || 1;
                     const el = document.getElementById("courses-list");
                     if (this.mounted && el && !this.isFilterDrawerOpen) {
                         setTimeout(() => {
@@ -514,11 +526,121 @@ export default {
                 .finally(() => {
                     this.loading = false;
                     this.mounted = true;
+                    this.$nextTick(() => {
+                        this.setupLoadMoreObserver();
+                        this.updateSidebarPin();
+                    });
                 });
         },
-        updatePage(value) {
-            this.currentPage = value;
-            this.getCourses(false);
+        loadMoreCourses() {
+            if (this.loading || this.loadingMore || !this.hasMore) {
+                return;
+            }
+
+            this.loadingMore = true;
+            const nextPage = Number(this.currentPage) + 1;
+            this.currentPage = nextPage;
+
+            axiosInstance
+                .get('/courses', { params: this.getCourseApiParams() })
+                .then((response) => {
+                    const incoming = response.data.courses || [];
+                    const existingIds = new Set(this.courses.map((course) => course.id));
+                    this.courses = [
+                        ...this.courses,
+                        ...incoming.filter((course) => course?.id == null || !existingIds.has(course.id)),
+                    ];
+                    this.pagination = response.data.pagination || this.pagination;
+                    this.currentPage = Number(this.pagination.current_page) || nextPage;
+                })
+                .catch((error) => {
+                    console.error("An error occurred:", error);
+                    this.currentPage = Math.max(1, nextPage - 1);
+                })
+                .finally(() => {
+                    this.loadingMore = false;
+                    this.$nextTick(() => {
+                        this.setupLoadMoreObserver();
+                    });
+                });
+        },
+        setupLoadMoreObserver() {
+            this.teardownLoadMoreObserver();
+            const sentinel = this.$refs.loadMoreSentinel;
+            if (!sentinel || !this.hasMore) {
+                return;
+            }
+
+            this.loadMoreObserver = new IntersectionObserver(
+                (entries) => {
+                    if (entries.some((entry) => entry.isIntersecting)) {
+                        this.loadMoreCourses();
+                    }
+                },
+                { root: null, rootMargin: "320px 0px", threshold: 0 }
+            );
+            this.loadMoreObserver.observe(sentinel);
+        },
+        teardownLoadMoreObserver() {
+            if (this.loadMoreObserver) {
+                this.loadMoreObserver.disconnect();
+                this.loadMoreObserver = null;
+            }
+        },
+        clearSidebarPinStyles(panel) {
+            this.sidebarPinned = false;
+            if (!panel) {
+                return;
+            }
+            panel.style.height = '';
+            panel.style.width = '';
+            panel.style.left = '';
+            panel.style.right = '';
+            panel.style.top = '';
+        },
+        updateSidebarPin() {
+            const panel = this.$refs.sidebarPanel;
+
+            if (!import.meta.client || window.innerWidth < 1024) {
+                this.clearSidebarPinStyles(panel);
+                return;
+            }
+            if (!panel) {
+                return;
+            }
+            const host = panel.parentElement;
+            const list = document.getElementById('courses-list');
+            if (!host) {
+                this.clearSidebarPinStyles(panel);
+                return;
+            }
+
+            const hostRect = host.getBoundingClientRect();
+            const listTop = list ? list.getBoundingClientRect().top : hostRect.top;
+            const footer = document.querySelector('footer');
+            const footerTop = footer
+                ? footer.getBoundingClientRect().top - 8
+                : Number.POSITIVE_INFINITY;
+
+            if (!this.sidebarPinned && listTop <= 8) {
+                this.sidebarPinned = true;
+            } else if (this.sidebarPinned && listTop > 72) {
+                this.sidebarPinned = false;
+            }
+
+            const usedTop = this.sidebarPinned ? 0 : Math.max(hostRect.top, 12);
+            const bottomLimit = Math.min(footerTop, hostRect.bottom, window.innerHeight);
+            panel.style.height = `${Math.max(0, Math.round(bottomLimit - usedTop))}px`;
+            panel.style.width = '';
+            panel.style.left = '';
+            panel.style.right = '';
+            panel.style.top = '';
+        },
+        onWindowScroll() {
+            this.updateSidebarPin();
+        },
+        onWindowResize() {
+            this.updateSidebarPin();
         },
         normalizeStatusFilters() {
             if (!this.sidebarData?.statuses?.length || !this.filters.status.length) {
@@ -567,6 +689,16 @@ export default {
             this.getPaths();
             this.getCourses(false);
         }
+
+        this.setupLoadMoreObserver();
+        this.updateSidebarPin();
+        window.addEventListener("scroll", this.onWindowScroll, { passive: true });
+        window.addEventListener("resize", this.onWindowResize, { passive: true });
+    },
+    beforeUnmount() {
+        this.teardownLoadMoreObserver();
+        window.removeEventListener("scroll", this.onWindowScroll);
+        window.removeEventListener("resize", this.onWindowResize);
     },
 
     created() {
@@ -617,9 +749,7 @@ export default {
             this.filters.order = query.order || 'newest';
         }
 
-        if (query.page) {
-            this.currentPage = Number(query.page) || 1;
-        }
+        this.currentPage = 1;
     },
 };
 </script>
@@ -671,5 +801,72 @@ export default {
 .paths-swiper :deep(.swiper-slide > article) {
     width: 100%;
     min-width: 0;
+}
+
+@media (min-width: 1024px) {
+    .courses-sidebar-col {
+        height: 0;
+        min-height: 100%;
+        overflow-anchor: none;
+    }
+
+    .courses-sidebar-panel {
+        position: sticky;
+        top: 0.75rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border-radius: 1.5rem;
+        overflow-anchor: none;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        transition:
+            top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+            padding 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+            border-radius 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 0.35s ease;
+    }
+
+    .courses-sidebar-panel::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+
+    .courses-sidebar-panel.is-pinned {
+        top: 0;
+        padding: 1rem 0.7rem;
+        border-radius: 0;
+        animation: courses-sidebar-dock 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .courses-sidebar-panel.is-pinned::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+}
+
+@keyframes courses-sidebar-dock {
+    from {
+        top: 0.75rem;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-radius: 1.5rem;
+    }
+    to {
+        top: 0;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        border-radius: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .courses-sidebar-panel,
+    .courses-sidebar-panel.is-pinned {
+        transition: none;
+        animation: none;
+    }
 }
 </style>

@@ -11,7 +11,7 @@
 					class="shrink-0 appearance-none w-5 h-5 rounded-lg bg-gray-200 checked:bg-yellow-400 focus:ring-2 focus:ring-yellow-400 focus:ring-offset-1 ring-offset-white dark:ring-offset-gray-800 focus:outline-none transition relative custom-checkbox"
 					:class="isSelected ? 'is-checked' : ''"
 				/>
-				<div v-html="notification.data.icon" class="border-gray-100 dark:border-gray-300/10 flex items-center justify-center rounded-full w-7 h-7 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400" :class="{ 'text-gray-700 dark:text-zinc-800 bg-yellow-400 dark:bg-yellow-400': !notification.read_at }"></div>
+				<div v-html="safeHtml(notification.data.icon)" class="border-gray-100 dark:border-gray-300/10 flex items-center justify-center rounded-full w-7 h-7 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400" :class="{ 'text-gray-700 dark:text-zinc-800 bg-yellow-400 dark:bg-yellow-400': !notification.read_at }"></div>
 			</div>
 			<div class="flex items-center">
 				<button @click="deleteNotification(notification.id)" class="border-gray-100 dark:border-gray-300/10 flex items-center justify-center rounded-full w-7 h-7 bg-white dark:bg-gray-900 text-rose-500 hover:bg-rose-400 hover:text-white dark:hover:text-white dark:hover:bg-rose-500 duration-200">
@@ -38,11 +38,12 @@
 				</button>
 			</div>
 		</div>
-		<div @click="notificationDetails(notification.id)" v-html="notification.data.message" class="cursor-pointer mt-3 md:mt-4 w-full rounded-xl bg-gray-100/50 p-1.5 px-3 md:px-1.5 dark:bg-gray-600/10 text-start text-xs text-gray-600 dark:text-gray-400 line-clamp-3 md:line-clamp-2 leading-6 min-h-[5rem] md:min-h-[3.4rem] " :class="{ 'font-semibold text-gray-700 dark:text-zinc-300': !notification.read_at }"></div>
+		<div @click="notificationDetails(notification.id)" v-html="safeHtml(notification.data.message)" class="cursor-pointer mt-3 md:mt-4 w-full rounded-xl bg-gray-100/50 p-1.5 px-3 md:px-1.5 dark:bg-gray-600/10 text-start text-xs text-gray-600 dark:text-gray-400 line-clamp-3 md:line-clamp-2 leading-6 min-h-[5rem] md:min-h-[3.4rem] " :class="{ 'font-semibold text-gray-700 dark:text-zinc-300': !notification.read_at }"></div>
 	</div>
 </template>
 
 <script>
+	import { sanitizeHtml } from "@/utils/sanitizeHtml";
 	export default {
 		data() {
 			return {
@@ -63,6 +64,9 @@
 	},
 
 	methods: {
+		safeHtml(value) {
+			return sanitizeHtml(value || "");
+		},
 		notificationDetails() {
 			this.$emit("notification-details", this.notification.id);
 		},

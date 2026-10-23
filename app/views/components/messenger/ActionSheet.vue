@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <ConfirmDialog
     :open="open"
     :title="title"

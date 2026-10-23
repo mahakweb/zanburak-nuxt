@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage
         :breadcrumb-title-override="course?.title"
         :breadcrumb-last-override="course?.title">

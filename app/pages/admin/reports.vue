@@ -5,7 +5,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         
         <template #breadcrumb-actions>
@@ -249,7 +249,7 @@ definePageMeta({
                                         :class="getReportStatusBarClass(item)"></div>
                                     <AdminBulkCheckbox v-model="selectedIds" :value="item.id" />
                                 </td>
-                                <td class="pط-1 py-3 whitespace-nowrap text-start">
+                                <td class="px-1 py-3 whitespace-nowrap text-start">
                                     <div class="flex items-center">
                                         <div
                                             class="flex-shrink-0 w-9 h-9 bg-gray-100 dark:bg-opacity-10 rounded-lg border-2 border-gray-200 border-opacity-30 dark:border-opacity-10 overflow-hidden">
@@ -284,44 +284,46 @@ definePageMeta({
                                     </div>
                                 </td>
                                 <td class="px-1 py-3 text-start">
-                                    <div class="max-w-xs">
-                                        <div v-if="item.reportable_type === 'question' && item.reportable" class="text-xs">
-                                            <div class="font-semibold text-gray-900 dark:text-white line-clamp-1">
+                                    <button v-if="item.reportable && getContentRoute(item)" type="button"
+                                        class="max-w-xs text-start group" @click="goToContent(item)">
+                                        <div v-if="item.reportable_type === 'question'" class="text-xs">
+                                            <div class="font-semibold text-gray-900 dark:text-white line-clamp-1 group-hover:text-amber-500 transition">
                                                 {{ item.reportable.subject || 'بدون عنوان' }}
                                             </div>
                                             <div class="text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
                                                 {{ item.reportable.question?.substring(0, 80) || '' }}
                                             </div>
                                         </div>
-                                        <div v-else-if="item.reportable_type === 'answer' && item.reportable" class="text-xs">
-                                            <div class="text-gray-500 dark:text-gray-400 line-clamp-2">
+                                        <div v-else-if="item.reportable_type === 'answer'" class="text-xs">
+                                            <div class="text-gray-500 dark:text-gray-400 line-clamp-2 group-hover:text-amber-500 transition">
                                                 {{ item.reportable.answer?.substring(0, 80) || '' }}
                                             </div>
                                         </div>
-                                        <div v-else-if="item.reportable_type === 'comment' && item.reportable" class="text-xs">
-                                            <div class="text-gray-500 dark:text-gray-400 line-clamp-2">
+                                        <div v-else-if="item.reportable_type === 'comment'" class="text-xs">
+                                            <div class="text-gray-500 dark:text-gray-400 line-clamp-2 group-hover:text-amber-500 transition">
                                                 {{ item.reportable.comment?.substring(0, 80) || '' }}
                                             </div>
                                         </div>
-                                        <div v-else-if="item.reportable_type === 'course' && item.reportable" class="text-xs">
-                                            <div class="font-semibold text-gray-900 dark:text-white line-clamp-1">
+                                        <div v-else-if="item.reportable_type === 'course'" class="text-xs">
+                                            <div class="font-semibold text-gray-900 dark:text-white line-clamp-1 group-hover:text-amber-500 transition">
                                                 {{ item.reportable.title || 'بدون عنوان' }}
                                             </div>
                                         </div>
-                                        <div v-else-if="item.reportable_type === 'article' && item.reportable" class="text-xs">
-                                            <router-link
-                                                :to="{ name: 'admin-article-details', params: { id: item.reportable.id } }"
-                                                class="font-semibold text-gray-900 dark:text-white line-clamp-1 hover:text-yellow-500 transition block">
+                                        <div v-else-if="item.reportable_type === 'article'" class="text-xs">
+                                            <div class="font-semibold text-gray-900 dark:text-white line-clamp-1 group-hover:text-amber-500 transition">
                                                 {{ item.reportable.title || 'بدون عنوان' }}
-                                            </router-link>
+                                            </div>
                                             <div v-if="item.reportable.excerpt" class="text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
                                                 {{ item.reportable.excerpt?.substring(0, 80) || '' }}
                                             </div>
                                         </div>
-                                        <div v-else
-                                            class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100/50 dark:bg-gray-800/30 px-2 py-1 rounded-lg w-max">
-                                            محتوای حذف شده
-                                        </div>
+                                    </button>
+                                    <div v-else-if="item.reportable" class="max-w-xs text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                                        {{ getContentPreview(item) }}
+                                    </div>
+                                    <div v-else
+                                        class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100/50 dark:bg-gray-800/30 px-2 py-1 rounded-lg w-max">
+                                        محتوای حذف شده
                                     </div>
                                 </td>
                                 <td class="px-1 py-3 whitespace-nowrap text-start">
@@ -351,10 +353,17 @@ definePageMeta({
                                     <div v-else class="text-xs text-gray-400 dark:text-gray-500">-</div>
                                 </td>
                                 <td class="px-1 py-3 text-start">
-                                    <div
-                                        class="max-w-xs text-xs text-gray-600 dark:text-gray-300 line-clamp-2 bg-gray-50/80 dark:bg-gray-800/30 px-2 py-1 rounded-lg">
-                                        {{ item.report || '-' }}
-                                    </div>
+                                    <button type="button" class="max-w-xs text-start" @click="openViewReport(item)">
+                                        <div
+                                            class="text-xs text-gray-600 dark:text-gray-300 bg-gray-50/80 dark:bg-gray-800/30 px-2 py-1 rounded-lg">
+                                            <div class="font-semibold text-gray-800 dark:text-gray-100 line-clamp-1">
+                                                {{ getReportReasonLabel(item.report) }}
+                                            </div>
+                                            <div v-if="item.report === 'other' && item.description" class="line-clamp-2 mt-0.5">
+                                                {{ item.description }}
+                                            </div>
+                                        </div>
+                                    </button>
                                 </td>
                                 <td class="px-1 py-3 whitespace-nowrap text-start">
                                     <div class="text-xs font-medium px-2 py-1 rounded-lg line-clamp-1 w-max"
@@ -368,73 +377,20 @@ definePageMeta({
                                         {{ formatDate(item.created_at) }}
                                     </div>
                                 </td>
-                                <td class="relative px-1 py-3 whitespace-nowrap text-center">
-                                    <Popover class="group flex items-center justify-center">
-                                        <PopoverOverlay class="fixed inset-0 z-20 bg-black opacity-50" />
-                                        <PopoverButton
-                                            class="text-gray-900 dark:text-white relative group-focus-within:z-30 focus:outline-none flex items-center justify-center p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-                                            <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M8 12C9.10457 12 10 12.8954 10 14C10 15.1046 9.10457 16 8 16C6.89543 16 6 15.1046 6 14C6 12.8954 6.89543 12 8 12Z"
-                                                    fill="currentColor" />
-                                                <path
-                                                    d="M8 6C9.10457 6 10 6.89543 10 8C10 9.10457 9.10457 10 8 10C6.89543 10 6 9.10457 6 8C6 6.89543 6.89543 6 8 6Z"
-                                                    fill="currentColor" />
-                                                <path
-                                                    d="M10 2C10 0.89543 9.10457 -4.82823e-08 8 0C6.89543 4.82823e-08 6 0.895431 6 2C6 3.10457 6.89543 4 8 4C9.10457 4 10 3.10457 10 2Z"
-                                                    fill="currentColor" />
-                                            </svg>
-                                        </PopoverButton>
-                                        <transition enter-active-class="transition duration-200 ease-out"
-                                            enter-from-class="translate-y-1 opacity-0"
-                                            enter-to-class="translate-y-0 opacity-100"
-                                            leave-active-class="transition duration-150 ease-in"
-                                            leave-from-class="translate-y-0 opacity-100"
-                                            leave-to-class="translate-y-1 opacity-0">
-                                            <PopoverPanel
-                                                class="text-start flex flex-col z-30 end-10 absolute p-2 bg-white rounded-lg shadow w-max min-w-[10rem] dark:bg-gray-900 dark:divide-gray-800">
-                                                <ul class="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                                    <li v-if="!item.status">
-                                                        <button type="button" @click="updateReportStatus(item.id, true)"
-                                                            class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                            علامت‌گذاری بررسی شده
-                                                        </button>
-                                                    </li>
-                                                    <li v-if="item.status">
-                                                        <button type="button" @click="updateReportStatus(item.id, false)"
-                                                            class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                            علامت‌گذاری بررسی نشده
-                                                        </button>
-                                                    </li>
-                                                    <li v-if="item.reportable && !isContentDeactivated(item)">
-                                                        <button type="button" @click="deactivateContent(item.id)"
-                                                            class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-orange-600 dark:text-orange-400">
-                                                            غیرفعال کردن محتوا
-                                                        </button>
-                                                    </li>
-                                                    <li v-if="item.reportable && isContentDeactivated(item)">
-                                                        <button type="button" @click="activateContent(item.id)"
-                                                            class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-green-600 dark:text-green-400">
-                                                            فعال کردن محتوا
-                                                        </button>
-                                                    </li>
-                                                    <li v-if="item.reportable">
-                                                        <button type="button" @click="openDeleteContentModal(item.id)"
-                                                            class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-rose-600 dark:text-rose-400">
-                                                            حذف محتوا
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button" @click="openDeleteReportModal(item.id)"
-                                                            class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-rose-600 dark:text-rose-400">
-                                                            حذف گزارش
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </PopoverPanel>
-                                        </transition>
-                                    </Popover>
+                                <td class="px-1 py-3 whitespace-nowrap text-center">
+                                    <AdminReportRowActions
+                                        :item="item"
+                                        :can-go-to-content="!!getContentRoute(item)"
+                                        :deactivated="isContentDeactivated(item)"
+                                        @view="openViewReport"
+                                        @goto="goToContent"
+                                        @resolve="(row) => updateReportStatus(row.id, true)"
+                                        @unresolve="(row) => updateReportStatus(row.id, false)"
+                                        @deactivate="(row) => deactivateContent(row.id)"
+                                        @activate="(row) => activateContent(row.id)"
+                                        @delete-content="(row) => openDeleteContentModal(row.id)"
+                                        @delete-report="(row) => openDeleteReportModal(row.id)"
+                                    />
                                 </td>
                             </tr>
                             <tr v-if="!loading && items.length === 0">
@@ -462,49 +418,72 @@ definePageMeta({
             </div>
         </div>
 
-        <!-- Delete Report Modal -->
-        <div v-if="showDeleteReportModal"
-            class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-            <div class="bg-white dark:bg-gray-900 rounded-xl w-[95%] md:w-[480px] p-5 shadow-xl">
-                <div class="text-sm font-semibold text-gray-800 dark:text-gray-50 mb-1">حذف گزارش</div>
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-5">
-                    از حذف این گزارش اطمینان دارید؟ این عمل قابل بازگشت نیست.
+        <BottomSheetDrawer
+            v-model="showViewReportModal"
+            :initial-height="0.58"
+            :max-height="0.86"
+            :min-height="0.4"
+            :auto-close-on-min="true"
+            :close-on-backdrop="true"
+            :lock-scroll="true"
+            :panel-class="bs.ADMIN_BS_PANEL_SM"
+            :content-class="bs.ADMIN_BS_CONTENT"
+            :backdrop-class="bs.ADMIN_BS_BACKDROP"
+            @update:model-value="(open) => { if (!open) closeViewReport() }">
+            <div v-if="viewingReport" class="flex h-full min-h-0 flex-col">
+                <div class="flex items-center gap-3 pb-4">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 3.75A.75.75 0 0 1 6.75 3h.5A.75.75 0 0 1 8 3.75V21a.75.75 0 0 1-1.5 0V3.75Z" />
+                            <path d="M8 4.6c2.12 1.36 4.38 1.9 7.12.86 1.7-.64 3.12-.5 4.13.18A.75.75 0 0 1 20.5 6.2v7.16a.75.75 0 0 1-1.12.65c-1.38-.86-3.14-1.12-5.13-.37-2.5.94-4.5.5-6.25-.58V4.6Z" />
+                        </svg>
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-sm text-gray-900 dark:text-white">جزئیات گزارش</div>
+                        <div class="mt-0.5 text-[11px] text-gray-400">{{ formatDate(viewingReport.created_at) }}</div>
+                    </div>
+                    <button v-if="getContentRoute(viewingReport)" type="button"
+                        class="inline-flex h-8 items-center rounded-lg bg-amber-400 px-3 text-xs text-gray-900"
+                        @click="goToContent(viewingReport)">
+                        رفتن به محتوا
+                    </button>
                 </div>
-                <div class="flex items-center justify-end gap-2">
-                    <button @click="closeDeleteReportModal"
-                        class="text-xs font-semibold px-4 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">
-                        انصراف
-                    </button>
-                    <button :disabled="deleteReportLoading" @click="deleteReport"
-                        class="text-xs font-semibold px-4 py-1.5 rounded-lg bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-50 min-w-[5rem]">
-                        <span v-if="deleteReportLoading">...</span>
-                        <span v-else>حذف</span>
-                    </button>
+                <div class="min-h-0 flex-1 space-y-2.5 overflow-auto pb-4 custom-scrollbar">
+                    <div class="rounded-2xl border border-gray-100 bg-gray-50/80 p-3.5 dark:border-white/10 dark:bg-gray-800/40">
+                        <div class="mb-1 text-[11px] text-gray-400">گزینه انتخاب‌شده</div>
+                        <div class="text-sm leading-6 text-gray-900 dark:text-white">{{ getReportReasonLabel(viewingReport.report) }}</div>
+                    </div>
+                    <div class="rounded-2xl border border-gray-100 bg-gray-50/80 p-3.5 dark:border-white/10 dark:bg-gray-800/40">
+                        <div class="mb-1 text-[11px] text-gray-400">متن توضیح سیستمی</div>
+                        <div class="text-sm leading-7 text-gray-600 dark:text-gray-300">{{ getReportReasonText(viewingReport.report) }}</div>
+                    </div>
+                    <div v-if="viewingReport.report === 'other' && viewingReport.description" class="rounded-2xl border border-rose-100 bg-rose-50/80 p-3.5 dark:border-rose-500/20 dark:bg-rose-500/10">
+                        <div class="mb-1 text-[11px] text-rose-400">متن واردشده توسط کاربر</div>
+                        <div class="whitespace-pre-wrap text-sm leading-7 text-gray-800 dark:text-gray-100">{{ viewingReport.description }}</div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </BottomSheetDrawer>
 
-        <!-- Delete Content Modal -->
-        <div v-if="showDeleteContentModal"
-            class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-            <div class="bg-white dark:bg-gray-900 rounded-xl w-[95%] md:w-[480px] p-5 shadow-xl">
-                <div class="text-sm font-semibold text-gray-800 dark:text-gray-50 mb-1">حذف محتوا</div>
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-5">
-                    از حذف این محتوا اطمینان دارید؟ تمام گزارش‌های مربوطه نیز حذف خواهند شد.
-                </div>
-                <div class="flex items-center justify-end gap-2">
-                    <button @click="closeDeleteContentModal"
-                        class="text-xs font-semibold px-4 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">
-                        انصراف
-                    </button>
-                    <button :disabled="deleteContentLoading" @click="deleteContent"
-                        class="text-xs font-semibold px-4 py-1.5 rounded-lg bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-50 min-w-[5rem]">
-                        <span v-if="deleteContentLoading">...</span>
-                        <span v-else>حذف</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <BottomSheetDrawer v-model="showDeleteReportModal" :panel-class="bs.ADMIN_BS_PANEL_SM">
+            <AdminBottomSheetConfirm
+                message="حذف گزارش"
+                description="از حذف این گزارش اطمینان دارید؟ این عمل قابل بازگشت نیست."
+                :loading="deleteReportLoading"
+                @cancel="closeDeleteReportModal"
+                @confirm="deleteReport"
+            />
+        </BottomSheetDrawer>
+
+        <BottomSheetDrawer v-model="showDeleteContentModal" :panel-class="bs.ADMIN_BS_PANEL_SM">
+            <AdminBottomSheetConfirm
+                message="حذف محتوا"
+                description="از حذف این محتوا اطمینان دارید؟ تمام گزارش‌های مربوطه نیز حذف خواهند شد."
+                :loading="deleteContentLoading"
+                @cancel="closeDeleteContentModal"
+                @confirm="deleteContent"
+            />
+        </BottomSheetDrawer>
 
         <LoadingComponent v-if="loading" class="" />
     </AdminMasterPage>
@@ -516,8 +495,11 @@ import AdminBulkCheckbox from "@/views/components/admin/AdminBulkCheckbox.vue";
 import AdminBulkActionBar from "@/views/components/admin/AdminBulkActionBar.vue";
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import axiosInstance from "@/store/axiosInstance";
-import { Popover, PopoverButton, PopoverPanel, PopoverOverlay } from "@headlessui/vue";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
+import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
+import AdminBottomSheetConfirm from "@/views/components/admin/bottomSheet/AdminBottomSheetConfirm.vue";
+import AdminReportRowActions from "@/views/components/admin/report/AdminReportRowActions.vue";
+import { ADMIN_BS_PANEL_SM, ADMIN_BS_CONTENT, ADMIN_BS_BACKDROP } from "@/views/components/admin/bottomSheet/adminBottomSheetStyles";
 import debounce from "lodash/debounce";
 
 export default {
@@ -526,8 +508,10 @@ export default {
         AdminBulkCheckbox,
         AdminBulkActionBar,
         LoadingComponent,
-        Popover, PopoverButton, PopoverPanel, PopoverOverlay,
         PaginationComponent,
+        BottomSheetDrawer,
+        AdminBottomSheetConfirm,
+        AdminReportRowActions,
     },
     data() {
         const statuses = [
@@ -565,13 +549,20 @@ export default {
             perPage: 20,
             perPages: [10, 20, 30, 50, 100],
             selectedIds: [],
+            showViewReportModal: false,
+            viewingReport: null,
             showDeleteReportModal: false,
             showDeleteContentModal: false,
             deleteReportLoading: false,
             deleteContentLoading: false,
             reportToDelete: null,
             contentToDelete: null,
-            currentPage: 1
+            currentPage: 1,
+            bs: {
+                ADMIN_BS_PANEL_SM,
+                ADMIN_BS_CONTENT,
+                ADMIN_BS_BACKDROP,
+            },
         };
     },
     computed: {
@@ -688,6 +679,78 @@ export default {
             this.currentPage = page;
             this.fetchReports();
         },
+        getReportReasonLabel(key) {
+            const labels = {
+                'spam': 'محتوای نامربوط، تبلیغاتی یا ارسال مکرر',
+                'offensive-writing': 'نوشته‌های توهین‌آمیز یا نامناسب',
+                'violation-of-rules': 'نقض قوانین و مقررات سایت',
+                'other': 'سایر موارد',
+            };
+            return labels[key] || key || '-';
+        },
+        getReportReasonText(key) {
+            const texts = {
+                'spam': 'این مطلب شامل محتوای نامربوط، تبلیغاتی یا ارسال مکرر است که هیچ ارتباطی با موضوع اصلی ندارد',
+                'offensive-writing': 'این مطلب حاوی نوشته‌های توهین‌آمیز، نژادپرستانه یا هر گونه محتوای نامناسب است که باعث آسیب رساندن به افراد یا گروه‌های مختلف می‌شود',
+                'violation-of-rules': 'این مطلب قوانین و مقررات سایت زنبورک را نقض کرده و باید مورد بازبینی قرار گیرد',
+                'other': 'اگر مورد دیگری به نظرتان می‌رسد که شامل هیچ‌یک از دسته‌بندی‌های بالا نمی‌شود، این گزینه را انتخاب کنید',
+            };
+            return texts[key] || '-';
+        },
+        openViewReport(item) {
+            this.viewingReport = item;
+            this.showViewReportModal = true;
+        },
+        closeViewReport() {
+            this.showViewReportModal = false;
+            this.viewingReport = null;
+        },
+        getContentPreview(item) {
+            const r = item?.reportable;
+            if (!r) return '';
+            if (item.reportable_type === 'question') return r.subject || r.question || '';
+            if (item.reportable_type === 'answer') return r.answer || '';
+            if (item.reportable_type === 'comment') return r.comment || '';
+            return r.title || '';
+        },
+        getContentRoute(item) {
+            if (!item?.reportable) return null;
+            const r = item.reportable;
+            const type = item.reportable_type;
+            if (type === 'question' && r.id) {
+                return { name: 'admin-question-details', params: { id: r.id } };
+            }
+            if (type === 'answer' && (r.question?.id || r.question_id)) {
+                return { name: 'admin-question-details', params: { id: r.question?.id || r.question_id } };
+            }
+            if (type === 'article' && r.id) {
+                return { name: 'admin-article-details', params: { id: r.id } };
+            }
+            if (type === 'course' && r.slug) {
+                return { name: 'admin-course-details', params: { courseSlug: r.slug } };
+            }
+            if (type === 'comment' && r.commentable) {
+                const parentType = r.commentable_type;
+                const parent = r.commentable;
+                if (parentType === 'question' && parent.id) {
+                    return { name: 'admin-question-details', params: { id: parent.id } };
+                }
+                if (parentType === 'article' && parent.id) {
+                    return { name: 'admin-article-details', params: { id: parent.id } };
+                }
+                if (parentType === 'course' && parent.slug) {
+                    return { name: 'admin-course-details', params: { courseSlug: parent.slug } };
+                }
+            }
+            return null;
+        },
+        goToContent(item) {
+            const route = this.getContentRoute(item);
+            if (route) this.$router.push(route);
+        },
+        actionError(error, fallback) {
+            return error?.response?.data?.error || error?.response?.data?.message || fallback;
+        },
         getTypeName(type) {
             const typeNames = {
                 'question': 'سوال',
@@ -761,7 +824,7 @@ export default {
             } catch (error) {
                 if (this.isRequestCanceled(error)) return;
                 console.error('Error updating report status:', error);
-                alert('خطا در به‌روزرسانی وضعیت گزارش');
+                alert(this.actionError(error, 'خطا در به‌روزرسانی وضعیت گزارش'));
             }
         },
         async deactivateContent(id) {
@@ -774,7 +837,7 @@ export default {
             } catch (error) {
                 if (this.isRequestCanceled(error)) return;
                 console.error('Error deactivating content:', error);
-                alert('خطا در غیرفعال کردن محتوا');
+                alert(this.actionError(error, 'خطا در غیرفعال کردن محتوا'));
             }
         },
         async activateContent(id) {
@@ -787,7 +850,7 @@ export default {
             } catch (error) {
                 if (this.isRequestCanceled(error)) return;
                 console.error('Error activating content:', error);
-                alert('خطا در فعال کردن محتوا');
+                alert(this.actionError(error, 'خطا در فعال کردن محتوا'));
             }
         },
         openDeleteReportModal(id) {
@@ -869,7 +932,7 @@ export default {
                 }
             } catch (error) {
                 console.error('Error deleting content:', error);
-                alert('خطا در حذف محتوا');
+                alert(this.actionError(error, 'خطا در حذف محتوا'));
             } finally {
                 this.deleteContentLoading = false;
             }
@@ -877,5 +940,3 @@ export default {
     }
 }
 </script>
-
-<style scoped></style>

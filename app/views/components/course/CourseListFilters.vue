@@ -63,7 +63,7 @@
             <h3 class="text-sm font-extrabold text-gray-800 dark:text-gray-50">{{ $t('course.list.courseCategory') }}</h3>
             <div class="mt-3 space-y-0.5">
                 <label
-                    v-for="(category, index) in visibleCategories"
+                    v-for="(category, index) in previewCategories"
                     :key="`${category.title}-${index}`"
                     class="filter-row"
                     :for="fieldId(`category-${index}`)">
@@ -76,9 +76,27 @@
                         @change="$emit('change')" />
                     <span class="min-w-0 flex-1 text-sm font-medium text-gray-800 dark:text-gray-200">{{ category.title }}</span>
                 </label>
+                <div v-if="extraCategories.length" class="category-more" :class="{ 'is-open': categoriesExpanded }">
+                    <div class="category-more__inner">
+                        <label
+                            v-for="(category, index) in extraCategories"
+                            :key="`${category.title}-extra-${index}`"
+                            class="filter-row"
+                            :for="fieldId(`category-extra-${index}`)">
+                            <input
+                                :id="fieldId(`category-extra-${index}`)"
+                                class="course-filter-checkbox"
+                                type="checkbox"
+                                :value="category.title"
+                                v-model="filters.cat"
+                                @change="$emit('change')" />
+                            <span class="min-w-0 flex-1 text-sm font-medium text-gray-800 dark:text-gray-200">{{ category.title }}</span>
+                        </label>
+                    </div>
+                </div>
             </div>
             <button
-                v-if="categories.length > categoryPreviewCount"
+                v-if="extraCategories.length"
                 type="button"
                 class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition"
                 @click="$emit('update:categoriesExpanded', !categoriesExpanded)">
@@ -124,9 +142,11 @@ export default {
         categories() {
             return this.sidebarData?.categories || [];
         },
-        visibleCategories() {
-            if (this.categoriesExpanded) return this.categories;
+        previewCategories() {
             return this.categories.slice(0, this.categoryPreviewCount);
+        },
+        extraCategories() {
+            return this.categories.slice(this.categoryPreviewCount);
         },
         typeOptions() {
             const data = this.sidebarData || {};
@@ -148,6 +168,21 @@ export default {
 </script>
 
 <style scoped>
+.category-more {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.category-more.is-open {
+    grid-template-rows: 1fr;
+}
+
+.category-more__inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
 .filter-row {
     display: flex;
     align-items: center;

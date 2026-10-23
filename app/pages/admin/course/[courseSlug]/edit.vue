@@ -6,7 +6,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link :to="{ name: 'admin-courses-list' }" :class="BTN_SECONDARY">
@@ -144,6 +144,12 @@ definePageMeta({
                                 <label for="publish"
                                     class="field-label">وضعیت
                                     انتشار</label>
+                                <div v-if="publish_status === 'pending'" class="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
+                                    این دوره در انتظار تایید انتشار است. ذخیره ویرایش این درخواست را لغو نمی‌کند.
+                                </div>
+                                <div v-else-if="publish_status === 'rejected' && publish_review?.comment" class="mb-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200">
+                                    دلیل رد انتشار: {{ publish_review.comment }}
+                                </div>
                                 <ul
                                     class="h-10 grid w-full gap-3 grid-cols-2 p-1 rounded-lg bg-gray-100 dark:bg-gray-700">
                                     <li>
@@ -158,17 +164,21 @@ definePageMeta({
                                     </li>
                                     <li>
                                         <input v-model="publish" type="radio" id="publish-true" name="publish" :value="true"
-                                            class="hidden peer">
+                                            class="hidden peer" :disabled="!canDirectPublish">
                                         <label for="publish-true"
-                                            class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
+                                            class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400"
+                                            :class="{ 'opacity-50 cursor-not-allowed': !canDirectPublish }">
                                             <div class="block text-xs font-semibold text-center w-full">
                                                 منتشر شده
                                             </div>
                                         </label>
                                     </li>
                                 </ul>
-                                <p class="text-xs text-gray-400 mt-1">اگر در حالت "منتشر شده" باشد، دوره برای عموم قابل
-                                    مشاهده خواهد بود.</p>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    {{ canDirectPublish
+                                        ? 'اگر در حالت «منتشر شده» باشد، دوره برای عموم قابل مشاهده خواهد بود.'
+                                        : 'برای انتشار از منوی دوره درخواست بفرستید. لغو انتشار فقط توسط بررسی‌کننده انجام می‌شود.' }}
+                                </p>
                             </div>
 
                             <div v-if="type !== 'free'" class="md:col-span-2">
@@ -887,6 +897,7 @@ import AsyncSearchSelect from "@/views/components/multiselect/AsyncSearchSelect.
 import PN from "persian-number";
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import axiosInstance from "@/store/axiosInstance";
+import { COURSE_PUBLISH_APPROVE_PERMS, publishLabel } from "@/utils/coursePublish";
 import axios from "axios";
 import { listCertificateTemplates } from "@/services/certificate.service";
 import { toast } from "vue3-toastify";
@@ -955,6 +966,8 @@ export default {
             price: "",
             formattedPrice: "",
             publish: 0,
+            publish_status: 'draft',
+            publish_review: null,
             allows_installment: false,
             has_money_back_guarantee: true,
             tags: [],
@@ -1082,6 +1095,9 @@ export default {
         },
     },
     computed: {
+        canDirectPublish() {
+            return this.$can(COURSE_PUBLISH_APPROVE_PERMS);
+        },
         confirmSummary() {
             const typeLabels = { free: "رایگان", cash: "نقدی", "cash-vip": "نقدی/VIP" };
             return [
@@ -1089,7 +1105,7 @@ export default {
                 { label: "عنوان انگلیسی", value: this.english_title, ltr: true },
                 { label: "نوع دوره", value: typeLabels[this.type] || this.type },
                 { label: "قیمت", value: this.type === "free" ? "رایگان" : (this.formattedPrice ? this.formattedPrice + " تومان" : "") },
-                { label: "انتشار", value: String(this.publish) === "1" ? "منتشر شده" : "پیش‌نویس" },
+                { label: "انتشار", value: publishLabel({ publish: this.publish, publish_status: this.publish_status }) },
                 { label: "گواهینامه", value: this.certificate_enabled ? "فعال" : "غیرفعال" },
                 { label: "گارانتی بازگشت وجه", value: this.has_money_back_guarantee ? "فعال" : "غیرفعال" },
             ];
@@ -1171,6 +1187,8 @@ export default {
                     this.price = String(response.data.course.price).replace(/[^0-9]/g, "");
                     this.formattedPrice = String(response.data.course.price).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                     this.publish = response.data.course.publish;
+                    this.publish_status = response.data.course.publish_status || (response.data.course.publish ? 'published' : 'draft');
+                    this.publish_review = response.data.course.publish_review || null;
                     this.allows_installment = Boolean(response.data.course.allows_installment);
                     this.has_money_back_guarantee = response.data.course.has_money_back_guarantee !== false;
                     this.tags = response.data.course.tags;

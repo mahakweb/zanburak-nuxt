@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link :to="{ name: 'admin-categories-list' }" :class="BTN_SECONDARY">

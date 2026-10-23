@@ -1,7 +1,8 @@
 <template>
     <MasterPage>
-        <div class="mx-auto max-w-screen-xl px-2">
-            <section class="bg-white dark:bg-gray-900 my-10 md:my-20 rounded-xl">
+        <section class="pt-5 pb-2 md:pt-10">
+            <div class="mx-auto max-w-screen-xl px-3 md:px-4">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl ring-1 ring-slate-200/80 dark:ring-white/10">
                 <div class="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
                     <div class="md:ps-10 mt-8 md:mt-0 order-last md:order-first col-span-12 md:col-span-7 text-gray-800 dark:text-gray-50 flex flex-col gap-3">
                         <h1 class="max-w-2xl mb-4 text-center ltr:md:text-left rtl:md:text-right text-3xl font-extrabold tracking-tight leading-none md:text-4xl xl:text-5xl text-gray-800 dark:text-white">{{ $t('discuss.list.title') }}</h1>
@@ -124,50 +125,73 @@
                         </svg>
                     </div>
                 </div>
-            </section>
-            <section class="my-8">
-                <div class="">
-                    <!-- drawer init and toggle -->
-                    <div class="lg:hidden w-full text-center">
-                        <button class="flex items-center mx-auto text-white dark:text-gray-800 bg-amber-400 hover:bg-amber-500/50 focus:ring-2 focus:ring-amber-300 rounded-lg px-5 py-2.5 mb-2 dark:bg-amber-400 dark:hover:bg-amber-400/70 focus:outline-none dark:focus:ring-amber-600 text-sm font-semibold" type="button" data-drawer-target="bottom-sheet" data-drawer-show="bottom-sheet" data-drawer-placement="bottom" data-drawer-edge="true" data-drawer-edge-offset="bottom-[0px]" aria-controls="bottom-sheet">
-                            {{ $t('discuss.list.filters') }}
-                            <svg class="w-5 h-5 ms-2" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M0.75 11C0.75 13.2475 0.871405 15.0024 1.17704 16.3776C1.48077 17.7443 1.9564 18.6896 2.63339 19.3666C3.31039 20.0436 4.25571 20.5192 5.62241 20.823C6.99762 21.1286 8.75249 21.25 11 21.25C13.2475 21.25 15.0024 21.1286 16.3776 20.823C17.7443 20.5192 18.6896 20.0436 19.3666 19.3666C20.0436 18.6896 20.5192 17.7443 20.823 16.3776C21.1286 15.0024 21.25 13.2475 21.25 11C21.25 8.75249 21.1286 6.99762 20.823 5.62241C20.5192 4.25571 20.0436 3.31039 19.3666 2.63339C18.6896 1.9564 17.7443 1.48077 16.3776 1.17704C15.0024 0.871405 13.2475 0.75 11 0.75C8.75249 0.75 6.99762 0.871405 5.62241 1.17704C4.25571 1.48077 3.31039 1.9564 2.63339 2.63339C1.9564 3.31039 1.48077 4.25571 1.17704 5.62241C0.871405 6.99762 0.75 8.75249 0.75 11Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                <path opacity="0.4" d="M11.0001 6.41663V15.5833M15.5834 10.0833V15.5833M6.41675 11.9166V15.5833" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </div>
+            </div>
+        </section>
+        <section class="pb-10 pt-6 md:pb-16 md:pt-8">
+            <div class="mx-auto max-w-screen-xl px-3 md:px-4">
+                <div class="lg:hidden sticky top-3 z-20 mb-4">
+                    <button
+                        type="button"
+                        class="flex h-12 w-full items-center justify-between gap-3 rounded-2xl bg-white px-3 text-gray-800 shadow-md shadow-slate-900/5 ring-1 ring-slate-200/80 dark:bg-gray-900 dark:text-gray-50 dark:ring-white/10"
+                        @click="isFilterDrawerOpen = true">
+                        <span class="inline-flex min-w-0 items-center gap-2.5">
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-gray-900">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="truncate text-sm font-extrabold">{{ $t('discuss.list.filters') }}</span>
+                        </span>
+                        <span class="inline-flex shrink-0 items-center gap-2">
+                            <span
+                                v-if="activeFilterCount"
+                                class="inline-flex h-5 min-w-[1.35rem] items-center justify-center rounded-full bg-amber-400 px-1.5 text-[11px] font-extrabold text-gray-900">
+                                {{ activeFilterCount }}
+                            </span>
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none">
+                                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
-                        </button>
-                    </div>
-                    <div class="mx-auto max-w-screen-xl md:grid lg:grid-cols-12 gap-3 md:gap-5 lg:gap-7 mb-20">
-                        <div id="questions-list" class="xl:col-span-9 lg:col-span-8">
+                        </span>
+                    </button>
+                </div>
+                    <div class="mb-8 grid gap-5 lg:grid-cols-12 lg:gap-6">
+                        <div id="questions-list" class="lg:col-span-9 lg:self-start">
                             <div class="mb-6">
-                                <div class="relative">
-                                    <div v-if="searchLoading" class="absolute inset-y-0 end-0 flex items-center pe-3.5 pointer-events-none">
-                                        <svg class="w-5 h-5 text-yellow-400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="25 25 50 50">
-                                            <circle class="stroke-current opacity-30" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dashoffset="0" stroke-dasharray="200, 300"></circle>
-                                            <circle class="stroke-current" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dashoffset="0" stroke-dasharray="100, 200">
+                                <label class="discuss-search">
+                                    <span class="discuss-search__shine" aria-hidden="true"></span>
+                                    <svg class="discuss-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" />
+                                        <path d="M20 20l-3.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                    </svg>
+                                    <input
+                                        @keyup="handleSearch"
+                                        @keydown.enter.prevent="submitSearch"
+                                        v-model="searchKey"
+                                        type="search"
+                                        :placeholder="$t('discuss.list.searchPlaceholder')"
+                                        class="discuss-search-input" />
+                                    <span v-if="searchLoading" class="discuss-search__spin" aria-hidden="true">
+                                        <svg viewBox="25 25 50 50">
+                                            <circle class="stroke-current opacity-30" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="200, 300"></circle>
+                                            <circle class="stroke-current" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="100, 200">
                                                 <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 50 50" to="360 50 50" dur="2.5s" repeatCount="indefinite"></animateTransform>
                                                 <animate attributeName="stroke-dashoffset" values="0;-30;-124" dur="1.25s" repeatCount="indefinite"></animate>
                                                 <animate attributeName="stroke-dasharray" values="0,200;110,200;110,200" dur="1.25s" repeatCount="indefinite"></animate>
                                             </circle>
                                         </svg>
-                                    </div>
-                                    <input @keyup="handleSearch" v-model="searchKey" type="text" :placeholder="$t('discuss.list.searchPlaceholder')" class="w-full h-12 ps-12 pe-4 text-sm font-semibold text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder-gray-400 outline-none bg-white dark:bg-gray-900 rounded-xl border-0 focus:ring-2 ring-yellow-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-800" />
-                                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-400 absolute top-1/2 transform -translate-y-1/2 start-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="7.24756" cy="7.24768" r="6.24756" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></circle>
-                                        <path d="M11.5938 11.9176L14.0431 14.3606" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    </svg>
-                                </div>
-                                <div v-if="searchFor.length > 0" class="my-4 flex items-center text-xs font-semibold">
-                                    <span class="rounded-lg py-1 px-2.5 text-gray-800 dark:text-yellow-300 bg-yellow-400/20 line-clamp-1"><span class="font-medium me-1">{{ $t('discuss.list.searchFor') }} </span>{{ searchFor }}</span>
-                                    <button @click="deleteSearchKey()" class="p-1 text-rose-500">
-                                        <svg class="w-6 h-6 text-current" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                fill-rule="evenodd"
-                                                clip-rule="evenodd"
-                                                d="M9.02975 3.3437C10.9834 2.88543 13.0166 2.88543 14.9703 3.3437C17.7916 4.00549 19.9945 6.20842 20.6563 9.02975C21.1146 10.9834 21.1146 13.0166 20.6563 14.9703C19.9945 17.7916 17.7916 19.9945 14.9703 20.6563C13.0166 21.1146 10.9834 21.1146 9.02975 20.6563C6.20842 19.9945 4.0055 17.7916 3.3437 14.9703C2.88543 13.0166 2.88543 10.9834 3.3437 9.02974C4.0055 6.20841 6.20842 4.00549 9.02975 3.3437ZM10.7139 9.90158C10.4896 9.67727 10.1259 9.67727 9.90158 9.90158C9.67727 10.1259 9.67727 10.4896 9.90158 10.7139L11.1877 12L9.90158 13.2861C9.67727 13.5104 9.67727 13.8741 9.90158 14.0984C10.1259 14.3227 10.4896 14.3227 10.7139 14.0984L12 12.8123L13.2861 14.0984C13.5104 14.3227 13.8741 14.3227 14.0984 14.0984C14.3227 13.8741 14.3227 13.5104 14.0984 13.2861L12.8123 12L14.0984 10.7139C14.3227 10.4896 14.3227 10.1259 14.0984 9.90158C13.8741 9.67727 13.5104 9.67727 13.2861 9.90158L12 11.1877L10.7139 9.90158Z"
-                                                fill="currentColor"
-                                            ></path>
-                                        </svg>
+                                    </span>
+                                    <button v-else-if="searchKey" type="button" class="discuss-search__clear" @click="deleteSearchKey()">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                                    </button>
+                                </label>
+                                <div v-if="searchFor.length > 0" class="mt-3 flex items-center gap-2 text-xs font-semibold">
+                                    <span class="discuss-search__chip">
+                                        <span class="font-medium opacity-70">{{ $t('discuss.list.searchFor') }}</span>
+                                        <span class="truncate font-extrabold">{{ searchFor }}</span>
+                                    </span>
+                                    <button type="button" class="discuss-search__chip-clear" @click="deleteSearchKey()">
+                                        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
                                     </button>
                                 </div>
                             </div>
@@ -206,123 +230,73 @@
 							<PaginationComponent dir="ltr" :pagination="pagination" @updatePage="updatePage" />
 						</div> -->
                         </div>
-                        <div class="xl:col-span-3 lg:col-span-4 lg:order-first order-last">
-                            <div class="hidden lg:block">
-                                <div v-if="initLoadingSidebar" class="flex flex-col">
-                                    <div class="w-full">
-                                        <div class="bg-white dark:bg-gray-900 p-2 rounded-xl">
-                                            <div>
-                                                <div class="flex w-full justify-between items-center text-gray-800 dark:text-gray-50 rounded-lg px-4 py-2 text-start text-base font-bold focus:outline-none">
-                                                    <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full w-32 h-2"></div>
-                                                    <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-lg h-5 w-5"></div>
-                                                </div>
-                                                <div class="px-4 pb-2 pt-2 text-sm text-gray-500">
-                                                    <div class="pt-4 flex flex-col border-t space-y-6 border-gray-100 dark:border-opacity-20">
-                                                        <div v-for="i in 6" :key="i" class="flex items-center">
-                                                            <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-lg h-6 w-6 me-3"></div>
-                                                            <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full w-32 h-1.5"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <aside class="discuss-sidebar-col order-last lg:order-first lg:col-span-3">
+                            <div
+                                ref="sidebarPanel"
+                                class="discuss-sidebar-panel space-y-4"
+                                :class="sidebarPinned ? 'is-pinned' : ''">
+                                <div class="hidden lg:block">
+                                    <div v-if="sidebarReady" class="space-y-4">
+                                        <SideBar :showFilterQuestions="true" :showCategories="true" :categories="initData.categories" :showPopularTags="true" :popularTags="initData.popularTags" :showMyTags="isLoggedin" :myTags="initData.myTags || []" :showTopUsers="true" :topUsers="initData.topUsers" :initialSelectedCategories="selectedCategories" :initialSelectedQuestionFilter="selectedFilter" @filter-change="handleFilterChange" />
                                     </div>
-                                    <div class="mt-6 w-full">
-                                        <div class="bg-white dark:bg-gray-900 p-2 rounded-xl">
-                                            <div>
-                                                <div class="flex w-full justify-between items-center text-gray-800 dark:text-gray-50 rounded-lg px-4 py-2 text-start text-base font-bold focus:outline-none">
-                                                    <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full w-32 h-2"></div>
-                                                    <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-lg h-5 w-5"></div>
-                                                </div>
-                                                <div class="px-4 pb-2 pt-2 text-sm text-gray-500">
-                                                    <div class="pt-4 flex flex-col border-t space-y-6 border-gray-100 dark:border-opacity-20">
-                                                        <div v-for="i in 6" :key="i" class="flex items-center">
-                                                            <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full h-6 w-6 me-3"></div>
-                                                            <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full w-32 h-1.5"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                    <div v-else class="space-y-4">
+                                        <div v-for="block in 4" :key="block" class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/80 dark:bg-gray-900 dark:ring-white/10">
+                                            <div class="mb-4 h-3 w-28 animate-pulse rounded-full bg-slate-200 dark:bg-gray-700"></div>
+                                            <div v-for="i in 5" :key="i" class="mb-3 flex items-center gap-3">
+                                                <div class="h-5 w-5 animate-pulse rounded bg-slate-200 dark:bg-gray-700"></div>
+                                                <div class="h-2.5 w-32 animate-pulse rounded-full bg-slate-200 dark:bg-gray-700"></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <ClientOnly v-else>
-                                    <SideBar :showFilterQuestions="true" :showCategories="true" :categories="initData.categories" :showPopularTags="true" :popularTags="initData.popularTags" :showMyTags="isLoggedin" :myTags="initData.myTags || []" :showTopUsers="true" :topUsers="initData.topUsers" :initialSelectedCategories="selectedCategories" :initialSelectedQuestionFilter="selectedFilter" @filter-change="handleFilterChange" />
-                                </ClientOnly>
                             </div>
+                        </aside>
+                    </div>
+            </div>
+        </section>
+
+        <BottomSheetDrawer
+            v-model="isFilterDrawerOpen"
+            :initial-height="0.82"
+            :min-height="0.5"
+            :max-height="0.94"
+            :header-height="56"
+            :auto-close-on-min="true"
+            content-class="overflow-hidden px-0 pb-0"
+            panel-class="bg-slate-100 dark:bg-gray-800 border-t border-slate-200 dark:border-white/10 rounded-t-[1.5rem] md:rounded-b-2xl shadow-[0_-12px_40px_rgba(15,23,42,0.28)]">
+            <div class="flex h-full min-h-0 flex-col">
+                <div class="shrink-0 px-4 pb-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-extrabold text-gray-800 dark:text-gray-50">{{ $t('discuss.list.filters') }}</h3>
+                            <p class="mt-1 text-xs font-normal leading-5 text-gray-500 dark:text-gray-400">{{ $t('discuss.list.filterDrawerHint') }}</p>
                         </div>
-
-                        <!-- bottom sheet component -->
-                        <div id="bottom-sheet" class="lg:hidden fixed z-40 w-full overflow-y-auto bg-white shadow-xl border-t border-gray-200 rounded-t-xl dark:border-gray-800 dark:bg-gray-900 transition-transform bottom-0 left-0 right-0 translate-y-full" tabindex="-1" aria-labelledby="bottom-sheet-label">
-                            <div class="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700" data-drawer-toggle="bottom-sheet">
-                                <span class="absolute w-24 h-1 -translate-x-1/2 bg-gray-300 rounded-lg top-3 left-1/2 dark:bg-gray-600"></span>
-                                <!-- <span id="bottom-sheet-label"
-								class="mt-6 mb-3 inline-flex items-center text-sm text-gray-500 dark:text-gray-400">
-								<svg class="w-4 h-4 me-2 text-gray-500 dark:text-gray-400" viewBox="0 0 24 24"
-									fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path opacity="0.2"
-										d="M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22Z"
-										fill="currentColor"></path>
-									<path
-										d="M12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75Z"
-										fill="currentColor"></path>
-									<path
-										d="M12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z"
-										fill="currentColor"></path>
-								</svg>
-								از منوی زیر برای فیلتر و دسته بندی های خود استفاده کنید.
-							</span>
-							<hr class="mx-2 border-t border-gray-300 dark:border-gray-300/20 h-1" /> -->
-                            </div>
-
-                            <div class="max-h-[60vh] overflow-auto mx-1 px-1.5">
-                                <div v-if="initLoadingSidebar" class="flex flex-col">
-                                    <div class="w-full">
-                                        <div class="bg-white dark:bg-gray-900 p-2 rounded-xl">
-                                            <div>
-                                                <div class="flex w-full justify-between items-center text-gray-800 dark:text-gray-50 rounded-lg px-4 py-2 text-start text-base font-bold focus:outline-none">
-                                                    <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full w-32 h-2"></div>
-                                                    <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-lg h-5 w-5"></div>
-                                                </div>
-                                                <div class="px-4 pb-2 pt-2 text-sm text-gray-500">
-                                                    <div class="pt-4 flex flex-col border-t space-y-6 border-gray-100 dark:border-opacity-20">
-                                                        <div v-for="i in 6" :key="i" class="flex items-center">
-                                                            <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-lg h-6 w-6 me-3"></div>
-                                                            <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full w-32 h-1.5"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-6 w-full">
-                                        <div class="bg-white dark:bg-gray-900 p-2 rounded-xl">
-                                            <div>
-                                                <div class="flex w-full justify-between items-center text-gray-800 dark:text-gray-50 rounded-lg px-4 py-2 text-start text-base font-bold focus:outline-none">
-                                                    <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full w-32 h-2"></div>
-                                                    <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-lg h-5 w-5"></div>
-                                                </div>
-                                                <div class="px-4 pb-2 pt-2 text-sm text-gray-500">
-                                                    <div class="pt-4 flex flex-col border-t space-y-6 border-gray-100 dark:border-opacity-20">
-                                                        <div v-for="i in 6" :key="i" class="flex items-center">
-                                                            <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full h-6 w-6 me-3"></div>
-                                                            <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-500 bg-gray-300 dark:bg-gray-600 rounded-full w-32 h-1.5"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <ClientOnly v-else>
-                                    <SideBar :showFilterQuestions="true" :showCategories="true" :categories="initData.categories" :showPopularTags="true" :popularTags="initData.popularTags" :showMyTags="isLoggedin" :myTags="initData.myTags || []" :showTopUsers="true" :topUsers="initData.topUsers" :initialSelectedCategories="selectedCategories" :initialSelectedQuestionFilter="selectedFilter" @filter-change="handleFilterChange" />
-                                </ClientOnly>
+                    </div>
+                </div>
+                <div class="min-h-0 flex-1 overflow-auto px-4 pb-4 custom-scrollbar">
+                    <div v-if="sidebarReady">
+                        <SideBar :showFilterQuestions="true" :showCategories="true" :categories="initData.categories" :showPopularTags="true" :popularTags="initData.popularTags" :showMyTags="isLoggedin" :myTags="initData.myTags || []" :showTopUsers="true" :topUsers="initData.topUsers" :initialSelectedCategories="selectedCategories" :initialSelectedQuestionFilter="selectedFilter" @filter-change="handleFilterChange" />
+                    </div>
+                    <div v-else class="space-y-4">
+                        <div v-for="block in 4" :key="block" class="rounded-2xl bg-white p-4 dark:bg-gray-900">
+                            <div class="mb-4 h-3 w-28 animate-pulse rounded-full bg-slate-200 dark:bg-gray-700"></div>
+                            <div v-for="i in 5" :key="i" class="mb-3 flex items-center gap-3">
+                                <div class="h-5 w-5 animate-pulse rounded bg-slate-200 dark:bg-gray-700"></div>
+                                <div class="h-2.5 w-32 animate-pulse rounded-full bg-slate-200 dark:bg-gray-700"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
-        </div>
+                <div class="shrink-0 border-t border-slate-200 bg-white/95 px-4 py-3 dark:border-white/10 dark:bg-gray-900/95">
+                    <button
+                        type="button"
+                        class="flex h-11 w-full items-center justify-center rounded-xl bg-amber-400 text-sm font-extrabold text-gray-900 shadow-amber-400/30 transition hover:opacity-90"
+                        @click="isFilterDrawerOpen = false">
+                        {{ $t('discuss.list.showResults') }}
+                    </button>
+                </div>
+            </div>
+        </BottomSheetDrawer>
     </MasterPage>
     <LoadingComponent v-if="loading" fullscreen class="z-50"/>
 </template>
@@ -334,6 +308,7 @@ import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import QuestionCard2 from "@/views/components/discuss/QuestionCard2.vue";
 import QuestionCard2Loading from "@/views/components/discuss/QuestionCard2Loading.vue";
 import SideBar from "@/views/page/discuss/layouts/SideBar.vue";
+import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import axiosInstance from "@/store/axiosInstance";
 import debounce from "lodash/debounce";
 import { useSEO } from "@/composables/useSEO";
@@ -349,6 +324,7 @@ export default {
         QuestionCard2,
         QuestionCard2Loading,
         SideBar,
+        BottomSheetDrawer,
     },
 
     data() {
@@ -368,6 +344,8 @@ export default {
             searchKey: this.$route.query.search ?? "",
             searchFor: this.$route.query.search ?? "",
             searchLoading: false,
+            isFilterDrawerOpen: false,
+            sidebarPinned: false,
         };
     },
     computed: {
@@ -376,6 +354,15 @@ export default {
         },
         currentUser() {
             return this.authStore.status.userInfo;
+        },
+        activeFilterCount() {
+            let count = this.selectedCategories.length;
+            if (this.selectedFilter && this.selectedFilter !== "all") count += 1;
+            if (this.searchFor) count += 1;
+            return count;
+        },
+        sidebarReady() {
+            return !this.initLoadingSidebar && this.initData && Array.isArray(this.initData.categories);
         },
     },
     created() {
@@ -389,18 +376,19 @@ export default {
 
         const ssr = this.ssrDiscussBootstrap;
         const payload = ssr && typeof ssr === 'object' && 'value' in ssr ? ssr.value : ssr;
+        if (!payload) return;
+        if (payload.initData) {
+            this.initData = payload.initData;
+            this.initLoadingSidebar = false;
+        }
         const hasQuery = Object.keys(query || {}).length > 0;
-        if (!payload || hasQuery) return;
+        if (hasQuery) return;
         if (Array.isArray(payload.questions)) {
             this.questions = payload.questions;
             this.currentPage = (payload.pagination?.current_page || 1) + 1;
             this.lastPage = payload.pagination?.last_page || null;
             this.initLoadingQuestions = false;
             this.mounted = true;
-        }
-        if (payload.initData) {
-            this.initData = payload.initData;
-            this.initLoadingSidebar = false;
         }
     },
     methods: {
@@ -486,6 +474,15 @@ export default {
             }
         }, 1000),
 
+        submitSearch() {
+            const q = (this.searchKey || "").trim();
+            if (q === this.searchFor) return;
+            this.searchKey = q;
+            this.searchLoading = true;
+            this.searchFor = q;
+            this.handleFilterChange(q ? { search: q } : {});
+        },
+
         handleFilterChange(filter) {
             // this.filterLoading = true;
 
@@ -527,12 +524,12 @@ export default {
         },
 
         handleScroll() {
+            this.updateSidebarPin();
             const questionContainer = this.$refs.questionContainer;
             if (!questionContainer) return;
             const rect = questionContainer.getBoundingClientRect();
 
             if (rect.bottom <= window.innerHeight - 30 && !this.hasReachedEnd) {
-                // default is (+10)
                 this.getQuestions(true);
                 this.hasReachedEnd = true;
             }
@@ -540,6 +537,58 @@ export default {
             if (rect.bottom > window.innerHeight) {
                 this.hasReachedEnd = false;
             }
+        },
+        clearSidebarPinStyles(panel) {
+            this.sidebarPinned = false;
+            if (!panel) {
+                return;
+            }
+            panel.style.height = '';
+            panel.style.width = '';
+            panel.style.left = '';
+            panel.style.right = '';
+            panel.style.top = '';
+        },
+        updateSidebarPin() {
+            const panel = this.$refs.sidebarPanel;
+
+            if (!import.meta.client || window.innerWidth < 1024) {
+                this.clearSidebarPinStyles(panel);
+                return;
+            }
+            if (!panel) {
+                return;
+            }
+            const host = panel.parentElement;
+            const list = document.getElementById('questions-list');
+            if (!host) {
+                this.clearSidebarPinStyles(panel);
+                return;
+            }
+
+            const hostRect = host.getBoundingClientRect();
+            const listTop = list ? list.getBoundingClientRect().top : hostRect.top;
+            const footer = document.querySelector('footer');
+            const footerTop = footer
+                ? footer.getBoundingClientRect().top - 8
+                : Number.POSITIVE_INFINITY;
+
+            if (!this.sidebarPinned && listTop <= 8) {
+                this.sidebarPinned = true;
+            } else if (this.sidebarPinned && listTop > 72) {
+                this.sidebarPinned = false;
+            }
+
+            const usedTop = this.sidebarPinned ? 0 : Math.max(hostRect.top, 12);
+            const bottomLimit = Math.min(footerTop, hostRect.bottom, window.innerHeight);
+            panel.style.height = `${Math.max(0, Math.round(bottomLimit - usedTop))}px`;
+            panel.style.width = '';
+            panel.style.left = '';
+            panel.style.right = '';
+            panel.style.top = '';
+        },
+        onWindowResize() {
+            this.updateSidebarPin();
         },
     },
     mounted() {
@@ -568,10 +617,13 @@ export default {
         if (this.initLoadingSidebar) this.getInitData();
         if (this.initLoadingQuestions) this.getQuestions(false);
 
-        window.addEventListener("scroll", this.handleScroll);
+        this.$nextTick(() => this.updateSidebarPin());
+        window.addEventListener("scroll", this.handleScroll, { passive: true });
+        window.addEventListener("resize", this.onWindowResize, { passive: true });
     },
     beforeUnmount() {
         window.removeEventListener("scroll", this.handleScroll);
+        window.removeEventListener("resize", this.onWindowResize);
     },
 };
 </script>
@@ -579,5 +631,255 @@ export default {
 <style>
 html {
     scroll-behavior: smooth;
+}
+
+.discuss-search {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 3.25rem;
+    padding: 0 1.05rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.28));
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.88),
+        0 10px 28px rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(22px) saturate(1.55);
+    -webkit-backdrop-filter: blur(22px) saturate(1.55);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.discuss-search:focus-within {
+    border-color: rgba(251, 191, 36, 0.55);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.92),
+        0 0 0 4px rgba(251, 191, 36, 0.14),
+        0 14px 32px rgba(15, 23, 42, 0.07);
+}
+
+.discuss-search__shine {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 46%, rgba(251, 191, 36, 0.08) 100%);
+}
+
+.discuss-search__icon,
+.discuss-search-input,
+.discuss-search__spin,
+.discuss-search__clear {
+    position: relative;
+    z-index: 1;
+}
+
+.discuss-search__icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex-shrink: 0;
+    color: rgb(148 163 184);
+    transition: color 0.2s ease;
+}
+
+.discuss-search:focus-within .discuss-search__icon {
+    color: rgb(217 119 6);
+}
+
+.discuss-search-input {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(31 41 55);
+    outline: none;
+    box-shadow: none;
+}
+
+.discuss-search-input::placeholder {
+    font-weight: 500;
+    color: rgb(148 163 184);
+}
+
+.discuss-search-input::-webkit-search-cancel-button,
+.discuss-search-input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.discuss-search__spin,
+.discuss-search__clear,
+.discuss-search__chip-clear {
+    display: flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    color: rgb(148 163 184);
+}
+
+.discuss-search__spin svg,
+.discuss-search__clear svg,
+.discuss-search__chip-clear svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.discuss-search__clear {
+    border-radius: 999px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.discuss-search__clear:hover {
+    background: rgba(15, 23, 42, 0.06);
+    color: rgb(244 63 94);
+}
+
+.discuss-search__chip {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+    color: rgb(120 53 15);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(251, 191, 36, 0.16));
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.discuss-search__chip-clear:hover {
+    color: rgb(244 63 94);
+}
+
+.dark .discuss-search {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.58), rgba(17, 24, 39, 0.28));
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 10px 28px rgba(0, 0, 0, 0.2);
+}
+
+.dark .discuss-search:focus-within {
+    border-color: rgba(251, 191, 36, 0.4);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 4px rgba(251, 191, 36, 0.12),
+        0 14px 32px rgba(0, 0, 0, 0.24);
+}
+
+.dark .discuss-search__shine {
+    background: linear-gradient(115deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 48%, rgba(251, 191, 36, 0.08) 100%);
+}
+
+.dark .discuss-search-input {
+    color: white;
+}
+
+.dark .discuss-search-input::placeholder {
+    color: rgb(107 114 128);
+}
+
+.dark .discuss-search__clear:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .discuss-search__chip {
+    color: rgb(253 230 138);
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.5), rgba(251, 191, 36, 0.12));
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 1024px) {
+    .discuss-sidebar-col {
+        height: 0;
+        min-height: 100%;
+        overflow-anchor: none;
+    }
+
+    .discuss-sidebar-panel {
+        position: sticky;
+        top: 0.75rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border-radius: 1.5rem;
+        overflow-anchor: none;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        transition:
+            top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+            padding 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+            border-radius 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+            background 0.35s ease,
+            box-shadow 0.35s ease,
+            backdrop-filter 0.35s ease;
+    }
+
+    .discuss-sidebar-panel::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+
+    .discuss-sidebar-panel.is-pinned {
+        top: 0;
+        padding: 1rem 0.7rem;
+        border-radius: 0;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(241, 245, 249, 0.82));
+        border-inline-end: 1px solid rgba(255, 255, 255, 0.45);
+        box-shadow:
+            inset -1px 0 0 rgba(15, 23, 42, 0.05),
+            12px 0 40px rgba(15, 23, 42, 0.04);
+        backdrop-filter: blur(18px) saturate(1.2);
+        -webkit-backdrop-filter: blur(18px) saturate(1.2);
+        animation: discuss-sidebar-dock 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .dark .discuss-sidebar-panel.is-pinned {
+        background: linear-gradient(180deg, rgba(17, 24, 39, 0.62), rgba(15, 23, 42, 0.84));
+        border-inline-end: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow:
+            inset -1px 0 0 rgba(255, 255, 255, 0.05),
+            12px 0 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .discuss-sidebar-panel.is-pinned::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+}
+
+@keyframes discuss-sidebar-dock {
+    from {
+        top: 0.75rem;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-radius: 1.5rem;
+    }
+    to {
+        top: 0;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        border-radius: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .discuss-sidebar-panel,
+    .discuss-sidebar-panel.is-pinned {
+        transition: none;
+        animation: none;
+    }
 }
 </style>

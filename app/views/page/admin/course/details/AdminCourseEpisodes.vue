@@ -67,6 +67,7 @@
                     @delete-section="openDeleteSectionModal"
                     @edit-section="openEditSectionModal"
                     @delete-episode="openDeleteEpisodeModal"
+                    @publish-episode="openPublishEpisodeModal"
                 />
             </div>
             </div>
@@ -250,6 +251,15 @@
         />
     </BottomSheetDrawer>
 
+    <AdminCoursePublishReviewModal
+        v-model="showPublishModal"
+        kind="episode"
+        :course="course"
+        :episode="publishEpisode"
+        :action="publishAction"
+        @updated="onEpisodePublishUpdated"
+    />
+
 </template>
 
 <script>
@@ -265,6 +275,8 @@ import AdminBottomSheetHeader from "@/views/components/admin/bottomSheet/AdminBo
 import AdminBottomSheetActions from "@/views/components/admin/bottomSheet/AdminBottomSheetActions.vue";
 import AdminBottomSheetConfirm from "@/views/components/admin/bottomSheet/AdminBottomSheetConfirm.vue";
 import * as bs from "@/views/components/admin/bottomSheet/adminBottomSheetStyles.js";
+import AdminCoursePublishReviewModal from "@/views/components/admin/AdminCoursePublishReviewModal.vue";
+import { applyPublishResponse } from "@/utils/coursePublish";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
@@ -279,6 +291,7 @@ export default {
         AdminBottomSheetHeader,
         AdminBottomSheetActions,
         AdminBottomSheetConfirm,
+        AdminCoursePublishReviewModal,
     },
     props: {
         courseSlug: {
@@ -315,6 +328,9 @@ export default {
             episodeForDelete: null,
             sectionForDeleteEpisode: null,
             viewportWidth: typeof window !== 'undefined' ? window.innerWidth : 1280,
+            showPublishModal: false,
+            publishEpisode: null,
+            publishAction: 'request',
         };
     },
     computed: {
@@ -605,6 +621,18 @@ export default {
             this.episodeForDelete = episode;
             this.sectionForDeleteEpisode = section;
             this.showDeleteEpisodeModal = true;
+        },
+        openPublishEpisodeModal({ action, episode }) {
+            this.publishEpisode = episode;
+            this.publishAction = action;
+            this.showPublishModal = true;
+        },
+        onEpisodePublishUpdated(payload) {
+            if (!payload || !this.course?.sections) return;
+            this.course.sections.forEach((section) => {
+                const item = (section.episodes || []).find((row) => row.id === payload.id || row.slug === payload.slug);
+                if (item) applyPublishResponse(item, payload);
+            });
         },
         closeDeleteEpisodeModal() {
             this.episodeForDelete = null;

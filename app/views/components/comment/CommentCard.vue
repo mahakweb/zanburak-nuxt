@@ -89,7 +89,10 @@
                     </div>
                 </div>
 
-                <div class="my-3 mx-2 h-[1.5px]" :class="[comment.approved ? 'bg-green-500/50 dark:bg-green-400/50' : 'bg-pink-500/60 dark:bg-pink-400/80']"></div>
+                <div class="my-3 mx-2 flex items-center gap-2">
+                    <div class="flex-1 h-[1.5px]" :class="commentStatusLineClass(comment)"></div>
+                    <CommentStatusBadge :comment="comment" />
+                </div>
                 <div class="flex-grow overflow-hidden text-ellipsis rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-50 font-light text-sm py-2 px-2">
                     <div v-text="comment.comment" class="line-clamp-4 leading-relaxed"></div>
                 </div>
@@ -122,9 +125,12 @@
                                 </div>
 
                                 <!-- Modal Footer -->
-                                <div class="flex-shrink-0 flex items-center justify-between">
+                                <div class="flex-shrink-0 flex items-center justify-between gap-2">
                                     <button @click="closeViewCommentModal" type="button" class="h-8 py-2 px-3 text-xs font-medium text-gray-500 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:ring-2 focus:outline-none focus:ring-primary-300 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">{{ $t('comment.cancelAndClose') }}</button>
-                                    <div class="text-xs font-medium py-2 px-3 rounded-lg bg-gray-50 dark:bg-cyan-700/10 text-gray-500 dark:text-gray-400">{{ $t('comment.submittedAgo', { time: timeAgo(comment.created_at) }) }}</div>
+                                    <div class="flex items-center gap-2">
+                                        <CommentStatusBadge :comment="comment" />
+                                        <div class="text-xs font-medium py-2 px-3 rounded-lg bg-gray-50 dark:bg-cyan-700/10 text-gray-500 dark:text-gray-400">{{ $t('comment.submittedAgo', { time: timeAgo(comment.created_at) }) }}</div>
+                                    </div>
                                 </div>
         </div>
     </BottomSheetDrawer>
@@ -134,7 +140,9 @@
 import { useAuthStore } from '@/stores/auth'
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import MarkdownRenderer from "@/views/components/home/MarkdownRenderer.vue";
+import CommentStatusBadge from "@/views/components/comment/CommentStatusBadge.vue";
 import { episodeShowRoute } from "@/utils/episodeRoute";
+import { commentStatusLineClass } from "@/utils/commentStatus";
 import moment from "moment";
 import "moment/locale/fa";
 export default {
@@ -142,6 +150,7 @@ export default {
     components: {
         BottomSheetDrawer,
         MarkdownRenderer,
+        CommentStatusBadge,
     },
     props: {
         comment: Object,
@@ -162,6 +171,7 @@ export default {
     },
     methods: {
         episodeShowRoute,
+        commentStatusLineClass,
         timeAgo(date) {
             moment.locale(this.$i18n.locale === "en" ? "en" : "fa");
             return moment(date).fromNow();

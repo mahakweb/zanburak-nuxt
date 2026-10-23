@@ -21,7 +21,7 @@
                                 <i class="w-1 h-1 bg-current me-8 -ms-[1.65rem] rounded-full" :class="{ 'text-black dark:text-amber-400 font-semibold': $route.name == sub.link }"></i>
                                 <span :class="{ 'font-bold lg:text-[14px] text-black dark:text-amber-400': $route.name == sub.link }">{{ sub.title }}</span>
                             </div>
-                            <span v-if="sub.badge && sub.badge > 0" class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">{{ sub.badge }}</span>
+                            <span v-if="sub.badge && sub.badge > 0" class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">{{ sub.badge > 99 ? '99+' : sub.badge }}</span>
                         </router-link>
                     </DisclosurePanel>
                 </Disclosure>
@@ -37,12 +37,14 @@
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useAdminCommentsStore } from '@/stores/adminComments'
+import { useAdminCoursePublishStore } from '@/stores/adminCoursePublish'
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import { ADMIN_MENU_ITEMS } from "@/config/adminMenuItems";
 import { filterAdminMenuByPermission } from "@/utils/adminMenu";
+import { COURSE_PUBLISH_QUEUE_PERMS } from "@/utils/coursePublish";
 
 export default {
-		setup() { return { authStore: useAuthStore(), adminCommentsStore: useAdminCommentsStore() } },
+		setup() { return { authStore: useAuthStore(), adminCommentsStore: useAdminCommentsStore(), coursePublishStore: useAdminCoursePublishStore() } },
     components: {
         Disclosure,
         DisclosureButton,
@@ -51,6 +53,9 @@ export default {
     computed: {
         unapprovedCommentsCount() {
             return this.adminCommentsStore.unapprovedCommentsCount;
+        },
+        pendingPublishCount() {
+            return this.coursePublishStore.pendingCount;
         },
         user() {
             return this.authStore.status.userInfo;
@@ -68,6 +73,12 @@ export default {
                                 return {
                                     ...sub,
                                     badge: this.unapprovedCommentsCount > 0 ? this.unapprovedCommentsCount : null
+                                };
+                            }
+                            if (sub.key === 'course-requests') {
+                                return {
+                                    ...sub,
+                                    badge: this.pendingPublishCount > 0 ? this.pendingPublishCount : null
                                 };
                             }
                             return sub;
@@ -139,6 +150,9 @@ export default {
         this.scrollToActiveItem();
         // Fetch the unapproved comments count from Pinia
         this.adminCommentsStore.fetchUnapprovedCommentsCount();
+        if (this.$can(COURSE_PUBLISH_QUEUE_PERMS)) {
+            this.coursePublishStore.fetchPendingCount();
+        }
     },
 };
 </script>

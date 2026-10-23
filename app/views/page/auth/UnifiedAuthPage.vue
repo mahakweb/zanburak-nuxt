@@ -9,7 +9,7 @@
             alt="image"
             class="h-full w-full object-cover"
           />
-        </div>
+    </div>
 
         <div
           class="relative flex min-h-screen items-center justify-center bg-[url(@/assets/image/auth/map.png)] bg-cover bg-center bg-no-repeat px-2 py-10 dark:bg-[#060818] sm:px-12"
@@ -43,19 +43,21 @@
           />
 
           <div
-            class="relative flex w-full max-w-[1502px] flex-col justify-between overflow-hidden rounded-2xl bg-white/60 backdrop-blur-lg dark:bg-black/50 lg:min-h-[758px] lg:flex-row lg:gap-10 xl:gap-0"
+            class="relative flex w-full max-w-[1502px] flex-col justify-between overflow-hidden rounded-2xl bg-white/60 backdrop-blur-lg dark:bg-black/50 lg:min-h-[758px] lg:flex-row lg:gap-0"
           >
             <div
-              class="relative hidden w-full items-center justify-center bg-[linear-gradient(225deg,rgba(239,18,98,1)_0%,rgba(67,97,238,1)_100%)] p-5 lg:inline-flex lg:max-w-[835px] xl:-ms-28 ltr:xl:skew-x-[14deg] rtl:xl:skew-x-[-14deg]"
+              class="auth-art-wrap relative hidden lg:flex lg:w-[40%] lg:max-w-[40%] lg:flex-none lg:self-stretch"
             >
+              <div class="auth-art__shadow" aria-hidden="true"></div>
               <div
-                class="absolute inset-y-0 w-8 from-gray-200 dark:from-gray-800 via-transparent to-transparent ltr:-right-10 ltr:bg-gradient-to-r rtl:-left-10 rtl:bg-gradient-to-l xl:w-16 ltr:xl:-right-20 rtl:xl:-left-20"
-              ></div>
+                class="auth-art relative flex w-full items-center justify-center bg-[linear-gradient(225deg,rgba(239,18,98,1)_0%,rgba(67,97,238,1)_100%)] p-5"
+              >
+                <div class="auth-art__fade pointer-events-none absolute inset-0 z-[1]"></div>
 
-              <div class="ltr:xl:-skew-x-[14deg] rtl:xl:skew-x-[14deg]">
-                <div class="hidden w-48 lg:w-72 lg:block">
+                <div class="relative z-[2]">
+                <div class="hidden w-full max-w-[26rem] lg:block">
                   <svg
-                    class="w-[26rem] mx-auto"
+                    class="mx-auto w-full"
                     viewBox="0 0 522 522"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -498,16 +500,17 @@
                   </svg>
                 </div>
               </div>
+              </div>
             </div>
 
             <div
-              class="relative flex w-full flex-col items-center justify-center gap-6 px-4 pb-16 pt-6 sm:px-6 lg:max-w-[667px]"
+              class="relative flex w-full flex-col items-center justify-center gap-6 px-4 pb-16 pt-6 sm:px-6 lg:max-w-none lg:flex-1"
             >
               <div
                 class="flex w-full max-w-[440px] items-center gap-2 lg:absolute lg:end-6 lg:top-6 lg:max-w-full"
               >
-                <router-link
-                  to="/"
+        <router-link
+          to="/"
                   class="w-10 block lg:hidden bg-white rounded-xl p-1"
                   ><img
                     onerror="this.style.display='none'"
@@ -518,19 +521,23 @@
                 <DarkMode class="ms-auto w-max" />
               </div>
 
-              <div class="w-full max-w-md lg:mt-8">
+              <div
+                class="w-full max-w-md lg:mt-8"
+                :class="{ 'lg:max-w-xl': step === 'register' }"
+              >
                 <div
                   class="hidden lg:block p-1 rounded-3xl dark:bg-white  h-12 w-64 dark:shadow dark:shadow-gray-500 mx-auto mb-4"
-                >
-                  <img
+        >
+          <img
                     class="w-full h-full object-cover"
-                    src="@/assets/image/logo/logo-wide.svg"
+            src="@/assets/image/logo/logo-wide.svg"
                   />
                 </div>
 
-                <div
+<div
                   v-if="shouldShowBackButton()"
                   class="w-full max-w-md mb-3 flex items-center justify-start"
+                  :class="{ 'lg:max-w-xl': step === 'register' }"
                 >
                   <button
                     @click="goBack"
@@ -554,23 +561,13 @@
 
                 <div
                   class="w-full max-w-md bg-white dark:bg-gray-700/40 backdrop-blur-sm rounded-2xl p-4 md:p-6 lg:p-8 space-y-4"
+                  :class="{ 'lg:max-w-xl': step === 'register' }"
                 >
-                  <div v-if="step === 'start' || step === 'password'" class="">
-                    <h2 class="text-lg text-gray-800 dark:text-white font-bold">
+                  <div v-if="step === 'start' || step === 'password'" class="mb-1">
+                    <h2 class="text-base font-semibold text-gray-800 dark:text-white">
                       {{ $t("auth.unified.loginRegister") }}
                     </h2>
-
-                    <h6
-                      class="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1"
-                    >
-                      {{ $t("auth.unified.enterMobileOrEmail") }}
-                    </h6>
                   </div>
-
-                  <div
-                    v-if="step === 'start' || step === 'password'"
-                    class="border-t-2 mx-2 border-gray-200 dark:border-gray-700 my-2"
-                  ></div>
 
                   <!-- Single input for both email and mobile -->
 
@@ -606,33 +603,15 @@
                       {{ errors["identifier"][0] }}
                     </span>
 
-                    <div
-                      class="mt-3 flex flex-wrap items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-50"
-                    >
-                      <svg
-                        class="w-4 h-4 text-blue-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 256 256"
-                      >
-                        <path
-                          d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z"
-                          opacity="0.2"
-                        ></path>
-
-                        <path
-                          d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"
-                        ></path>
-                      </svg>
-
+                    <p class="mt-3 text-xs leading-5 text-gray-500 dark:text-gray-400">
                       {{ $t("auth.unified.termsPrefix") }}
                       <router-link
-                        class="font-bold text-blue-500 underline"
+                        class="text-gray-700 underline underline-offset-2 dark:text-gray-200"
                         to=""
                         >{{ $t("auth.unified.terms") }}</router-link
                       >
                       {{ $t("auth.unified.termsSuffix") }}
-                    </div>
+                    </p>
                   </div>
 
                   <!-- Direct password step for existing users -->
@@ -1878,22 +1857,16 @@
                   <div v-if="step === 'register_prompt'" class="space-y-3">
                     <div class="mb-5">
                       <h2
-                        class="text-lg text-gray-800 dark:text-white font-bold mb-1"
+                        class="mb-1 text-base font-semibold text-gray-800 dark:text-white"
                       >
                         {{ $t("auth.unified.createNewAccountQuestion") }}
                       </h2>
 
-                      <h6
-                        class="text-sm text-gray-500 dark:text-gray-400 font-medium"
-                      >
+                      <p class="text-sm leading-6 text-gray-500 dark:text-gray-400">
                         {{ $t("auth.unified.createAccountPrefix", { channel: isEmail ? $t("auth.unified.email") : $t("auth.unified.mobile") }) }}
-                        <span
-                          class="inline-block underline underline-offset-2 font-semibold px-1"
-                          dir="ltr"
-                          >{{ identifier }}</span
-                        >
+                        <span class="px-1 font-medium text-gray-700 dark:text-gray-200" dir="ltr">{{ identifier }}</span>
                         {{ $t("auth.unified.createAccountSuffix") }}
-                      </h6>
+                      </p>
                     </div>
 
                     <button
@@ -1973,7 +1946,10 @@
                   </div>
 
                   <div v-if="step === 'register'" class="space-y-3">
-                    <div class="grid grid-cols-1">
+                    <div class="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-stretch lg:gap-x-1.5 lg:gap-y-0">
+                      <div class="min-w-0">
+                      <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                        <div>
                       <label class="text-xs text-gray-500 dark:text-gray-400">{{ $t("auth.unified.firstName") }}</label>
                       <input
                         v-model="first_name"
@@ -1995,8 +1971,10 @@
                       >
                         {{ errors["first_name"][0] }}
                       </span>
+                        </div>
 
-                      <label class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $t("auth.unified.lastName") }}</label>
+                        <div>
+                      <label class="text-xs text-gray-500 dark:text-gray-400">{{ $t("auth.unified.lastName") }}</label>
                       <input
                         v-model="last_name"
                         v-no-autofill="'strong'"
@@ -2016,6 +1994,8 @@
                       >
                         {{ errors["last_name"][0] }}
                       </span>
+                        </div>
+                      </div>
 
                       <label class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         {{ isEmail ? $t('auth.unified.email') : $t('auth.unified.mobile') }}
@@ -2025,10 +2005,9 @@
                         disabled
                         :type="isEmail ? 'email' : 'text'"
                         class="h-10 placeholder-gray-400 dark:placeholder-gray-500 w-full bg-slate-200 dark:bg-slate-700 opacity-50 dark:opacity-50 bg-opacity-75 rounded-lg transition duration-200 text-sm text-gray-600 dark:text-gray-200 px-3 font-medium border border-amber-400 border-opacity-0 ring-0 ring-offset-0 outline-none cursor-not-allowed"
-                        :dir="isEmail ? 'ltr' : 'ltr'"
+                        dir="ltr"
                       />
 
-                      <!-- Mobile field (for email users) -->
                       <div v-if="isEmail" class="mt-2">
                         <label class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $t("auth.unified.mobileNumber") }}</label>
                         <input
@@ -2054,7 +2033,6 @@
                         </span>
                       </div>
 
-                      <!-- Email field for mobile users -->
                       <div v-if="!isEmail" class="space-y-2">
                         <label class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $t("auth.unified.email") }}</label>
                         <input
@@ -2079,7 +2057,9 @@
                         </span>
                       </div>
 
-                      <label class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $t("auth.unified.password") }}</label>
+                      <div class="mt-2 grid grid-cols-1 gap-3 lg:grid-cols-2">
+                        <div>
+                      <label class="text-xs text-gray-500 dark:text-gray-400">{{ $t("auth.unified.password") }}</label>
                       <div class="relative">
                       <button
                         type="button"
@@ -2197,17 +2177,9 @@
                       >
                         {{ errors["password"][0] }}
                       </span>
-
-                      <ul v-if="!allConditionsMetForRegister"
-                        class="border border-pink-500 dark:border-pink-400 dark:bg-pink-400 dark:bg-opacity-10 bg-pink-500 bg-opacity-5 rounded-xl px-4 py-2 mt-4">
-                        <li v-if="!hasLowercaseForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.lowercase") }}</li>
-                        <li v-if="!hasUppercaseForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.uppercase") }}</li>
-                        <li v-if="!hasMinLengthForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.minLength") }}</li>
-                        <li v-if="!hasSpecialCharForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.specialChar") }}</li>
-                        <li v-if="!hasNumberForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.number") }}</li>
-                      </ul>
-
-                      <label class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $t("auth.unified.confirmPassword") }}</label>
+                        </div>
+                        <div>
+                      <label class="text-xs text-gray-500 dark:text-gray-400">{{ $t("auth.unified.confirmPassword") }}</label>
                       <div class="relative">
                       <button
                         type="button"
@@ -2325,8 +2297,23 @@
                       >
                         {{ errors["password_confirmation"][0] }}
                       </span>
+                        </div>
+                      </div>
 
-                      <label class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $t("auth.unified.referralCode") }}</label>
+                      <ul v-if="!allConditionsMetForRegister"
+                        class="border border-pink-500 dark:border-pink-400 dark:bg-pink-400 dark:bg-opacity-10 bg-pink-500 bg-opacity-5 rounded-xl px-4 py-2 mt-4">
+                        <li v-if="!hasLowercaseForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.lowercase") }}</li>
+                        <li v-if="!hasUppercaseForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.uppercase") }}</li>
+                        <li v-if="!hasMinLengthForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.minLength") }}</li>
+                        <li v-if="!hasSpecialCharForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.specialChar") }}</li>
+                        <li v-if="!hasNumberForRegister" class="font-semibold text-[0.8rem] text-pink-700 dark:text-pink-600 mb-2 last:mb-0">{{ $t("auth.password.number") }}</li>
+                      </ul>
+                      </div>
+
+                      <div class="min-h-0">
+                      <div class="flex flex-col lg:h-full lg:flex-row lg:items-stretch lg:gap-1.5">
+                      <label class="auth-referral-label text-xs text-gray-500 dark:text-gray-400">{{ $t("auth.unified.referralCode") }}</label>
+                      <div class="auth-referral-box h-10 w-full">
                       <input
                         v-model="referral_code"
                         v-no-autofill="'strong'"
@@ -2337,11 +2324,13 @@
                           'border-rose-500 text-rose-500 border-opacity-100 dark:text-rose-500':
                             errors && errors['referral_code'],
                         }"
-                        class="h-10 placeholder-gray-400 font-semibold text-center dark:placeholder-gray-500 w-full bg-slate-400 dark:bg-slate-800 bg-opacity-10 rounded-lg transition duration-200 text-sm text-gray-600 dark:text-gray-200 focus:dark:text-white px-3 border border-amber-400 border-opacity-0 focus:border-opacity-100 ring-0 ring-offset-0 outline-none uppercase"
+                        class="auth-referral-input h-full w-full placeholder-gray-400 font-semibold text-center dark:placeholder-gray-500 bg-slate-400 dark:bg-slate-800 bg-opacity-10 rounded-lg transition duration-200 text-sm text-gray-600 dark:text-gray-200 focus:dark:text-white px-3 border border-amber-400 border-opacity-0 focus:border-opacity-100 ring-0 ring-offset-0 outline-none uppercase lg:px-1 lg:py-3"
                         placeholder=""
                         @input="referral_code = referral_code.toUpperCase().replace(/[^A-Z]/g, '')"
                         dir="ltr"
                       />
+                      </div>
+                      </div>
 
                       <span
                         v-if="errors && errors['referral_code']"
@@ -2349,6 +2338,7 @@
                       >
                         {{ errors["referral_code"][0] }}
                       </span>
+                      </div>
                     </div>
 
                     <span
@@ -2550,8 +2540,8 @@
                 {{
                   $t(`footer.copyright`)
                 }}.
-              </p>
-            </div>
+          </p>
+        </div>
           </div>
         </div>
       </div>
@@ -4028,4 +4018,77 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.auth-art-wrap {
+  filter: drop-shadow(-18px 0 20px rgba(109, 40, 217, 0.38))
+    drop-shadow(-6px 0 10px rgba(167, 139, 250, 0.28));
+}
+.auth-art,
+.auth-art__shadow {
+  clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+}
+.auth-art__shadow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(225deg, rgba(239, 18, 98, 1) 0%, rgba(67, 97, 238, 1) 100%);
+  transform: translateX(-14px);
+  filter: blur(16px);
+  opacity: 0.55;
+}
+.auth-art {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+.auth-art__fade {
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(196, 181, 253, 0.16) 10%,
+    transparent 22%
+  );
+}
+:global(html[dir='ltr']) .auth-art-wrap {
+  filter: drop-shadow(18px 0 20px rgba(109, 40, 217, 0.38))
+    drop-shadow(6px 0 10px rgba(167, 139, 250, 0.28));
+}
+:global(html[dir='ltr']) .auth-art,
+:global(html[dir='ltr']) .auth-art__shadow {
+  clip-path: polygon(0 0, 78% 0, 100% 100%, 0 100%);
+}
+:global(html[dir='ltr']) .auth-art__shadow {
+  transform: translateX(14px);
+}
+:global(html[dir='ltr']) .auth-art__fade {
+  background: linear-gradient(
+    260deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(196, 181, 253, 0.16) 10%,
+    transparent 22%
+  );
+}
+@media (min-width: 1024px) {
+  .auth-referral-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+    align-self: center;
+  }
+  .auth-referral-box {
+    position: relative;
+    width: 2.5rem;
+    height: auto;
+    min-height: 0;
+    align-self: stretch;
+  }
+  .auth-referral-input {
+    position: absolute;
+    inset: 0;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    letter-spacing: 0.45em;
+    font-size: 1.05rem;
+  }
+}
+</style>

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage
         :breadcrumb-title-override="userFullName"
         :breadcrumb-subtitle-override="userSubtitle"

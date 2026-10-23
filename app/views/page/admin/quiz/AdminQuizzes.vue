@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <button @click="refreshData" :class="BTN_SECONDARY">

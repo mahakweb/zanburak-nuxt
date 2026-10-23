@@ -183,126 +183,14 @@
         </div>
     </article>
 
-    <BottomSheetDrawer v-model="isOpenReportModal" :initialHeight="0.7" :maxHeight="0.8" :minHeight="0.6"
-    :autoCloseOnMin="true" :closeOnBackdrop="true" :lockScroll="true"
-    :panelClass="'bg-white dark:bg-gray-900 border-t border-gray-500/70 dark:border-gray-700/70 rounded-t-2xl lg:w-[40rem] lg:rounded-b-2xl shadow-[0_-8px_30px_rgba(15,23,42,0.35)]'"
-    :contentClass="'px-4 pb-4 overflow-auto custom-scrollbar'"
-    :backdropClass="'bg-gray-300/30 dark:bg-gray-500/30 backdrop-blur-sm'">
-
-        <div>
-                                        <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
-                                            aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                            viewBox="0 0 20 20">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                        </svg>
-                                        <h3
-                                            class="mb-2 text-start text-base font-bold text-gray-500 dark:text-gray-200">
-                                            {{ $t('discuss.common.reportTitle') }}
-                                        </h3>
-                                        <div class="flex flex-col space-y-2 my-3">
-                                            <div
-                                                class="flex flex-col space-y-2 text-sm text-start text-gray-700 dark:text-gray-400">
-                                                <div
-                                                    class="rounded-lg flex items-start bg-gray-100 dark:bg-gray-700/20 p-2.5">
-                                                    <input id="report-spam" v-model="report" type="radio"
-                                                        class="radio radio-warning bg-gray-300 border-none w-5 h-5 me-3 focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900" name="" value="spam">
-                                                    <label for="report-spam" class="ms-1.5">
-                                                        {{ $t('discuss.common.reportSpamBefore') }} <span
-                                                            class="mx-0.5 font-bold text-gray-800 dark:text-gray-50">{{ $t('discuss.common.reportSpamHighlight') }}</span> {{ $t('discuss.common.reportSpamAfter') }}
-                                                    </label>
-                                                </div>
-                                                <div
-                                                    class="rounded-lg flex items-start bg-gray-100 dark:bg-gray-700/20 p-2.5">
-                                                    <input id="report-offensive-writing" v-model="report" type="radio"
-                                                        class="radio radio-warning bg-gray-300 border-none w-5 h-5 me-3 focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900" name=""
-                                                        value="offensive-writing">
-                                                    <label for="report-offensive-writing" class="ms-1.5">
-                                                        {{ $t('discuss.common.reportOffensiveBefore') }} <span
-                                                            class="mx-0.5 font-bold text-gray-800 dark:text-gray-50">{{ $t('discuss.common.reportOffensiveHighlight') }}</span> {{ $t('discuss.common.reportOffensiveAfter') }}
-                                                    </label>
-                                                </div>
-                                                <div
-                                                    class="rounded-lg flex items-start bg-gray-100 dark:bg-gray-700/20 p-2.5">
-                                                    <input id="report-violation-of-rules" v-model="report" type="radio"
-                                                        class="radio radio-warning bg-gray-300 border-none w-5 h-5 me-3 focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900" name=""
-                                                        value="violation-of-rules">
-                                                    <label for="report-violation-of-rules" class="ms-1.5">
-                                                        {{ $t('discuss.common.reportRulesBefore') }} <span
-                                                            class="mx-0.5 font-bold text-gray-800 dark:text-gray-50">{{ $t('discuss.common.reportRulesHighlight') }}</span> {{ $t('discuss.common.reportRulesAfter') }}
-                                                    </label>
-                                                </div>
-                                                <div
-                                                    class="rounded-lg flex items-start bg-gray-100 dark:bg-gray-700/20 p-2.5">
-                                                    <input id="report-other" v-model="report" type="radio"
-                                                        class="radio radio-warning bg-gray-300 border-none w-5 h-5 me-3 focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900" name="" value="other">
-                                                    <label for="report-other" class="ms-1.5">
-                                                        {{ $t('discuss.common.reportOther') }}
-                                                    </label>
-                                                </div>
-                                            </div>
-
-                                            <span v-if="errors && errors.report"
-                                                class="mt-2 text-red-500 text-xs font-semibold">
-                                                {{ errors.report[0] }}
-                                            </span>
-                                            <span v-if="errors && errors.reportable_id"
-                                                class="mt-2 text-red-500 text-xs font-semibold">
-                                                {{ errors.reportable_id[0] }}
-                                            </span>
-                                            <span v-if="errors && errors.reportable_type"
-                                                class="mt-2 text-red-500 text-xs font-semibold">
-                                                {{ errors.reportable_type[0] }}
-                                            </span>
-                                        </div>
-
-
-                                        <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
-                                            <button @click="closeReportModal" type="button"
-                                                class="h-9 py-2 px-3 text-sm font-semibold text-gray-500 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:ring-2 focus:outline-none focus:ring-primary-300 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
-                                                {{ $t('discuss.common.cancel') }}
-                                            </button>
-                                            <button type="submit" @click="sendReport" :disabled="reportLoading"
-                                                class="w-32 h-9 py-2 px-3 text-sm font-semibold text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-2 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900">
-                                                <svg v-if="reportLoading" class="w-4 h-4 m-auto" version="1.1"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="25 25 50 50">
-
-                                                    <circle class="stroke-current text-gray-50 text-opacity-30" cx="50"
-                                                        cy="50" r="20" fill="none" stroke-width="8"
-                                                        stroke-linecap="round" stroke-dashoffset="0"
-                                                        stroke-dasharray="200, 300">
-
-                                                    </circle>
-                                                    <circle class="stroke-current text-gray-50" cx="50" cy="50" r="20"
-                                                        fill="none" stroke-width="8" stroke-linecap="round"
-                                                        stroke-dashoffset="0" stroke-dasharray="100, 200">
-                                                        <animateTransform attributeName="transform" attributeType="XML"
-                                                            type="rotate" from="0 50 50" to="360 50 50" dur="2.5s"
-                                                            repeatCount="indefinite">
-                                                        </animateTransform>
-                                                        <animate attributeName="stroke-dashoffset" values="0;-30;-124"
-                                                            dur="1.25s" repeatCount="indefinite">
-                                                        </animate>
-                                                        <animate attributeName="stroke-dasharray"
-                                                            values="0,200;110,200;110,200" dur="1.25s"
-                                                            repeatCount="indefinite"></animate>
-                                                    </circle>
-                                                </svg>
-                                                <span v-else class="flex items-center">
-                                                    <svg class="w-4 h-4 me-2" viewBox="0 0 24 24" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M16.3027 15.3365H6.68V20.1818C6.68 20.6337 6.30392 21 5.84 21C5.37608 21 5 20.6337 5 20.1818V3.81818C5 3.36631 5.37608 3 5.84 3H16.3027C17.4037 3 18.2506 3.65926 18.6739 4.48207C19.0965 5.30334 19.1414 6.35681 18.6123 7.28021L18.1096 8.15756C17.757 8.77312 17.757 9.56335 18.1096 10.1789L18.6123 11.0563C19.1414 11.9797 19.0965 13.0331 18.6739 13.8544C18.2506 14.6772 17.4037 15.3365 16.3027 15.3365Z"
-                                                            fill="currentColor"></path>
-                                                    </svg>
-                                                    {{ $t('discuss.common.sendReport') }}
-                                                </span>
-                                            </button>
-                                        </div>
-        </div>
-    </BottomSheetDrawer>
+    <ReportBottomSheet
+        v-model="isOpenReportModal"
+        v-model:reason="report"
+        v-model:description="reportDescription"
+        :loading="reportLoading"
+        :errors="errors"
+        @submit="sendReport"
+    />
 
     <AddTagSheet
         :open="isOpenAddTagSheet"
@@ -316,7 +204,7 @@
 
 <script>
 import { useAuthStore } from '@/stores/auth'
-import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
+import ReportBottomSheet from "@/views/components/common/ReportBottomSheet.vue";
 import AddTagSheet from "@/views/components/tag/AddTagSheet.vue";
 import TagChip from "@/views/components/tag/TagChip.vue";
 import { useClipboard } from '@vueuse/core';
@@ -332,7 +220,7 @@ export default {
 		setup() { return { authStore: useAuthStore() } },
     components: {
         SeoImage,
-        BottomSheetDrawer,
+        ReportBottomSheet,
         AddTagSheet,
         TagChip,
     },
@@ -341,6 +229,7 @@ export default {
             isOpenReportModal: false,
             isOpenAddTagSheet: false,
             report: null,
+            reportDescription: '',
             reportLoading: false,
             isCopied: false,
             appUrl: config.appUrl,
@@ -390,7 +279,8 @@ export default {
                 .post("/sendReport", {
                     reportable_id: this.localQuestion.id,
                     reportable_type: 'Question',
-                    report: this.report
+                    report: this.report,
+                    description: this.report === 'other' ? String(this.reportDescription || '').trim() : null,
                 })
                 .then(() => {
                     toast.success(this.$t('discuss.common.reportSuccess'), {
@@ -403,7 +293,6 @@ export default {
                         position: toast.POSITION.BOTTOM_RIGHT
                     });
                     this.closeReportModal();
-                    this.report = null;
                 })
                 .catch((error) => {
                     console.error(error.response.data.errors);
@@ -431,6 +320,9 @@ export default {
         },
         closeReportModal() {
             this.isOpenReportModal = false;
+            this.report = null;
+            this.reportDescription = '';
+            this.errors = null;
         },
         openReportModal() {
             this.isOpenReportModal = true;

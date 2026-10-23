@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link v-can="'courses.create'" :to="{ name: 'admin-course-create' }"

@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "password-reset",
   props: true,
+  middleware: ['guest'],
 })
 </script>
 

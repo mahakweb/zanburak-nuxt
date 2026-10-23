@@ -16,14 +16,11 @@
                         img-class="relative z-0 w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-110"
                     />
                 </router-link>
-                <CourseStatusRibbon :status="localCourse.status" />
-                <InstallmentRibbon
+                <CourseRibbonPins
+                    :status="localCourse.status"
                     :allows-installment="localCourse.allows_installment"
-                    :alternate-corner="hasStatusRibbon"
+                    :discount-percent="hasDiscount ? discountPercent : 0"
                 />
-                <div v-if="hasDiscount" class="absolute z-20 top-2 rtl:right-2 ltr:left-2 pointer-events-none">
-                    <DiscountBadge :percent="discountPercent" overlay compact />
-                </div>
                 <div class="hidden group-hover:block absolute top-0 rtl:left-0 ltr:right-0 z-10">
                     <div
                         class="pointer-events-none absolute top-0 rtl:left-0 ltr:right-0 w-28 h-24 rtl:rounded-ee-xl ltr:rounded-es-xl rtl:bg-[radial-gradient(ellipse_at_0_0,rgba(15,23,42,0.28)_0%,rgba(15,23,42,0.08)_48%,transparent_70%)] ltr:bg-[radial-gradient(ellipse_at_100%_0,rgba(15,23,42,0.28)_0%,rgba(15,23,42,0.08)_48%,transparent_70%)]">
@@ -146,10 +143,8 @@
 import { useAuthStore } from '@/stores/auth'
 import { initPopovers } from "flowbite";
 import axiosInstance from "@/store/axiosInstance";
-import CourseStatusRibbon from "@/views/components/course/CourseStatusRibbon.vue";
-import InstallmentRibbon from "@/views/components/payment/InstallmentRibbon.vue";
+import CourseRibbonPins from "@/views/components/course/CourseRibbonPins.vue";
 import PriceDisplay from "@/views/components/price/PriceDisplay.vue";
-import DiscountBadge from "@/views/components/price/DiscountBadge.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 import { cleanCourseTitle } from "@/utils/courseDisplay";
 import { courseDiscountPercent, courseHasDiscount } from "@/utils/priceDisplay";
@@ -157,7 +152,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 export default {
 		setup() { return { authStore: useAuthStore() } },
-    components: { CourseStatusRibbon, InstallmentRibbon, PriceDisplay, DiscountBadge, SeoImage },
+    components: { CourseRibbonPins, PriceDisplay, SeoImage },
     props: {
         course: {
             type: Object,
@@ -200,11 +195,6 @@ export default {
                 return null;
             }
             return Number(rating.toFixed(1));
-        },
-        hasStatusRibbon() {
-            const status = this.localCourse?.status;
-            const slug = status?.english_title || status?.slug || null;
-            return ['presale', 'upcoming', 'archive'].includes(slug);
         },
         hasDiscount() {
             return courseHasDiscount(this.localCourse);

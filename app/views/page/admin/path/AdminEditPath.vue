@@ -1,6 +1,15 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
+            <router-link v-if="resolvedPathSlug" :to="{ name: 'admin-path-details', params: { pathSlug: resolvedPathSlug } }" :class="BTN_SECONDARY">
+                <span class="flex items-center gap-1.5">
+                    مشخصات مسیر
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z" />
+                        <circle cx="12" cy="12" r="2.4" />
+                    </svg>
+                </span>
+            </router-link>
             <router-link :to="{ name: 'admin-paths-list' }" :class="BTN_SECONDARY">
                 <span class="flex items-center gap-1.5">
                     فهرست مسیرها

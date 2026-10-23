@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <button @click.prevent="openCreateModal"

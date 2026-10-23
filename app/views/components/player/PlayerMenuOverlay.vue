@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 
     <!-- Mobile: bottom sheet -->
 

@@ -88,39 +88,21 @@ definePageMeta({
 })
 
 import DarkMode from "@/views/components/DarkMode.vue";
-import axiosInstance from "@/store/axiosInstance";
 import { onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
+import { safeInternalPath } from "@/utils/safeRedirect";
 
 const route = useRoute();
 const auth = useAuthStore();
 const { t } = useI18n();
 
-function safeRedirect(value) {
-    return typeof value === "string" && value.startsWith("/") && !value.startsWith("//")
-        ? value
-        : "/";
-}
-
 onMounted(() => {
     document.title = t("auth.oauth.pageTitle");
     setTimeout(async () => {
-        const token = route.query.token;
-        if (typeof token === "string" && token) {
-            axiosInstance.addHeaders({ Authorization: `Bearer ${token}` });
-            try {
-                const { data: user } = await axiosInstance.get("/user");
-                await auth.completeLogin({ token, user });
-            } catch (error) {
-                console.error("[auth] OAuth user restore failed", error);
-            }
-        } else {
-            await auth.restoreFromStorage();
-        }
-
-        window.location.assign(safeRedirect(route.query.redirect));
+        await auth.restoreFromStorage();
+        window.location.assign(safeInternalPath(route.query.redirect));
     }, 3000);
 });
 </script>

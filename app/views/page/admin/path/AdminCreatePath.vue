@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link :to="{ name: 'admin-paths-list' }" :class="BTN_SECONDARY">

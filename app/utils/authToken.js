@@ -117,7 +117,7 @@ export function persistAuthToken(token) {
 
   if (import.meta.client) {
     try {
-      localStorage.setItem('token', JSON.stringify(value))
+      localStorage.removeItem('token')
     } catch {
       /* ignore */
     }

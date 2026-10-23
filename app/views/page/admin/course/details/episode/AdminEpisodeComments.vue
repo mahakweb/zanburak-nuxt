@@ -15,7 +15,7 @@
                 </button>
             </div>
         </div>
-        <AdminFilterSelect v-model="filters.approved" label="وضعیت تایید" :options="approvedOptions" @change="onFilterChange" />
+        <AdminFilterSelect v-model="filters.status" label="وضعیت نظر" :options="statusOptions" @change="onFilterChange" />
         <AdminFilterSelect v-model="filters.sort" label="مرتب‌سازی" :options="sortOptions" @change="onFilterChange" />
     </AdminTabPanelToolbar>
     <AdminInlineLoading v-if="loading" />
@@ -90,19 +90,7 @@
                             </div>
                         </td>
                         <td class="px-1 py-3 whitespace-nowrap text-start">
-                            <div v-if="item.approved"
-                                class="whitespace-nowrap flex items-center text-xs font-medium text-green-800 dark:text-green-100 bg-green-100/70 dark:bg-green-800/50 px-2 py-1 rounded-lg">
-                                <svg class="w-4 h-4 me-2" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round"></path>
-                                </svg>
-                                تایید شده
-                            </div>
-                            <div v-else
-                                class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
-                                در انتظار تایید
-                            </div>
+                            <CommentStatusBadge :comment="item" />
                         </td>
                         <td class="px-1 py-3 whitespace-nowrap text-start">
                             <div dir="ltr"
@@ -116,12 +104,10 @@
                                     class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">مشاهده</button>
                                 <button @click.prevent="openReplyCommentModal(item)"
                                     class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">پاسخ</button>
-                                <button v-if="!item.approved" :disabled="loadingComments[item.id]"
-                                    @click.prevent="commentToggleApproval(item, item.id)"
-                                    class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">تایید</button>
-                                <button v-else @click.prevent="commentToggleApproval(item, item.id)"
-                                    :disabled="loadingComments[item.id]"
-                                    class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">عدم تایید</button>
+                                <AdminCommentStatusActions
+                                    :comment="item"
+                                    :disabled="!!loadingComments[item.id]"
+                                    @set-status="setCommentStatus" />
                             </div>
                             <Popover class="md:hidden group relative flex items-center justify-center">
                                 <PopoverOverlay class="fixed inset-0 z-20 bg-black opacity-30" />
@@ -152,12 +138,11 @@
                                                     class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">پاسخ</button>
                                             </li>
                                             <li>
-                                                <button v-if="!item.approved" :disabled="loadingComments[item.id]"
-                                                    @click.prevent="commentToggleApproval(item, item.id)"
-                                                    class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">تایید</button>
-                                                <button v-else :disabled="loadingComments[item.id]"
-                                                    @click.prevent="commentToggleApproval(item, item.id)"
-                                                    class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">عدم تایید</button>
+                                                <AdminCommentStatusActions
+                                                    variant="menu"
+                                                    :comment="item"
+                                                    :disabled="!!loadingComments[item.id]"
+                                                    @set-status="setCommentStatus" />
                                             </li>
                                         </ul>
                                     </PopoverPanel>
@@ -202,18 +187,16 @@
                                     <span v-else class="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-1">کاربر ناشناس</span>
                                     <p class="text-xs text-gray-400 dark:text-gray-500 line-clamp-1">{{
                                         timeAgo(comment.created_at) }}</p>
+                                    <CommentStatusBadge class="mt-1" :comment="comment" />
                                 </div>
                             </div>
                             <div class="hidden md:flex items-center gap-1">
                                 <button @click.prevent="openReplyCommentModal(comment)"
                                     class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">پاسخ</button>
-                                <button v-if="!comment.approved" :disabled="loadingComments[comment.id]"
-                                    @click.prevent="commentToggleApproval(comment, comment.id)"
-                                    class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">تایید</button>
-                                <button v-else @click.prevent="commentToggleApproval(comment, comment.id)"
-                                    :disabled="loadingComments[comment.id]"
-                                    class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">عدم
-                                    تایید</button>
+                                <AdminCommentStatusActions
+                                    :comment="comment"
+                                    :disabled="!!loadingComments[comment.id]"
+                                    @set-status="setCommentStatus" />
                                 <button @click.prevent="openPreviewCommentModal(comment)"
                                     class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">مشاهده</button>
                             </div>
@@ -246,13 +229,11 @@
                                                     class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">پاسخ</button>
                                             </li>
                                             <li>
-                                                <button v-if="!comment.approved" :disabled="loadingComments[comment.id]"
-                                                    @click.prevent="commentToggleApproval(comment, comment.id)"
-                                                    class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">تایید</button>
-                                                <button v-else :disabled="loadingComments[comment.id]"
-                                                    @click.prevent="commentToggleApproval(comment, comment.id)"
-                                                    class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">عدم
-                                                    تایید</button>
+                                                <AdminCommentStatusActions
+                                                    variant="menu"
+                                                    :comment="comment"
+                                                    :disabled="!!loadingComments[comment.id]"
+                                                    @set-status="setCommentStatus" />
                                             </li>
                                         </ul>
                                     </PopoverPanel>
@@ -301,18 +282,16 @@
                                             <p class="text-xs text-gray-400 dark:text-gray-500 line-clamp-1">{{
                                                 timeAgo(reply.created_at) }}
                                             </p>
+                                            <CommentStatusBadge class="mt-1" :comment="reply" />
                                         </div>
                                     </div>
                                     <div class="hidden md:flex items-center gap-1">
                                         <button @click.prevent="openReplyCommentModal(reply)"
                                             class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">پاسخ</button>
-                                        <button v-if="!reply.approved" :disabled="loadingComments[reply.id]"
-                                            @click.prevent="commentToggleApproval(reply, reply.id)"
-                                            class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">تایید</button>
-                                        <button v-else @click.prevent="commentToggleApproval(reply, reply.id)"
-                                            :disabled="loadingComments[reply.id]"
-                                            class="disabled:opacity-60 px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">عدم
-                                            تایید</button>
+                                        <AdminCommentStatusActions
+                                            :comment="reply"
+                                            :disabled="!!loadingComments[reply.id]"
+                                            @set-status="setCommentStatus" />
                                         <button @click.prevent="openPreviewCommentModal(reply)"
                                             class="px-2 py-1.5 rounded-lg flex items-center text-xs font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100">مشاهده</button>
                                     </div>
@@ -346,14 +325,11 @@
                                                             class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">پاسخ</button>
                                                     </li>
                                                     <li>
-                                                        <button v-if="!reply.approved"
-                                                            :disabled="loadingComments[reply.id]"
-                                                            @click.prevent="commentToggleApproval(reply, reply.id)"
-                                                            class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">تایید</button>
-                                                        <button v-else :disabled="loadingComments[reply.id]"
-                                                            @click.prevent="commentToggleApproval(reply, reply.id)"
-                                                            class="disabled:opacity-50 block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">عدم
-                                                            تایید</button>
+                                                        <AdminCommentStatusActions
+                                                            variant="menu"
+                                                            :comment="reply"
+                                                            :disabled="!!loadingComments[reply.id]"
+                                                            @set-status="setCommentStatus" />
                                                     </li>
                                                 </ul>
                                             </PopoverPanel>
@@ -566,8 +542,13 @@ import AdminFilterSelect from "@/views/components/admin/AdminFilterSelect.vue";
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@headlessui/vue";
 import * as bs from "@/views/components/admin/bottomSheet/adminBottomSheetStyles.js";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
+import CommentStatusBadge from "@/views/components/comment/CommentStatusBadge.vue";
+import AdminCommentStatusActions from "@/views/components/admin/comment/AdminCommentStatusActions.vue";
+import commentModerationMixin from "@/utils/commentModerationMixin";
+import { applyCommentStatus, commentStatusFilterOptions } from "@/utils/commentStatus";
 export default {
 		setup() { return { adminCommentsStore: useAdminCommentsStore() } },
+    mixins: [commentModerationMixin],
     components: {
         AdminInlineLoading,
         EditorComponent,
@@ -579,6 +560,8 @@ export default {
         AdminFilterSelect,
         TabGroup, TabList, Tab, TabPanels, TabPanel,
         PaginationComponent,
+        CommentStatusBadge,
+        AdminCommentStatusActions,
     },
     props: {
         courseSlug: {
@@ -594,7 +577,7 @@ export default {
         return {
             bs,
             filters: {
-                approved: 'all',
+                status: 'all',
                 sort: 'desc'
             },
             errors: null,
@@ -615,12 +598,8 @@ export default {
         };
     },
     computed: {
-        approvedOptions() {
-            return [
-                { value: "all", label: "همه" },
-                { value: "true", label: "تایید‌شده" },
-                { value: "false", label: "تایید‌نشده" },
-            ];
+        statusOptions() {
+            return commentStatusFilterOptions();
         },
         sortOptions() {
             return [
@@ -642,33 +621,6 @@ export default {
             moment.locale("fa");
             return moment(date).fromNow();
         },
-        async commentToggleApproval(comment, id) {
-            this.loadingComments[id] = true;
-            const wasUnapproved = !comment.approved;
-            try {
-                await axiosInstance.post(
-                    'admin/comments/toggle-approval', { comment_id: comment.id }
-                );
-                comment.approved = !comment.approved;
-                
-                // Update the Pinia count if comment was unapproved and now is approved
-                if (wasUnapproved && comment.approved) {
-                    this.adminCommentsStore.decreaseUnapprovedComments();
-                    // Also update parent component if it has the method
-                    if (this.$parent && typeof this.$parent.decreaseUnapprovedCount === 'function') {
-                        this.$parent.decreaseUnapprovedCount();
-                    }
-                }
-                // If comment was approved and now is unapproved, increment
-                if (!wasUnapproved && !comment.approved) {
-                    this.adminCommentsStore.incrementUnapprovedComments();
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                this.loadingComments[id] = false;
-            }
-        },
         async getEpisodeComments() {
             this.loading = true;
             try {
@@ -679,7 +631,7 @@ export default {
                         page: this.currentPage,
                         perPage: this.perPage,
                         sort: this.filters.sort,
-                        filter: this.filters.approved === 'all' ? 'all' : (this.filters.approved === 'true' ? 'approved' : 'unapproved'),
+                        filter: this.filters.status,
                         viewMode: this.viewMode
                     }
                 );
@@ -747,9 +699,8 @@ export default {
                     this.selectedComment.replies = [newComment];
                 }
 
-                // If parent was approved, update it
-                if (this.selectedCommentForReplyApprovedCheck && !this.selectedComment.approved) {
-                    this.selectedComment.approved = true;
+                if (this.selectedCommentForReplyApprovedCheck && this.selectedComment) {
+                    applyCommentStatus(this.selectedComment, "approved");
                 }
 
                 toast.success('پاسخ کامنت با موفقیت ثبت شد.', {

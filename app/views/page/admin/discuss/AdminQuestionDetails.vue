@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage
         :breadcrumb-title-override="question?.subject"
         :breadcrumb-last-override="question?.subject">

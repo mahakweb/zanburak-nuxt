@@ -197,11 +197,12 @@ definePageMeta({
                                     </li>
                                     <li>
                                         <input v-model="publish" type="radio" id="publish-1" name="publish" :value="1"
-                                            class="hidden peer">
+                                            class="hidden peer" :disabled="!canDirectPublish">
                                         <label for="publish-1"
-                                            class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
+                                            class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400"
+                                            :class="{ 'opacity-50 cursor-not-allowed': !canDirectPublish }">
                                             <div class="block text-xs font-semibold text-center w-full">
-                                                منتشر شود
+                                                {{ canDirectPublish ? 'منتشر شود' : 'ارسال برای تایید' }}
                                             </div>
                                         </label>
                                     </li>
@@ -209,6 +210,11 @@ definePageMeta({
                                 <span v-if="errors && errors.publish" class="mt-1 text-rose-500 text-xs font-medium">
                                     {{ errors.publish[0] }}
                                 </span>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    {{ canDirectPublish
+                                        ? 'اگر منتشر شود، جلسه برای دانشجویان قابل مشاهده خواهد بود.'
+                                        : 'برای انتشار از صفحه جلسه درخواست بفرستید. لغو انتشار فقط توسط بررسی‌کننده انجام می‌شود.' }}
+                                </p>
 
                             </div>
 
@@ -767,6 +773,7 @@ import "vue3-toastify/dist/index.css";
 import EditorComponent from "@/views/components/editor/EditorComponent.vue";
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
+import { COURSE_PUBLISH_APPROVE_PERMS } from "@/utils/coursePublish";
 import { consumePendingEpisodeVideo } from "@/utils/episodeUploadBridge.js";
 import VideoProcessOptions from "@/views/components/admin/VideoProcessOptions.vue";
 import AdminAttachmentsField from "@/views/components/admin/AdminAttachmentsField.vue";
@@ -961,6 +968,9 @@ export default {
         }
     },
     computed: {
+        canDirectPublish() {
+            return this.$can(COURSE_PUBLISH_APPROVE_PERMS);
+        },
         confirmSummary() {
             return [
                 { label: "عنوان فارسی", value: this.title },

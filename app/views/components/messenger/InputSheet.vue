@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BottomSheetDrawer
     :model-value="open"
     :draggable="true"

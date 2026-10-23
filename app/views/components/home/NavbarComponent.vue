@@ -21,6 +21,11 @@ import SeoImage from "@/views/components/seo/SeoImage.vue";
 // const cartCount = ref(1)
 const isLoggedin = computed(() => authStore.status.loggedIn);
 const currentUser = computed(() => authStore.status.userInfo);
+const showAuthSkeleton = computed(() => {
+    if (isLoggedin.value && currentUser.value) return false
+    if (!authStore.status.ready) return true
+    return !!(isLoggedin.value && !currentUser.value)
+});
 
 const messengerUnread = computed(() => messengerStore.unreadCount || 0);
 const cartItems = computed(() => cartStore.cartItems);
@@ -277,7 +282,14 @@ watch(isLoggedin, (loggedIn) => {
                                     </button>
                                 </div>
                             </div>
-                            <div v-else-if="isLoggedin" class="animate-pulse inline-flex items-center">
+                            <div
+                                v-else-if="showAuthSkeleton"
+                                class="animate-pulse inline-flex items-center"
+                                aria-busy="true"
+                                aria-hidden="true"
+                            >
+                                <div class="hidden lg:block w-11 h-11 rounded-full bg-gray-300 dark:bg-gray-700 ltr:mr-2 rtl:ml-2"></div>
+                                <div class="hidden lg:block w-11 h-11 rounded-full bg-gray-300 dark:bg-gray-700 ltr:mr-2 rtl:ml-2"></div>
                                 <div
                                     class="mx-4 relative hidden lg:inline-flex bg-gray-300 dark:bg-gray-700 rounded-full text-sm p-3">
                                     <svg class="w-5 h-5 text-gray-200 dark:text-gray-600" viewBox="0 0 22 22"
@@ -334,8 +346,8 @@ watch(isLoggedin, (loggedIn) => {
                                     </svg>
                                 </div>
                             </div>
-                            <!-- is not login user -->
-                            <div v-if="!isLoggedin" class="ltr:ml-3 rtl:mr-3 flex items-center">
+                            <!-- Guest CTAs only after /user has resolved as logged-out. -->
+                            <div v-else class="ltr:ml-3 rtl:mr-3 flex items-center">
                             <div class="inline-flex items-center">
                                 <ChangeLang class="hidden lg:flex ltr:mr-2 rtl:ml-2">
                                     <template #trigger="{ open, current }">
@@ -409,10 +421,17 @@ watch(isLoggedin, (loggedIn) => {
                             </div>
                         </div>
                                     <template #fallback>
-                                        <div class="nav-auth ltr:ml-3 rtl:mr-3">
-                                            <NuxtLink :to="{ name: 'login' }" class="nav-auth__btn nav-auth__btn--login">
-                                                <span class="nav-auth__label">{{ $t("auth.login") }}</span>
-                                            </NuxtLink>
+                                        <div
+                                            class="animate-pulse inline-flex items-center"
+                                            aria-busy="true"
+                                            aria-hidden="true"
+                                        >
+                                            <div class="hidden lg:block w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 ltr:mr-2 rtl:ml-2"></div>
+                                            <div class="hidden lg:block w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 ltr:mr-2 rtl:ml-2"></div>
+                                            <div class="hidden lg:block w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 ltr:mr-4 rtl:ml-4"></div>
+                                            <div class="hidden lg:block w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 ltr:mr-4 rtl:ml-4"></div>
+                                            <div class="hidden lg:block w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                                            <div class="w-11 h-11 md:ms-4 rounded-full bg-gray-300 dark:bg-gray-700"></div>
                                         </div>
                                     </template>
                                 </ClientOnly>

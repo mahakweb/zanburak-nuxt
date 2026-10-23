@@ -62,6 +62,24 @@
       { "label": "فهرست دوره‌ها" }
     ]
   },
+  "admin-course-requests": {
+    "title": "درخواست‌های دوره",
+    "subtitle": "بررسی درخواست‌های انتشار، لغو انتشار و حذف دوره و جلسه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "درخواست‌های دوره" }
+    ]
+  },
+  "admin-course-publish-requests": {
+    "title": "درخواست‌های دوره",
+    "subtitle": "بررسی درخواست‌های انتشار، لغو انتشار و حذف دوره و جلسه",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت دوره‌ها" },
+      { "label": "درخواست‌های دوره" }
+    ]
+  },
   "admin-course-create": {
     "title": "ایجاد دوره جدید",
     "subtitle": "ثبت دوره آموزشی جدید در سامانه",
@@ -151,7 +169,18 @@
       { "label": "پنل مدیریت", "route": "admin-index" },
       { "label": "مدیریت مسیرهای یادگیری" },
       { "label": "فهرست مسیرها", "route": "admin-paths-list" },
+      { "label": "مشخصات مسیر", "route": "admin-path-details", "useRouteParams": true },
       { "label": "ویرایش مسیر یادگیری" }
+    ]
+  },
+  "admin-path-details": {
+    "title": "مشخصات مسیر",
+    "subtitle": "مشاهده جزئیات، دوره‌ها و ارتباطات مسیر یادگیری",
+    "breadcrumbs": [
+      { "label": "پنل مدیریت", "route": "admin-index" },
+      { "label": "مدیریت مسیرهای یادگیری" },
+      { "label": "فهرست مسیرها", "route": "admin-paths-list" },
+      { "label": "مشخصات مسیر" }
     ]
   },
   "admin-categories-list": {
@@ -422,12 +451,12 @@
     ]
   },
   "admin-comments": {
-    "title": "مدیریت نظرات دوره‌ها",
+    "title": "مدیریت نظرات",
     "subtitle": "بررسی و تأیید نظرات کاربران",
     "breadcrumbs": [
       { "label": "پنل مدیریت", "route": "admin-index" },
       { "label": "پشتیبانی و ارتباط با کاربران" },
-      { "label": "مدیریت نظرات دوره‌ها" }
+      { "label": "مدیریت نظرات" }
     ]
   },
   "admin-reports": {

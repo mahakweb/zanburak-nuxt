@@ -5,7 +5,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <PanelMasterPage>
         <div class="w-full space-y-5">
             <div class="md:hidden">
@@ -49,7 +49,7 @@ definePageMeta({
                             </Tab>
                         </TabList>
                         <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                            <Listbox v-model="selectedStatus" v-slot="{ open }" as="div" class="w-40">
+                            <Listbox v-model="selectedStatus" v-slot="{ open }" as="div" class="w-48">
                                 <div v-if="open" class="fixed inset-0 z-10 bg-black opacity-20 dark:opacity-60"></div>
                                 <div class="mt-1 relative" :class="open ? ' z-20' : ''">
                                     <ListboxButton :class="open ? 'rounded-b-none outline-none ring-0 text-yellow-400 ' : ''" class="w-full flex justify-between items-center px-3 py-3 md:py-2 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 rounded-lg text-xs">
@@ -155,6 +155,7 @@ import axiosInstance from "@/store/axiosInstance";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
 import CommentCard from "@/views/components/comment/CommentCard.vue";
 import CommentCardLoading from "@/views/components/comment/CommentCardLoading.vue";
+import { resolveStatusFilter } from "@/utils/commentStatus";
 import { TabGroup, TabList, Tab, TabPanels, Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/vue";
 export default {
     components: {
@@ -176,7 +177,7 @@ export default {
         const urlParams = new URLSearchParams(window.location.search);
         const slugFilterFromUrl = urlParams.get("filter") || "course";
         const slugSortFromUrl = urlParams.get("sort") || "newest";
-        const slugStatusFromUrl = urlParams.get("status") || "all";
+        const slugStatusFromUrl = resolveStatusFilter(urlParams.get("status") || "all");
         const filters = {
             course: {
                 title: this.$t("panel.comments.filterCourse"),
@@ -244,16 +245,22 @@ export default {
                 slug: "all",
                 icon: ``,
             },
-            published: {
-                title: this.$t("panel.common.statusPublished"),
-                english_title: "published",
-                slug: "published",
+            pending: {
+                title: this.$t("panel.common.statusPending"),
+                english_title: "pending",
+                slug: "pending",
                 icon: ``,
             },
-            unpublished: {
-                title: this.$t("panel.common.statusUnpublished"),
-                english_title: "unpublished",
-                slug: "unpublished",
+            approved: {
+                title: this.$t("panel.common.statusApproved"),
+                english_title: "approved",
+                slug: "approved",
+                icon: ``,
+            },
+            rejected: {
+                title: this.$t("panel.common.statusRejected"),
+                english_title: "rejected",
+                slug: "rejected",
                 icon: ``,
             },
         };

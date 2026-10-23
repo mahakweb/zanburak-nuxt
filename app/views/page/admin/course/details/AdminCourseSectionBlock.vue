@@ -132,8 +132,8 @@
                                         {{ formatDuration(episode.total_time) }}
                                     </span>
                                     <span class="episode-meta-chip">
-                                        <span class="status-dot" :class="episode.publish ? 'status-dot--active' : 'status-dot--inactive'"></span>
-                                        {{ episode.publish_date ? formatPublishDate(episode.publish_date) : 'بدون تاریخ' }}
+                                        <span class="status-dot" :class="publishStatus(episode) === 'published' ? 'status-dot--active' : (publishStatus(episode) === 'pending' ? 'status-dot--pending' : 'status-dot--inactive')"></span>
+                                        {{ publishLabel(episode) }}
                                     </span>
                                     <span v-if="episode.attached" title="پیوست دارد" class="episode-meta-chip">
                                         <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none"><path d="M20 15V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18L4 15M8 11L12 15M12 15L16 11M12 15V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -202,6 +202,11 @@
                                         <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
                                         ایجاد آزمون
                                     </router-link>
+                                </li>
+                                <li v-for="item in episodePublishItems(openEpisodeMenu.episode)" :key="item.action">
+                                    <button type="button" class="menu-item" :class="item.tone === 'danger' ? 'menu-item--danger' : ''" @click.prevent="onPublishEpisode(openEpisodeMenu.episode, item.action)">
+                                        {{ item.label }}
+                                    </button>
                                 </li>
                                 <li>
                                     <button type="button" @click.prevent="onDeleteEpisode(openEpisodeMenu.episode)" class="menu-item menu-item--danger">
@@ -294,6 +299,7 @@ import BottomSheetDrawer from '@/views/components/common/BottomSheetDrawer.vue';
 import AdminBottomSheetHeader from '@/views/components/admin/bottomSheet/AdminBottomSheetHeader.vue';
 import AdminCourseQuizzes from '@/views/page/admin/course/details/AdminCourseQuizzes.vue';
 import * as bs from '@/views/components/admin/bottomSheet/adminBottomSheetStyles.js';
+import { getEpisodePublishActions, publishLabel, publishStatus } from '@/utils/coursePublish';
 
 export default {
     name: 'AdminCourseSectionBlock',
@@ -308,7 +314,7 @@ export default {
         sectionNumber: { type: String, required: true },
         getPayload: { type: Function, required: true },
     },
-    emits: ['delete-section', 'edit-section', 'delete-episode', 'drop'],
+    emits: ['delete-section', 'edit-section', 'delete-episode', 'publish-episode', 'drop'],
     data() {
         return {
             bs,
@@ -414,6 +420,15 @@ export default {
         onDeleteEpisode(episode) {
             this.closeEpisodeMenu();
             this.$emit('delete-episode', episode, this.section);
+        },
+        publishLabel,
+        publishStatus,
+        episodePublishItems(episode) {
+            return getEpisodePublishActions(episode, (perms) => this.$can(perms));
+        },
+        onPublishEpisode(episode, action) {
+            this.closeEpisodeMenu();
+            this.$emit('publish-episode', { action, episode, section: this.section });
         },
         formatDate(value) {
             if (!value) return '';
@@ -710,7 +725,8 @@ export default {
 }
 
 .status-dot--active { background: rgb(34 197 94); }
-.status-dot--inactive { background: rgb(234 179 8); }
+.status-dot--pending { background: rgb(245 158 11); }
+.status-dot--inactive { background: rgb(148 163 184); }
 
 /* ── دکمه‌ها ── */
 .btn-add-episode {

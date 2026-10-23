@@ -6,7 +6,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link v-can="'courses.create'" :to="{ name: 'admin-course-create' }"
@@ -67,6 +67,8 @@ definePageMeta({
                 <AdminFilterSelect v-model="dataView" label="نمایش" :options="viewOptions" />
             </AdminListFilterBar>
 
+            <AdminStatusLegend :items="publishLegendItems" />
+
             <div id="data-list">
                 <div v-if="dataView === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 pt-1">
                     <article
@@ -104,62 +106,18 @@ definePageMeta({
                             </div>
 
                             <div class="absolute top-2.5 end-2.5 z-10" @click.stop>
-                                <Popover class="relative flex items-center justify-center">
-                                    <PopoverOverlay class="fixed inset-0 z-20 bg-black opacity-30" />
-                                    <PopoverButton
-                                        class="flex h-7 w-7 items-center justify-center rounded-lg bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/55 focus:outline-none group-focus-within:z-30"
-                                    >
-                                        <svg class="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
-                                            <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
-                                        </svg>
-                                    </PopoverButton>
-                                    <transition
-                                        enter-active-class="transition duration-200 ease-out"
-                                        enter-from-class="translate-y-1 opacity-0"
-                                        enter-to-class="translate-y-0 opacity-100"
-                                        leave-active-class="transition duration-150 ease-in"
-                                        leave-from-class="translate-y-0 opacity-100"
-                                        leave-to-class="translate-y-1 opacity-0"
-                                    >
-                                        <PopoverPanel
-                                            class="absolute top-full end-0 z-30 mt-2 flex w-max min-w-[8.5rem] flex-col rounded-lg bg-white p-2 text-start shadow-lg dark:bg-gray-900 dark:divide-gray-800"
-                                        >
-                                            <ul class="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                                <li>
-                                                    <router-link
-                                                        :to="{ name: 'admin-course-edit', params: { courseSlug: item.slug } }"
-                                                        class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    >ویرایش دوره</router-link>
-                                                </li>
-                                                <li>
-                                                    <router-link
-                                                        :to="{ name: 'admin-course-details', params: { courseSlug: item.slug } }"
-                                                        class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    >جزئیات دوره</router-link>
-                                                </li>
-                                                <li>
-                                                    <router-link
-                                                        :to="{ name: 'admin-course-details', params: { courseSlug: item.slug }, query: { section: 'episodes' } }"
-                                                        class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    >مدیریت جلسات</router-link>
-                                                </li>
-                                                <li v-can="'courses.delete'">
-                                                    <button
-                                                        type="button"
-                                                        class="block w-full px-4 py-2 text-start text-red-500 hover:rounded-lg hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-600"
-                                                        @click="openDeleteCourseModal(item.id)"
-                                                    >حذف دوره</button>
-                                                </li>
-                                            </ul>
-                                        </PopoverPanel>
-                                    </transition>
-                                </Popover>
+                                <AdminCourseRowActions
+                                    :course="item"
+                                    tone="overlay"
+                                    @publish-action="openPublishModal"
+                                    @delete="onRowDelete"
+                                />
                             </div>
 
                             <div class="pointer-events-none absolute bottom-2.5 start-2.5 end-2.5 flex items-end justify-between gap-2">
                                 <span
                                     class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm"
-                                    :class="item.publish ? 'bg-emerald-500/80' : 'bg-gray-600/80'"
+                                    :class="publishBadgeClass(item)"
                                 >
                                     <span class="h-1.5 w-1.5 rounded-full bg-white/90" />
                                     {{ publishLabel(item) }}
@@ -212,25 +170,12 @@ definePageMeta({
                             </div>
 
                             <div class="mt-auto flex items-center gap-2 border-t border-gray-100 pt-2.5 dark:border-gray-800">
-                                <router-link
-                                    v-if="item.teacher && !$scopeOwn('courses')"
-                                    :to="{ name: 'profile-page', params: { username: item.teacher.username } }"
-                                    class="flex min-w-0 flex-1 items-center gap-2 hover:opacity-80 transition-opacity"
-                                >
-                                    <div class="h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
-                                        <img
-                                            v-if="item.teacher.profile_pic"
-                                            :src="item.teacher.profile_pic"
-                                            :alt="teacherName(item.teacher)"
-                                            class="h-full w-full object-cover"
-                                            onerror="this.style.display='none'"
-                                        />
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="truncate text-[11px] font-semibold text-gray-800 dark:text-gray-200">{{ teacherName(item.teacher) }}</p>
-                                        <p class="text-[10px] text-gray-400">مدرس دوره</p>
-                                    </div>
-                                </router-link>
+                                <AdminCourseTeacherCell
+                                    v-if="item.teacher && showTeacherColumn"
+                                    :teacher="item.teacher"
+                                    compact
+                                    class="min-w-0 flex-1"
+                                />
 
                                 <div class="flex shrink-0 items-center gap-1">
                                     <router-link
@@ -268,6 +213,7 @@ definePageMeta({
                                 <th class="px-1 py-3 whitespace-nowrap text-start">نوع دوره</th>
                                 <th class="px-1 py-3 whitespace-nowrap text-start">دسته‌بندی(ها)</th>
                                 <th class="px-1 py-3 whitespace-nowrap text-start">وضعیت دوره</th>
+                                <th v-if="showTeacherColumn" class="px-1 py-3 whitespace-nowrap text-start">مدرس</th>
                                 <th class="px-1 py-3 whitespace-nowrap text-center">عملیات</th>
                             </tr>
                         </thead>
@@ -276,7 +222,7 @@ definePageMeta({
                                 class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 hover:bg-amber-50/40 dark:hover:bg-gray-800/60 transition-colors">
                                 <td class="relative ps-2 pe-2 py-3 whitespace-nowrap text-start">
                                     <div class="absolute w-1 h-[60%] start-0 top-[20%] rounded-e-lg"
-                                        :class="item.publish ? 'bg-emerald-400 dark:bg-emerald-600' : 'bg-gray-400 dark:bg-gray-600'"></div>
+                                        :class="publishBarClass(item)"></div>
                                     <AdminBulkCheckbox v-model="selectedIds" :value="item.id" />
                                 </td>
                                 <td class="px-1 py-3 whitespace-nowrap text-start">
@@ -305,28 +251,11 @@ definePageMeta({
                                     </router-link>
                                 </td>
                                 <td class="px-1 py-3 whitespace-nowrap text-start">
-                                    <div v-if="item.publish"
-                                        class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
-                                        <svg class="w-4 h-4 me-2" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M3 14C3 9.02944 7.02944 5 12 5C16.9706 5 21 9.02944 21 14M17 14C17 16.7614 14.7614 19 12 19C9.23858 19 7 16.7614 7 14C7 11.2386 9.23858 9 12 9C14.7614 9 17 11.2386 17 14Z"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round"></path>
-                                        </svg>
-                                        منتشر شده
-                                    </div>
-                                    <div v-else
-                                        class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
-                                        <svg class="w-4 h-4 me-2" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M9.60997 9.60714C8.05503 10.4549 7 12.1043 7 14C7 16.7614 9.23858 19 12 19C13.8966 19 15.5466 17.944 16.3941 16.3878M21 14C21 9.02944 16.9706 5 12 5C11.5582 5 11.1238 5.03184 10.699 5.09334M3 14C3 11.0069 4.46104 8.35513 6.70883 6.71886M3 3L21 21"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round"></path>
-                                        </svg>
-                                        پیش‌نویس
-                                    </div>
+                                    <button type="button" class="whitespace-nowrap flex items-center text-xs font-medium px-2 py-1 rounded-lg"
+                                        :class="publishChipClass(item)"
+                                        @click="openQuickPublish(item)">
+                                        {{ publishLabel(item) }}
+                                    </button>
                                 </td>
                                 <td class="px-1 py-3 whitespace-nowrap text-start">
                                     <div
@@ -392,62 +321,15 @@ definePageMeta({
                                         {{ item.status.title }}
                                     </div>
                                 </td>
+                                <td v-if="showTeacherColumn" class="px-1 py-3 whitespace-nowrap text-start">
+                                    <AdminCourseTeacherCell :teacher="item.teacher" />
+                                </td>
                                 <td class="px-1 py-3 whitespace-nowrap text-center">
-                                    <Popover class="group relative flex items-center justify-center">
-                                            <PopoverOverlay class="fixed inset-0 z-20 bg-black opacity-50" />
-                                            <PopoverButton
-                                                class="text-gray-900 dark:text-white me-2 relative  group-focus-within:z-30 focus:outline-none  flex items-center justify-center">
-                                                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M8 12C9.10457 12 10 12.8954 10 14C10 15.1046 9.10457 16 8 16C6.89543 16 6 15.1046 6 14C6 12.8954 6.89543 12 8 12Z"
-                                                        fill="currentColor"></path>
-                                                    <path
-                                                        d="M8 6C9.10457 6 10 6.89543 10 8C10 9.10457 9.10457 10 8 10C6.89543 10 6 9.10457 6 8C6 6.89543 6.89543 6 8 6Z"
-                                                        fill="currentColor"></path>
-                                                    <path
-                                                        d="M10 2C10 0.89543 9.10457 -4.82823e-08 8 0C6.89543 4.82823e-08 6 0.895431 6 2C6 3.10457 6.89543 4 8 4C9.10457 4 10 3.10457 10 2Z"
-                                                        fill="currentColor"></path>
-                                                </svg>
-                                            </PopoverButton>
-                                            <transition enter-active-class="transition duration-200 ease-out"
-                                                enter-from-class="translate-y-1 opacity-0"
-                                                enter-to-class="translate-y-0 opacity-100"
-                                                leave-active-class="transition duration-150 ease-in"
-                                                leave-from-class="translate-y-0 opacity-100"
-                                                leave-to-class="translate-y-1 opacity-0">
-                                                <PopoverPanel
-                                                    class="text-start flex flex-col z-30 end-10 absolute p-2 bg-white rounded-lg shadow w-max min-w-[8rem] dark:bg-gray-900 dark:divide-gray-800">
-                                                    <ul class="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                                        <li>
-                                                            <router-link
-                                                                :to="{ name: 'admin-course-details', params: { courseSlug: item.slug }, query: { section: 'episodes' } }"
-                                                                class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">مدیریت
-                                                                جلسات</router-link>
-                                                        </li>
-                                                        <li>
-                                                            <router-link
-                                                                :to="{ name: 'admin-course-edit', params: { courseSlug: item.slug } }"
-                                                                class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">ویرایش
-                                                                دوره</router-link>
-                                                        </li>
-                                                        <li>
-                                                            <router-link
-                                                                :to="{ name: 'admin-course-details', params: { courseSlug: item.slug } }"
-                                                                class="block px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                                جزئیات دوره</router-link>
-                                                        </li>
-                                                        <li v-can="'courses.delete'">
-                                                            <button type="button"
-                                                                @click="openDeleteCourseModal(item.id)"
-                                                                class="block w-full text-start px-4 py-2 hover:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-red-500 dark:text-red-400">
-                                                                حذف دوره
-                                                            </button>
-                                                        </li>
-                                                    </ul>
-                                                </PopoverPanel>
-                                            </transition>
-                                        </Popover>
+                                    <AdminCourseRowActions
+                                        :course="item"
+                                        @publish-action="openPublishModal"
+                                        @delete="onRowDelete"
+                                    />
                                 </td>
                             </tr>
                             <tr class="h-24"></tr>
@@ -475,6 +357,13 @@ definePageMeta({
 
         <AdminDeleteCourseModal v-model="showDeleteCourseModal" :course-ids="coursesIdForDelete"
             @deleted="onCoursesDeleted" />
+        <AdminCoursePublishReviewModal
+            v-model="showPublishModal"
+            :course="publishCourse"
+            :action="publishAction"
+            :kind="reviewKind"
+            @updated="onPublishUpdated"
+        />
         <LoadingComponent v-if="loading" class="" />
     </AdminMasterPage>
 </template>
@@ -484,11 +373,24 @@ import AdminBulkCheckbox from "@/views/components/admin/AdminBulkCheckbox.vue";
 import AdminBulkActionBar from "@/views/components/admin/AdminBulkActionBar.vue";
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import axiosInstance from "@/store/axiosInstance";
-import { Popover, PopoverButton, PopoverPanel, PopoverOverlay } from "@headlessui/vue";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
 import AdminDeleteCourseModal from "@/views/components/admin/AdminDeleteCourseModal.vue";
+import AdminCoursePublishReviewModal from "@/views/components/admin/AdminCoursePublishReviewModal.vue";
+import AdminCourseTeacherCell from "@/views/components/admin/AdminCourseTeacherCell.vue";
+import AdminCourseRowActions from "@/views/components/admin/AdminCourseRowActions.vue";
+import AdminStatusLegend from "@/views/components/admin/AdminStatusLegend.vue";
 import AdminListFilterBar from "@/views/components/admin/AdminListFilterBar.vue";
 import AdminFilterSelect from "@/views/components/admin/AdminFilterSelect.vue";
+import {
+    applyPublishResponse,
+    publishBadgeClass as publishBadgeTone,
+    publishBarClass as publishBarTone,
+    publishChipClass as publishChipTone,
+    publishLabel as resolvePublishLabel,
+    publishStatus,
+    COURSE_PUBLISH_APPROVE_PERMS,
+    COURSE_PUBLISH_REQUEST_PERMS,
+} from "@/utils/coursePublish";
 
 export default {
 		setup() { return { authStore: useAuthStore() } },
@@ -497,9 +399,12 @@ export default {
         AdminBulkCheckbox,
         AdminBulkActionBar,
         LoadingComponent,
-        Popover, PopoverButton, PopoverPanel, PopoverOverlay,
         PaginationComponent,
         AdminDeleteCourseModal,
+        AdminCoursePublishReviewModal,
+        AdminCourseTeacherCell,
+        AdminCourseRowActions,
+        AdminStatusLegend,
         AdminListFilterBar,
         AdminFilterSelect,
     },
@@ -529,6 +434,18 @@ export default {
                 title: "پیش نویس",
                 english_title: "draft",
                 slug: "draft",
+                icon: ``
+            },
+            pending: {
+                title: "در انتظار تایید",
+                english_title: "pending",
+                slug: "pending",
+                icon: ``
+            },
+            rejected: {
+                title: "رد شده",
+                english_title: "rejected",
+                slug: "rejected",
                 icon: ``
             }
         };
@@ -621,6 +538,10 @@ export default {
             dataView: 'list',
             showDeleteCourseModal: false,
             coursesIdForDelete: null,
+            showPublishModal: false,
+            publishCourse: null,
+            publishAction: 'request',
+            reviewKind: 'publish',
             searchQuery: this.$route.query.search || '',
         };
     },
@@ -657,6 +578,17 @@ export default {
         },
         currentUser() {
             return this.authStore.status.userInfo;
+        },
+        showTeacherColumn() {
+            return this.$scopeAny('courses');
+        },
+        publishLegendItems() {
+            return [
+                { label: 'در انتظار بررسی', barClass: 'bg-amber-400 dark:bg-amber-500' },
+                { label: 'منتشر شده', barClass: 'bg-emerald-400 dark:bg-emerald-600' },
+                { label: 'رد شده', barClass: 'bg-rose-400 dark:bg-rose-600' },
+                { label: 'پیش‌نویس', barClass: 'bg-gray-400 dark:bg-gray-600' },
+            ];
         },
     },
     methods: {
@@ -875,9 +807,13 @@ export default {
 
 
         publishBadgeClass(item) {
-            return item.publish
-                ? 'text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                : 'text-[10px] font-semibold px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+            return publishBadgeTone(item);
+        },
+        publishBarClass(item) {
+            return publishBarTone(item);
+        },
+        publishChipClass(item) {
+            return publishChipTone(item);
         },
         typeLabel(type) {
             if (type === 'free') return 'رایگان';
@@ -886,17 +822,54 @@ export default {
             return type || '—';
         },
         publishLabel(item) {
-            return item.publish ? 'منتشر شده' : 'پیش‌نویس';
+            return resolvePublishLabel(item);
+        },
+        defaultPublishAction(item) {
+            const status = publishStatus(item);
+            if (status === 'pending') {
+                return this.$can(COURSE_PUBLISH_APPROVE_PERMS) ? 'review' : 'cancel';
+            }
+            if (status === 'published') return this.$can(COURSE_PUBLISH_APPROVE_PERMS) ? 'unpublish' : null;
+            if (this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'publish';
+            if (this.$can(COURSE_PUBLISH_REQUEST_PERMS)) return 'request';
+            return 'request';
+        },
+        openQuickPublish(item) {
+            const action = this.defaultPublishAction(item);
+            if (!action) return;
+            if (action === 'unpublish' && !this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return;
+            if (action === 'cancel' && !this.$can(COURSE_PUBLISH_REQUEST_PERMS)) return;
+            if (action === 'request' && !this.$can(COURSE_PUBLISH_REQUEST_PERMS) && !this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return;
+            this.openPublishModal({ action, course: item });
+        },
+        openPublishModal({ action, course }) {
+            this.publishCourse = course;
+            this.publishAction = action;
+            this.reviewKind = String(action || '').startsWith('delete') ? 'delete' : 'publish';
+            this.showPublishModal = true;
+        },
+        onPublishUpdated(payload) {
+            if (!payload) {
+                this.getData();
+                return;
+            }
+            if (payload.deleted) {
+                this.items = this.items.filter((row) => row.id !== payload.id && row.slug !== payload.slug);
+                this.selectedIds = this.selectedIds.filter((id) => id !== payload.id);
+                this.getData();
+                return;
+            }
+            const item = this.items.find((row) => row.id === payload.id || row.slug === payload.slug);
+            if (item) applyPublishResponse(item, payload);
+            else this.getData();
         },
         formatDuration(totalTime) {
             if (!totalTime) return '—';
             const raw = new Date(totalTime * 1000).toISOString().slice(11, 19);
             return raw.startsWith('00:') ? raw.slice(3) : raw;
         },
-        teacherName(teacher) {
-            if (!teacher) return '—';
-            const fullName = [teacher.first_name, teacher.last_name].filter(Boolean).join(' ').trim();
-            return fullName || teacher.username || '—';
+        onRowDelete(course) {
+            this.openDeleteCourseModal(course?.id);
         },
         openDeleteCourseModal(value) {
             this.coursesIdForDelete = value;

@@ -5,7 +5,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <div class="min-w-0">
         <AdminArticlesStatsPanel ref="statsPanel" />
     </div>

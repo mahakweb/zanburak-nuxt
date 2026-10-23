@@ -5,7 +5,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link :to="{ name: 'admin-certificates' }" :class="btnSecondary">

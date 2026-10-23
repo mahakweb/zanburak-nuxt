@@ -5,7 +5,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <button type="button" @click="refreshData" :class="BTN_SECONDARY">

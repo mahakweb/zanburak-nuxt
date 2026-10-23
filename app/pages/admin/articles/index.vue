@@ -5,7 +5,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <div class="min-w-0">
             <AdminBulkActionBar v-if="selectedIds.length > 0 && canBulkManage" :count="selectedIds.length">
                 <select v-model="bulkAction"

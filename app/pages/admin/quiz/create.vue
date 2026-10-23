@@ -5,7 +5,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link v-if="isEdit" :to="{ name: 'admin-quiz-reports', params: { id } }" :class="BTN_SECONDARY">

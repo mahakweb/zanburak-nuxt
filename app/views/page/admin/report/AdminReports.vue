@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         
         <template #breadcrumb-actions>
@@ -242,7 +242,7 @@
                                         :class="getReportStatusBarClass(item)"></div>
                                     <AdminBulkCheckbox v-model="selectedIds" :value="item.id" />
                                 </td>
-                                <td class="pط-1 py-3 whitespace-nowrap text-start">
+                                <td class="px-1 py-3 whitespace-nowrap text-start">
                                     <div class="flex items-center">
                                         <div
                                             class="flex-shrink-0 w-9 h-9 bg-gray-100 dark:bg-opacity-10 rounded-lg border-2 border-gray-200 border-opacity-30 dark:border-opacity-10 overflow-hidden">

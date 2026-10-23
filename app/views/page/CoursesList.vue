@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <MasterPage>
         <section class="pt-5 pb-2 md:pt-10">
             <div class="mx-auto max-w-screen-xl px-3 md:px-4">

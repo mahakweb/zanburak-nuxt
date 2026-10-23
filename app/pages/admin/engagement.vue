@@ -5,7 +5,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <button @click="refreshAll" :disabled="loading || listLoading || refreshing" :class="BTN_SECONDARY">

@@ -10,7 +10,8 @@
     "postinstall": "node scripts/bundle-cjs.mjs && nuxt prepare",
     "bundle:cjs": "node scripts/bundle-cjs.mjs",
     "bundle:hljs": "node scripts/bundle-cjs.mjs",
-    "test:messenger": "node --test tests/messenger/*.test.mjs"
+    "test:messenger": "node --test tests/messenger/*.test.mjs",
+    "test:security": "node --test tests/security/*.test.mjs"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
@@ -37,7 +38,7 @@
     "leaflet": "^1.9.4",
     "lodash": "^4.18.1",
     "lodash-es": "^4.18.1",
-    "markdown-it": "^15.0.2",
+    "markdown-it": "^15.0.3",
     "markdown-it-abbr": "^2.0.0",
     "markdown-it-anchor": "^10.0.0",
     "markdown-it-footnote": "^4.0.0",

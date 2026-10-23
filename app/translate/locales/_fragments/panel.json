@@ -127,6 +127,18 @@
 		"fa": "منتشر نشده",
 		"en": "Unpublished"
 	},
+	"panel.common.statusPending": {
+		"fa": "در انتظار بررسی",
+		"en": "Pending review"
+	},
+	"panel.common.statusApproved": {
+		"fa": "تایید شده",
+		"en": "Approved"
+	},
+	"panel.common.statusRejected": {
+		"fa": "رد شده",
+		"en": "Rejected"
+	},
 	"panel.common.toman": {
 		"fa": "تومان",
 		"en": "Toman"

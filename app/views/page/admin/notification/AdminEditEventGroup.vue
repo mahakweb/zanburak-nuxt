@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         <div class="pb-10">
             <div class="grid grid-cols-12 gap-2 p-2 md:p-4">

@@ -136,6 +136,28 @@ export const ROUTE_META = {
       "courses.list.any"
     ]
   },
+  "admin-course-requests": {
+    "requiresAuth": true,
+    "can": [
+      "courses.publish.review",
+      "courses.publish.review.any",
+      "courses.publish.approve",
+      "courses.publish.approve.any",
+      "courses.publish.reject",
+      "courses.publish.reject.any"
+    ]
+  },
+  "admin-course-publish-requests": {
+    "requiresAuth": true,
+    "can": [
+      "courses.publish.review",
+      "courses.publish.review.any",
+      "courses.publish.approve",
+      "courses.publish.approve.any",
+      "courses.publish.reject",
+      "courses.publish.reject.any"
+    ]
+  },
   "admin-episode-create": {
     "requiresAuth": true,
     "can": [
@@ -320,6 +342,14 @@ export const ROUTE_META = {
   "admin-path-edit": {
     "requiresAuth": true,
     "can": [
+      "paths.edit",
+      "paths.update"
+    ]
+  },
+  "admin-path-details": {
+    "requiresAuth": true,
+    "can": [
+      "paths.view",
       "paths.edit",
       "paths.update"
     ]

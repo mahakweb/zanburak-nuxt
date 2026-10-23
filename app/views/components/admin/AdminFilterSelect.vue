@@ -36,6 +36,7 @@ export default {
                 sm: "min-w-[6rem]",
                 md: "min-w-[7rem]",
                 lg: "min-w-[8rem]",
+                xl: "min-w-[11rem]",
             };
             return widths[this.minWidth] || widths.md;
         },

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="manual-payment-illustration w-full max-w-md mx-auto">
                                     <svg class="w-full h-auto max-h-[280px] lg:max-h-[320px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 530 396"
                                 fill="none">

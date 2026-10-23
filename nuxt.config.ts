@@ -5,7 +5,7 @@ const appRoot = fileURLToPath(new URL('./app', import.meta.url))
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
   ssr: true,
 
   /**
@@ -38,6 +38,16 @@ export default defineNuxtConfig({
     // Discuss editor flows stay SPA under /discuss/**
     '/discuss/create': { ssr: false },
     '/discuss/**/edit': { ssr: false },
+
+    // Private app shells — never SSR (overrides any merged /** rule).
+    '/admin/**': { ssr: false },
+    '/panel/**': { ssr: false },
+    '/auth/**': { ssr: false },
+    '/messenger/**': { ssr: false },
+    '/oauth/**': { ssr: false },
+    '/quiz/**': { ssr: false },
+    '/payment/**': { ssr: false },
+    '/checkout/**': { ssr: false },
   },
 
   css: [
@@ -221,6 +231,17 @@ export default defineNuxtConfig({
   nitro: {
     externals: {
       inline: [/[\\/]node_modules[\\/]nuxt[\\/]dist[\\/]/],
+    },
+    routeRules: {
+      '/**': {
+        ssr: false,
+        headers: {
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'SAMEORIGIN',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+        },
+      },
     },
   },
 })

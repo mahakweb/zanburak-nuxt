@@ -4,6 +4,9 @@ export const ADMIN_BS_PANEL =
 export const ADMIN_BS_PANEL_SM =
     'bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 rounded-t-2xl lg:rounded-b-2xl lg:w-[30rem] lg:max-w-[30rem] shadow-[0_-8px_30px_rgba(15,23,42,0.35)]';
 
+export const ADMIN_BS_PANEL_PUBLISH =
+    'bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 rounded-t-2xl lg:rounded-b-2xl lg:w-[36rem] lg:max-w-[36rem] shadow-[0_-8px_30px_rgba(15,23,42,0.35)]';
+
 export const ADMIN_BS_CONTENT = 'px-5 flex flex-col flex-1 min-h-0 overflow-hidden';
 
 export const ADMIN_BS_SCROLL = 'flex-1 min-h-0 overflow-y-auto custom-scrollbar pb-1';
@@ -16,10 +19,10 @@ export const ADMIN_BS_FORM_LABEL =
     'block mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300';
 
 export const ADMIN_BS_INPUT =
-    'bg-gray-100 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-gray-900 text-sm rounded-xl outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400 block w-full px-3 py-2.5 dark:text-white transition-shadow';
+    'relative z-10 bg-gray-100 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-gray-900 text-sm rounded-xl outline-none focus:ring-2 focus:ring-inset focus:ring-amber-400/50 focus:border-amber-400 block w-full px-3 py-2.5 dark:text-white transition-shadow';
 
 export const ADMIN_BS_INPUT_ERROR =
-    'text-rose-500 dark:text-rose-400 ring-2 ring-rose-500/30 border-rose-400 dark:border-rose-500';
+    'text-rose-500 dark:text-rose-400 ring-2 ring-inset ring-rose-500/30 border-rose-400 dark:border-rose-500';
 
 export const ADMIN_BS_FORM_BODY =
     'rounded-xl border border-gray-200/60 dark:border-gray-700/60 bg-gray-50/40 dark:bg-gray-800/20 p-4';

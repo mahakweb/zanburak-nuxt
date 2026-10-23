@@ -1,4 +1,5 @@
 <template>
+    <ClientOnly>
     <div>
         <nav class="fixed top-0 z-50 w-full bg-white dark:bg-gray-900">
             <div class="px-2 py-3 md:px-4 lg:ps-1">
@@ -176,11 +177,11 @@
                                     class="group relative flex items-center md:w-max md:p-0.5 md:border-2 border-gray-200 dark:border-gray-800/70 rounded-full z-10 group-focus-within:z-30 focus:outline-none text-gray-900 bg-gray-50 dark:text-gray-200 dark:bg-gray-700">
                                     <div
                                         class="shrink-0 w-10 h-10 border-2 md:border-0 md:group-hover:border-2 border-yellow-400 dark:border-yellow-400 rounded-full overflow-hidden">
-                                        <img onerror="this.style.display='none'"
+                                        <img v-if="currentUser?.profile_pic" onerror="this.style.display='none'"
                                             class="w-full h-full object-cover transform transition duration-200 hover:scale-110"
                                             :src="currentUser.profile_pic" :alt="currentUser.username" />
                                     </div>
-                                    <div
+                                    <div v-if="currentUser"
                                         class="hidden md:block group-hover:ms-2 group-hover:me-4 text-start user-details-container transition-all duration-200 ease-in-out">
                                         <div class="text-xs font-semibold line-clamp-1">{{
                                             currentUser.first_name + ' ' + currentUser.last_name }}</div>
@@ -277,7 +278,7 @@
                                     </g>
                                 </svg>
                             </div>
-                            <div class="mt-2 flex flex-col ">
+                            <div v-if="currentUser" class="mt-2 flex flex-col ">
                                 <div class="text-gray-700 dark:text-gray-50 text-sm font-bold line-clamp-1">{{
                                     currentUser.first_name + " " + currentUser.last_name }}</div>
                                 <!-- <span dir="ltr" class="text-sm font-medium text-gray-500 dark:text-gray-400">@{{ currentUser.username }}</span> -->
@@ -319,6 +320,10 @@
             <AdminAccountMenuContent @close="isOpenUserMenu = false" />
         </BottomSheetDrawer>
     </div>
+    <template #fallback>
+        <div class="min-h-screen bg-white dark:bg-gray-900" />
+    </template>
+    </ClientOnly>
 </template>
 
 <script>

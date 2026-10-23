@@ -587,7 +587,7 @@ export default {
 				this.isVerifyingCurrentMobile = false;
 
 				const redirect = this.$route.query.redirect;
-				if (typeof redirect === 'string' && redirect.startsWith('/')) {
+				if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//') && !redirect.startsWith('/\\')) {
 					this.$router.replace(redirect);
 				} else if (this.$route.query.force_verify === '1') {
 					this.$router.replace({ name: 'home' });

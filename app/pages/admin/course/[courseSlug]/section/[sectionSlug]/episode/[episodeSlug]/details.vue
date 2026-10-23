@@ -13,12 +13,12 @@ definePageMeta({
         <template #breadcrumb-actions>
             <template v-if="episode">
                 <button
+                    v-if="publishActionLabel"
                     type="button"
-                    @click.prevent="togglePublish"
-                    :disabled="quickActionLoading"
-                    class="shrink-0 group h-9 select-none rounded-lg bg-white px-3 text-sm font-semibold leading-8 text-gray-800 shadow-[0_-3px_0_0px_#d4d4d5_inset,0_0_0_1px_#f4f4f8_inset,0_0.5px_0_1.5px_#fff_inset] hover:bg-zinc-100 active:shadow-[-1px_0px_1px_0px_#e4e4e7_inset,1px_0px_1px_0px_#e4e4e7_inset,0px_0.125rem_1px_0px_#d4d4d8_inset] disabled:opacity-60">
+                    @click.prevent="openPublishModal(defaultPublishAction)"
+                    class="shrink-0 group h-9 select-none rounded-lg bg-white px-3 text-sm font-semibold leading-8 text-gray-800 shadow-[0_-3px_0_0px_#d4d4d5_inset,0_0_0_1px_#f4f4f8_inset,0_0.5px_0_1.5px_#fff_inset] hover:bg-zinc-100 active:shadow-[-1px_0px_1px_0px_#e4e4e7_inset,1px_0px_1px_0px_#e4e4e7_inset,0px_0.125rem_1px_0px_#d4d4d8_inset]">
                     <span class="block group-active:[transform:translate3d(0,1px,0)]">
-                        {{ episode.publish ? 'منتشر شده' : 'پیش‌نویس' }}
+                        {{ publishActionLabel }}
                     </span>
                 </button>
                 <button
@@ -77,7 +77,7 @@ definePageMeta({
                             </div>
                             <div class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
                                 <span class="w-1 h-1 rounded-full bg-gray-700 dark:bg-gray-200 me-2"></span>
-                                <span>{{ episode.publish ? 'منتشرشده' : 'پیش‌نویس' }}</span>
+                                <span>{{ publishLabel(episode) }}</span>
                             </div>
                             <div class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
                                 <span class="w-1 h-1 rounded-full bg-gray-700 dark:bg-gray-200 me-2"></span>
@@ -142,7 +142,7 @@ definePageMeta({
                             <div class="h-10 space-y-3 px-4">
                                 <div class="text-xs font-semibold text-gray-400 dark:text-gray-500">وضعیت</div>
                                 <div class="text-gray-700 dark:text-gray-50 text-sm font-bold">
-                                    {{ episode.publish ? 'منتشرشده' : 'پیش‌نویس' }}
+                                    {{ publishLabel(episode) }}
                                     ·
                                     {{ episode.lock ? 'قفل' : 'باز' }}
                                 </div>
@@ -220,6 +220,14 @@ definePageMeta({
                 </div>
             </div>
         </div>
+        <AdminCoursePublishReviewModal
+            v-model="showPublishModal"
+            kind="episode"
+            :course="episode?.course"
+            :episode="episode"
+            :action="publishAction"
+            @updated="onPublishUpdated"
+        />
         <LoadingComponent v-if="loading" class="" />
     </AdminMasterPage>
 </template>
@@ -240,6 +248,14 @@ import AdminEpisodeAnalytics from "@/views/page/admin/course/details/episode/Adm
 import AdminCourseQuizzes from "@/views/page/admin/course/details/AdminCourseQuizzes.vue";
 import { toast } from "vue3-toastify";
 import VideoPlayer from "@/views/components/player/VideoPlayer.vue";
+import AdminCoursePublishReviewModal from "@/views/components/admin/AdminCoursePublishReviewModal.vue";
+import {
+    applyPublishResponse,
+    COURSE_PUBLISH_APPROVE_PERMS,
+    COURSE_PUBLISH_REQUEST_PERMS,
+    publishLabel,
+    publishStatus,
+} from "@/utils/coursePublish";
 
 export default {
 		setup() { return { adminCommentsStore: useAdminCommentsStore() } },
@@ -257,6 +273,7 @@ export default {
         AdminCourseQuizzes,
         AdminEpisodeAnalytics,
         VideoPlayer,
+        AdminCoursePublishReviewModal,
     },
     data() {
         const sections = ['analytics', 'quizzes', 'comments', 'views', 'videos', 'attachments', 'likes', 'bookmarks']
@@ -288,6 +305,8 @@ export default {
             loading: false,
             quickActionLoading: false,
             unapprovedCommentsCount: 0,
+            showPublishModal: false,
+            publishAction: 'request',
         };
     },
     computed: {
@@ -312,6 +331,28 @@ export default {
             } catch (e) {
                 return '00:00:00';
             }
+        },
+        defaultPublishAction() {
+            const status = publishStatus(this.episode);
+            if (status === 'pending') {
+                return this.$can(COURSE_PUBLISH_APPROVE_PERMS) ? 'review' : 'cancel';
+            }
+            if (status === 'published') return this.$can(COURSE_PUBLISH_APPROVE_PERMS) ? 'unpublish' : null;
+            if (this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'publish';
+            if (this.$can(COURSE_PUBLISH_REQUEST_PERMS)) return 'request';
+            return null;
+        },
+        publishActionLabel() {
+            if (!this.episode) return '';
+            const status = publishStatus(this.episode);
+            if (status === 'pending' && this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'بررسی انتشار';
+            if (status === 'pending' && this.$can(COURSE_PUBLISH_REQUEST_PERMS)) return 'انصراف از انتظار انتشار';
+            if (status === 'published' && this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'لغو انتشار';
+            if ((status === 'draft' || status === 'rejected') && this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'انتشار جلسه';
+            if ((status === 'draft' || status === 'rejected') && this.$can(COURSE_PUBLISH_REQUEST_PERMS)) {
+                return status === 'rejected' ? 'ارسال مجدد درخواست' : 'درخواست انتشار';
+            }
+            return '';
         },
     },
     methods: {
@@ -371,7 +412,7 @@ export default {
                         page: 1,
                         perPage: 1,
                         sort: 'desc',
-                        filter: 'unapproved',
+                        filter: 'pending',
                         viewMode: 'table'
                     }
                 );
@@ -389,40 +430,14 @@ export default {
             // Also decrease the Pinia count
             this.adminCommentsStore.decreaseUnapprovedComments();
         },
-        async togglePublish() {
-            this.quickActionLoading = true;
-            try {
-                await axiosInstance.post(
-                    `admin/course/${this.courseSlug}/episode/status`,
-                    {
-                        episode_id: this.episode.id,
-                        publish: !this.episode.publish
-                    }
-                );
-                this.episode.publish = !this.episode.publish;
-                toast.success(`اپیزود ${this.episode.publish ? 'منتشر' : 'غیرمنتشر'} شد.`, {
-                    theme: "colored",
-                    hideProgressBar: false,
-                    rtl: localStorage.getItem("direction") == "rtl" ? true : false,
-                    bodyClassName: "font-YekanBakh",
-                    toastClassName: "rounded-xl text-sm font-semibold mb-4 mx-3 md:mx-0",
-                    transition: toast.TRANSITIONS.BOUNCE,
-                    position: toast.POSITION.BOTTOM_RIGHT,
-                });
-            } catch (error) {
-                console.error('Error toggling publish:', error);
-                toast.error('خطا در تغییر وضعیت انتشار', {
-                    theme: "colored",
-                    hideProgressBar: false,
-                    rtl: localStorage.getItem("direction") == "rtl" ? true : false,
-                    bodyClassName: "font-YekanBakh",
-                    toastClassName: "rounded-xl text-sm font-semibold mb-4 mx-3 md:mx-0",
-                    transition: toast.TRANSITIONS.BOUNCE,
-                    position: toast.POSITION.BOTTOM_RIGHT,
-                });
-            } finally {
-                this.quickActionLoading = false;
-            }
+        publishLabel,
+        openPublishModal(action) {
+            if (!action) return;
+            this.publishAction = action;
+            this.showPublishModal = true;
+        },
+        onPublishUpdated(payload) {
+            if (payload && this.episode) applyPublishResponse(this.episode, payload);
         },
         async toggleLock() {
             this.quickActionLoading = true;

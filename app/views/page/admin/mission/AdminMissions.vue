@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <button v-if="selectedTab === 'missions'" v-can="'missions.create'" @click.prevent="openCreateMissionModal" :class="BTN_SECONDARY">

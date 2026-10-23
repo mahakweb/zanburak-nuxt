@@ -371,6 +371,7 @@ import {
     VIDEO_EXTENSIONS,
 } from "@/utils/fileTypeMeta";
 import { enhanceMarkdownAttachments } from "@/utils/markdownEnhancements";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 const LINE_HEIGHT_OPTIONS = [0.75, 1, 1.15, 1.25, 1.5, 1.75, 2];
 const HEADING_OPTION_DEFS = [
@@ -388,7 +389,7 @@ function renderEditorPreviewHtml(src) {
     const lineHeight = extractLineHeight(src);
     const processed = preprocessLineHeightSyntax(preprocessColorSyntax(preprocessGfmTables(stripContentMeta(src || ''))));
     const style = lineHeight ? ` style="line-height:${lineHeight}"` : '';
-    const html = `<div class="zan-md-content"${style}>${previewMarkdown.render(processed)}</div>`;
+    const html = `<div class="zan-md-content"${style}>${sanitizeHtml(previewMarkdown.render(processed))}</div>`;
     if (typeof document !== 'undefined') {
         const tmp = document.createElement('div');
         tmp.innerHTML = html;
@@ -430,7 +431,7 @@ const props = defineProps({
     },
     toolbarClass: {
         type: Array,
-        default: () => ["bg-slate-50", "dark:bg-slate-900", "px-2", "rounded-lg", "my-2"]
+        default: () => ["bg-slate-50/80", "dark:bg-slate-900/70", "px-2", "rounded-2xl", "my-2"]
     },
     enableFileUpload: {
         type: Boolean,
@@ -794,37 +795,62 @@ function withCm(fn) {
 }
 
 
+const isGuideOpen = ref(false);
+const guideUid = `eg-${Math.random().toString(36).slice(2, 8)}`;
+
+function getGuideRoot() {
+    return markdownEditor.value?.$el?.querySelector('.editor-guide')
+        || markdownEditor.value?.$el?.parentElement?.querySelector('.editor-guide');
+}
+
+function syncGuideButtonState() {
+    const btn = markdownEditor.value?.$el?.querySelector('.editor-toolbar button.guide');
+    if (!btn) return;
+    btn.classList.toggle('active', isGuideOpen.value);
+    btn.setAttribute('aria-pressed', isGuideOpen.value ? 'true' : 'false');
+}
+
 function toggleGuide() {
-    document.querySelector(".editor-guide").classList.toggle("hidden");
+    const guide = getGuideRoot();
+    if (!guide) return;
+    isGuideOpen.value = !isGuideOpen.value;
+    guide.classList.toggle('hidden', !isGuideOpen.value);
+    syncGuideButtonState();
 }
 
 // const content = ref('');
 const content = ref(props.modelValue || "");
+const markdownEditor = ref(null);
+const emit = defineEmits(["update"]);
 
 watch(
     () => props.modelValue,
     (newContent) => {
-        if (newContent) {
-            content.value = newContent;
+        const next = newContent ?? "";
+        if (content.value !== next) {
+            content.value = next;
+        }
+        const mde = markdownEditor.value?.easymde;
+        if (mde && mde.value() !== next) {
+            mde.value(next);
         }
     }
 );
-
-const markdownEditor = ref(null);
-const emit = defineEmits(["update"]);
 
 function onContentUpdate() {
     emit("update:modelValue", content.value);
 }
 
 function reset() {
+    if (isPreviewMode.value) {
+        isPreviewMode.value = false;
+        onPreviewChange();
+    }
     content.value = "";
     onContentUpdate();
-    if (markdownEditor.value) {
-        const mde = markdownEditor.value.easymde;
-        if (mde) {
-            mde.value("");
-        }
+    const mde = markdownEditor.value?.easymde;
+    if (mde) {
+        mde.value("");
     }
 }
 
@@ -1041,6 +1067,15 @@ const configs = {
             className: "undo",
             title: t("editor.undo"),
         },
+        ...(props.helpButton ? [
+            "|",
+            {
+                name: "guide",
+                action: function () { toggleGuide(); },
+                className: "guide",
+                title: t("editor.guide"),
+            },
+        ] : []),
     ],
 };
 
@@ -1166,6 +1201,7 @@ onMounted(() => {
 
         retreeToolbar();
         setButtonIcons();
+        syncGuideButtonState();
         initTabs();
         applyEditorScrollbars();
         setupEditorCmFocus();
@@ -1205,41 +1241,16 @@ onUnmounted(() => {
 function applyToolbarResponsiveLayout(root) {
     const wrap = root?.querySelector('.zan-editor-toolbar-wrap');
     const toolbar = wrap?.querySelector('.editor-toolbar');
-    const helpWrap = wrap?.querySelector('.zan-editor-help-wrap');
-    if (!wrap || !toolbar || !helpWrap) return;
+    if (!wrap || !toolbar) return;
 
-    wrap.className = [
-        'zan-editor-toolbar-wrap',
-        'relative',
-        'flex',
-        'flex-col',
-        'lg:flex-row',
-        'lg:items-center',
-        'lg:justify-start',
-        'lg:gap-3',
-        'w-full',
-        'items-stretch',
-        'gap-2',
-    ].join(' ');
-
+    wrap.className = 'zan-editor-toolbar-wrap relative w-full';
     toolbar.classList.add(
-        'order-last',
-        'lg:order-first',
         'w-full',
         'flex',
         'flex-wrap',
         'items-center',
         'gap-0.5',
         'content-start',
-    );
-    helpWrap.classList.add(
-        'order-first',
-        'lg:order-last',
-        'lg:ms-auto',
-        'w-full',
-        'lg:w-auto',
-        'mb-1',
-        'lg:mb-0',
     );
 }
 
@@ -1269,69 +1280,9 @@ function retreeToolbar() {
 
     const toolbar_parent = toolbar.parentElement;
     const toolbar_container = document.createElement('div');
-    toolbar_container.classList.add(
-        'zan-editor-toolbar-wrap',
-        'relative',
-        'flex',
-        'flex-col',
-        'lg:flex-row',
-        'lg:items-center',
-        'lg:justify-start',
-        'lg:gap-3',
-        'w-full',
-        'items-stretch',
-        'gap-2',
-    );
+    toolbar_container.className = 'zan-editor-toolbar-wrap relative w-full';
     toolbar_container.setAttribute('dir', 'ltr');
-
-    const rightSideButton = document.createElement('div');
-    rightSideButton.classList.add(
-        'zan-editor-help-wrap',
-        'relative',
-        'z-40',
-        'flex',
-        'shrink-0',
-        'order-first',
-        'lg:order-last',
-        'lg:ms-auto',
-        'w-full',
-        'lg:w-auto',
-        'items-center',
-        'justify-end',
-        'mb-1',
-        'lg:mb-0',
-    );
-    const helpBtn = document.createElement("button");
-    helpBtn.addEventListener("click", (e) => { 
-        e.preventDefault();
-        toggleGuide();
-    });
-    helpBtn.innerHTML =
-        `<span>${t("editor.guide")}</span>` +
-        `	<svg class="w-5 h-5 rtl:mr-2 ltr:ml-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd"
-				d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
-				fill="currentColor"></path>
-			<path
-				d="M5.47875 19.5818L9.75149 15.309C9.3348 15.0254 8.97447 14.6651 8.69079 14.2484L4.41807 18.5211C4.74471 18.9005 5.09934 19.2551 5.47875 19.5818Z"
-				fill="currentColor"></path>
-			<path
-				d="M4.41797 5.47912L8.6907 9.75185C8.97436 9.33516 9.33468 8.97485 9.75136 8.69119L5.47863 4.41846C5.09922 4.74509 4.7446 5.09971 4.41797 5.47912Z"
-				fill="currentColor"></path>
-			<path
-				d="M14.2479 8.69128L18.5206 4.41856C18.9 4.7452 19.2547 5.09982 19.5813 5.47924L15.3085 9.75198C15.0249 9.33529 14.6646 8.97496 14.2479 8.69128Z"
-				fill="currentColor"></path>
-			<path
-				d="M19.5812 18.521L15.3084 14.2483C15.0248 14.665 14.6645 15.0253 14.2478 15.3089L18.5205 19.5817C18.8999 19.255 19.2545 18.9004 19.5812 18.521Z"
-				fill="currentColor"></path>
-		</svg>`;
-    helpBtn.classList.add("flex", "items-center", "text-sm", "font-semibold", "space-x-2", "rounded-lg", "p-2.5", "transition", "duration-200", "bg-slate-50", "dark:bg-slate-950", "dark:text-gray-100", "hover:bg-slate-200", "dark:hover:bg-slate-800");
-    if (!props.helpButton) {
-        rightSideButton.classList.add('hidden');
-    }
     toolbar.classList.add(
-        'order-last',
-        'lg:order-first',
         'w-full',
         'flex',
         'flex-wrap',
@@ -1339,69 +1290,45 @@ function retreeToolbar() {
         'gap-0.5',
         'content-start',
     );
-    rightSideButton.appendChild(helpBtn);
     toolbar_container.appendChild(toolbar);
-    toolbar_container.appendChild(rightSideButton);
-
     ensurePopoverHost(toolbar_container);
 
-    const guide_container = document.createElement("div");
-    // guide_container.classList.add('my-2');
-    guide_container.innerHTML = `<div class="editor-guide mb-2 hidden">
-            <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
-                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab"
-                    data-tabs-toggle="#default-tab-content" role="tablist">
-                    <li class="me-2" role="presentation">
-                        <button class="inline-block p-4 border-b-2 rounded-t-lg" id="profile-tab"
-                            data-tabs-target="#profile" type="button" role="tab"                             aria-controls="profile"
-                            aria-selected="false">${t("editor.guideCodeError")}</button>
-                    </li>
-                    <li class="me-2" role="presentation">
-                        <button
-                            class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-                            id="dashboard-tab" data-tabs-target="#dashboard" type="button" role="tab"
-                            aria-controls="dashboard" aria-selected="false">${t("editor.guideLink")}</button>
-                    </li>
-                    <li class="me-2" role="presentation">
-                        <button
-                            class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-                            id="settings-tab" data-tabs-target="#settings" type="button" role="tab" aria-controls="settings"
-                            aria-selected="false">${t("editor.guideMention")}</button>
-                    </li>
-                    <li class="mr-auto">
-                        <a href="/" target="_blank"
-                            class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
-                            >${t("editor.guideFull")}</a>
-                    </li>
-                </ul>
-            </div>
-            <div id="default-tab-content">
-                <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="profile" role="tabpanel"
-                    aria-labelledby="profile-tab">
-                    <p class="text-gray-500 dark:text-gray-400 leading-7">
-                        ${t("editor.guideCodeDesc")}
-                    </p>
-                    <p class="text-center w-full my-4">
-                        <img onerror="this.style.display='none'" class="mx-auto rounded-xl" src="https://static.zanburak.ir/images/other/backtick.jpg" alt="${t("editor.guideImageAlt")}" height="334">
-                    </p>
-                    <p class="mb-4 text-gray-500 dark:text-gray-400 leading-6">
-                        ${t("editor.guideExample")}
-                    </p>
-                    <pre class="language-javascript"><code dir="ltr" class="hljs text-left"><span class="hljs-string"><span class="hljs-string"></span></span><span class="hljs-string"><span class="hljs-string">&grave;&grave;&grave;.my-link {text-decoration: underline;}&grave;&grave;&grave;</span></span><span class="hljs-string"><span class="hljs-string"></span></span></code></pre>
+    if (props.helpButton) {
+        const tabCode = `${guideUid}-code`;
+        const tabLink = `${guideUid}-link`;
+        const tabMention = `${guideUid}-mention`;
+        const guide_container = document.createElement('div');
+        guide_container.innerHTML = `<div class="editor-guide mb-2 hidden">
+            <div class="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 overflow-hidden">
+                <div class="flex flex-wrap items-center gap-1 border-b border-gray-100 px-2 pt-1.5 dark:border-gray-800" id="${guideUid}-tabs" data-tabs-toggle="#${guideUid}-content" role="tablist">
+                    <button class="editor-guide-tab" id="${tabCode}-btn" data-tabs-target="#${tabCode}" type="button" role="tab" aria-controls="${tabCode}" aria-selected="true">${t("editor.guideCodeError")}</button>
+                    <button class="editor-guide-tab" id="${tabLink}-btn" data-tabs-target="#${tabLink}" type="button" role="tab" aria-controls="${tabLink}" aria-selected="false">${t("editor.guideLink")}</button>
+                    <button class="editor-guide-tab" id="${tabMention}-btn" data-tabs-target="#${tabMention}" type="button" role="tab" aria-controls="${tabMention}" aria-selected="false">${t("editor.guideMention")}</button>
+                    <a href="/" target="_blank" class="ms-auto mb-1 px-2 py-1 text-[10px] font-medium text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400">${t("editor.guideFull")}</a>
                 </div>
-                <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="dashboard" role="tabpanel"
-                    aria-labelledby="dashboard-tab">
-                    <p class="text-gray-500 dark:text-gray-400 leading-7">${t("editor.guideLinkDesc1")}</p>
-                    <p class="text-gray-500 dark:text-gray-400 leading-7">${t("editor.guideLinkDesc2")}</p>
+                <div id="${guideUid}-content">
+                    <div class="editor-guide-panel" id="${tabCode}" role="tabpanel" aria-labelledby="${tabCode}-btn">
+                        <p>${t("editor.guideCodeDesc")}</p>
+                        <p class="my-2.5 text-center">
+                            <img onerror="this.style.display='none'" class="mx-auto max-h-36 rounded-lg" src="https://static.zanburak.ir/images/other/backtick.jpg" alt="${t("editor.guideImageAlt")}">
+                        </p>
+                        <p class="mb-1.5 font-medium text-gray-500 dark:text-gray-400">${t("editor.guideExample")}</p>
+                        <pre class="overflow-x-auto rounded-lg bg-gray-100 px-2.5 py-2 dark:bg-gray-800" dir="ltr"><code class="font-mono text-[11px] text-gray-700 dark:text-gray-200">\`\`\`css
+.my-link { text-decoration: underline; }
+\`\`\`</code></pre>
+                    </div>
+                    <div class="editor-guide-panel hidden" id="${tabLink}" role="tabpanel" aria-labelledby="${tabLink}-btn">
+                        <p>${t("editor.guideLinkDesc1")}</p>
+                        <p class="mt-1.5">${t("editor.guideLinkDesc2")}</p>
+                    </div>
+                    <div class="editor-guide-panel hidden" id="${tabMention}" role="tabpanel" aria-labelledby="${tabMention}-btn">
+                        <p>${t("editor.guideMentionDesc")}</p>
+                    </div>
                 </div>
-                <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="settings" role="tabpanel"
-                    aria-labelledby="settings-tab">
-                    <p class="text-gray-500 dark:text-gray-400">${t("editor.guideMentionDesc")}</p>
-                </div>
-
             </div>
         </div>`;
-    toolbar_parent.insertBefore(guide_container, toolbar_parent.firstChild);
+        toolbar_parent.insertBefore(guide_container, toolbar_parent.firstChild);
+    }
 
     toolbar_parent.insertBefore(toolbar_container, toolbar_parent.firstChild);
     applyToolbarResponsiveLayout(root);
@@ -1423,6 +1350,10 @@ function setButtonIcons() {
         if (buttonInfo) {
             button.innerHTML = buttonInfo.svg;
         }
+    });
+
+    editorRoot?.querySelectorAll('.editor-toolbar i.separator').forEach((el) => {
+        el.textContent = '';
     });
 }
 const imageInput = ref(null);
@@ -1752,9 +1683,27 @@ function emojiClick(emoji) {
     --CodeMirror-border: #404040;
 }
 
-.editor-toolbar {
+.editor-toolbar,
+.EasyMDEContainer .editor-toolbar,
+.zan-easymde .editor-toolbar {
     position: relative;
-    border: none;
+    opacity: 1 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 1rem !important;
+    padding: 6px 8px !important;
+}
+
+.editor-toolbar:hover,
+.EasyMDEContainer .editor-toolbar:hover {
+    opacity: 1 !important;
+}
+
+.editor-toolbar:before,
+.editor-toolbar:after {
+    display: none !important;
+    content: none !important;
 }
 
 .zan-editor-toolbar-wrap {
@@ -1767,12 +1716,11 @@ function emojiClick(emoji) {
     flex-wrap: wrap !important;
     align-items: center;
     align-content: flex-start;
-    gap: 2px 4px;
-    row-gap: 4px;
+    gap: 4px 6px;
+    row-gap: 6px;
     max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 2px;
 }
 
 @media (min-width: 768px) {
@@ -1821,56 +1769,105 @@ function emojiClick(emoji) {
 }
 
 .editor-toolbar button {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    padding: 5px !important;
-    border-radius: 6px !important;
-    border: 1px solid transparent !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    padding: 6px !important;
+    border-radius: 10px !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
     color: rgb(71 85 105);
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .dark .editor-toolbar button {
-    color: rgb(203 213 225);
+    color: rgb(226 232 240);
 }
 
 .editor-toolbar button svg,
 .editor-toolbar button svg.zan-toolbar-icon {
     display: block;
-    width: 16px !important;
-    height: 16px !important;
+    width: 18px !important;
+    height: 18px !important;
     flex-shrink: 0;
+    stroke-width: 2.2;
+}
+
+.editor-toolbar button.guide svg {
+    stroke-width: 0;
+}
+
+.editor-guide {
+    font-size: 11px;
+    line-height: 1.65;
+}
+
+.editor-guide-tab {
+    margin-bottom: -1px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    padding: 0.4rem 0.65rem;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgb(100 116 139);
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.editor-guide-tab:hover,
+.editor-guide-tab[aria-selected="true"] {
+    color: rgb(202 138 4);
+    border-bottom-color: rgb(250 204 21);
+}
+
+.dark .editor-guide-tab {
+    color: rgb(148 163 184);
+}
+
+.dark .editor-guide-tab:hover,
+.dark .editor-guide-tab[aria-selected="true"] {
+    color: rgb(250 204 21);
+}
+
+.editor-guide-panel {
+    padding: 0.75rem 0.9rem 0.9rem;
+    color: rgb(71 85 105);
+}
+
+.dark .editor-guide-panel {
+    color: rgb(203 213 225);
 }
 
 .editor-toolbar button.draw-table {
     width: auto !important;
-    min-width: 28px !important;
+    min-width: 32px !important;
     display: inline-flex !important;
     position: static !important;
 }
 
 .editor-toolbar button:hover {
     background-color: rgb(241 245 249) !important;
-    border-color: rgb(226 232 240) !important;
+    border: none !important;
 }
 
 .dark .editor-toolbar button:hover {
-    background-color: rgb(51 65 85 / 0.45) !important;
-    border-color: rgb(71 85 105) !important;
+    background-color: rgb(51 65 85 / 0.55) !important;
+    border: none !important;
 }
 
 .editor-toolbar .active {
     background-color: rgb(226 232 240) !important;
-    border-color: rgb(203 213 225) !important;
-    border-radius: 6px !important;
+    border: none !important;
+    border-radius: 10px !important;
 }
 
 .dark .editor-toolbar .active {
-    background-color: rgb(51 65 85 / 0.65) !important;
-    border-color: rgb(100 116 139) !important;
+    background-color: rgb(51 65 85 / 0.75) !important;
+    border: none !important;
 }
 
 .CodeMirror {
@@ -1995,9 +1992,28 @@ span.CodeMirror-selectedtext {
 
 @media (min-width: 768px) {
     .editor-toolbar i.separator {
-        display: flex !important;
-        height: 20px !important;
+        display: inline-block !important;
+        width: 1px !important;
+        min-width: 1px !important;
+        max-width: 1px !important;
+        height: 16px !important;
+        margin: 0 6px !important;
+        padding: 0 !important;
+        border: none !important;
+        border-left: none !important;
         border-right: none !important;
+        background: rgb(148 163 184) !important;
+        opacity: 0.45;
+        color: transparent !important;
+        font-size: 0 !important;
+        line-height: 0 !important;
+        overflow: hidden !important;
+        text-indent: 0 !important;
+    }
+    .editor-toolbar i.separator::before,
+    .editor-toolbar i.separator::after {
+        content: none !important;
+        display: none !important;
     }
 }
 </style>

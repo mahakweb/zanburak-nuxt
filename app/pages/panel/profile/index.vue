@@ -474,7 +474,7 @@ definePageMeta({
                     <button
                         @click.prevent="updateProfile"
                         :disabled="updateLoading"
-                        type="submit"
+                        type="button"
                         class="inline-flex items-center justify-center gap-2 min-w-[10rem] h-11 px-6 text-sm font-bold text-gray-900 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-xl shadow-md shadow-amber-500/25 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-md"
                     >
                         <svg v-if="updateLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -658,10 +658,13 @@ export default {
             img.style.removeProperty("display");
             img.src = DEFAULT_COVER_PIC;
         },
+        isCanceledRequest(error) {
+            return error?.code === "ERR_CANCELED" || error?.name === "CanceledError" || error?.response?.status === 0;
+        },
         getUserData() {
             this.loading = true;
             axiosInstance
-                .post("panel/profile/userData")
+                .post("panel/profile/userData", {}, { skipCancelOnNavigate: true })
                 .then((response) => {
                     this.userData.user = response.data.user;
                     this.userData.info = response.data.info;
@@ -685,7 +688,9 @@ export default {
                 })
 
                 .catch((error) => {
-                    console.error(error.response.data.message);
+                    if (!this.isCanceledRequest(error)) {
+                        console.error(error.response?.data?.message || error);
+                    }
                     this.loading = false;
                 });
         },
@@ -698,13 +703,21 @@ export default {
                 birth_date = `${this.userData.info.birth_date.year || ""}/${this.userData.info.birth_date.month || ""}/${this.userData.info.birth_date.day || ""}`;
             }
             axiosInstance
-                .post("panel/profile/update", {
-                    user: this.userData.user,
-                    info: {
-                        ...this.userData.info,
-                        birth_date: birth_date,
+                .post(
+                    "panel/profile/update",
+                    {
+                        user: {
+                            first_name: this.userData.user.first_name,
+                            last_name: this.userData.user.last_name,
+                            username: this.userData.user.username,
+                        },
+                        info: {
+                            ...this.userData.info,
+                            birth_date: birth_date,
+                        },
                     },
-                })
+                    { skipCancelOnNavigate: true },
+                )
                 .then(() => {
                     toast.success(this.$t("profile.account.updateSuccess"), {
                         theme: "colored",
@@ -718,10 +731,13 @@ export default {
                     this.authStore.getUser();
                 })
                 .catch((error) => {
-                    if (error.response.status === 422) {
+                    if (this.isCanceledRequest(error)) {
+                        return;
+                    }
+                    if (error.response?.status === 422) {
                         this.errors = error.response.data.errors;
                     }
-                    console.error(this.errors);
+                    console.error(this.errors || error);
                 })
                 .finally(() => {
                     this.updateLoading = false;
@@ -844,6 +860,7 @@ export default {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
+                    skipCancelOnNavigate: true,
                     onUploadProgress: (progressEvent) => {
                         const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                         this.uploadPercentageCover = percentage;
@@ -882,6 +899,7 @@ export default {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
+                    skipCancelOnNavigate: true,
                     onUploadProgress: (progressEvent) => {
                         const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                         this.uploadPercentageProfile = percentage;

@@ -6,11 +6,29 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage
         :breadcrumb-title-override="course?.title"
         :breadcrumb-last-override="course?.title">
         <template #breadcrumb-actions>
+            <button
+                v-if="course && publishActionLabel"
+                type="button"
+                @click="openPublishModal(defaultPublishAction)"
+                class="shrink-0 group h-9 select-none rounded-lg bg-white px-3 text-sm font-semibold leading-8 text-gray-800 shadow-[0_-3px_0_0px_#d4d4d5_inset,0_0_0_1px_#f4f4f8_inset,0_0.5px_0_1.5px_#fff_inset] hover:bg-zinc-100 active:shadow-[-1px_0px_1px_0px_#e4e4e7_inset,1px_0px_1px_0px_#e4e4e7_inset,0px_0.125rem_1px_0px_#d4d4d8_inset]">
+                <span class="block group-active:[transform:translate3d(0,1px,0)]">
+                    {{ publishActionLabel }}
+                </span>
+            </button>
+            <button
+                v-if="course && deleteActionLabel"
+                type="button"
+                @click="openPublishModal(defaultDeleteAction, 'delete')"
+                class="shrink-0 group h-9 select-none rounded-lg bg-white px-3 text-sm font-semibold leading-8 text-rose-700 shadow-[0_-3px_0_0px_#d4d4d5_inset,0_0_0_1px_#f4f4f8_inset,0_0.5px_0_1.5px_#fff_inset] hover:bg-zinc-100 active:shadow-[-1px_0px_1px_0px_#e4e4e7_inset,1px_0px_1px_0px_#e4e4e7_inset,0px_0.125rem_1px_0px_#d4d4d8_inset]">
+                <span class="block group-active:[transform:translate3d(0,1px,0)]">
+                    {{ deleteActionLabel }}
+                </span>
+            </button>
             <router-link
                 v-if="course"
                 :to="{ name: 'admin-course-edit', params: { courseSlug: courseSlug } }"
@@ -50,12 +68,43 @@ definePageMeta({
                                 <span class="w-1 h-1 rounded-full bg-gray-700 dark:bg-gray-200 me-2"></span>
                                 <span>{{ course.level.title }}</span>
                             </div>
-                            <div class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-100 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
-                                <span class="w-1 h-1 rounded-full bg-gray-700 dark:bg-gray-200 me-2"></span>
-                                <span>{{ course.publish ? 'منتشرشده' : 'پیش‌نویس' }}</span>
-                            </div>
+                            <button
+                                type="button"
+                                class="whitespace-nowrap flex items-center text-xs font-medium px-2 py-1 rounded-lg"
+                                :class="publishChipClass(course)"
+                                @click="openPublishModal(defaultPublishAction)"
+                            >
+                                <span class="w-1 h-1 rounded-full bg-current me-2"></span>
+                                <span>{{ publishLabel(course) }}</span>
+                            </button>
                         </div>
                         <h3 class="mt-0.5 w-max text-lg font-bold text-gray-700 dark:text-gray-100">{{ course.english_title }}</h3>
+                        <div v-if="course.publish_review?.comment" class="mt-3 max-w-xl rounded-xl border px-3 py-2 text-xs leading-relaxed"
+                            :class="publishStatus(course) === 'rejected'
+                                ? 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200'
+                                : 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200'">
+                            <div class="font-bold mb-1">آخرین توضیح بررسی انتشار</div>
+                            {{ course.publish_review.comment }}
+                            <div class="mt-1 text-[11px] opacity-80">
+                                {{ reviewActorLabel(course.publish_review.actor, course.publish_review.action, hideReviewerName) }}
+                            </div>
+                        </div>
+                        <div class="mt-3 max-w-xl space-y-1.5">
+                            <div class="text-[11px] font-bold text-gray-500">تاریخچه انتشار</div>
+                            <div v-if="publishHistory.length" class="space-y-1.5">
+                                <div v-for="row in publishHistory" :key="row.id" class="rounded-lg border border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/40 px-3 py-2 text-[11px] text-gray-600 dark:text-gray-300">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="font-bold text-gray-800 dark:text-gray-100">{{ reviewActionLabel(row.action) }}</span>
+                                        <span class="shrink-0 text-[10px] text-gray-400">{{ formatReviewDate(row.created_at) }}</span>
+                                    </div>
+                                    <div class="mt-0.5 text-[10px] text-gray-400">{{ reviewActorLabel(row.actor, row.action, hideReviewerName) }}</div>
+                                    <div v-if="row.comment" class="mt-1 leading-relaxed">{{ row.comment }}</div>
+                                </div>
+                            </div>
+                            <div v-else class="rounded-lg bg-gray-50 dark:bg-gray-800/40 px-3 py-2 text-[11px] text-gray-400">
+                                هنوز رویدادی برای انتشار این دوره ثبت نشده است.
+                            </div>
+                        </div>
                         <div class="mt-3 flex flex-wrap gap-1.5 items-center">
                             <div v-for="(cat, i) in course.categories" :key="i"
                                 class="whitespace-nowrap flex items-center text-xs font-medium text-gray-800 dark:text-gray-300 bg-gray-100/70 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
@@ -169,6 +218,13 @@ definePageMeta({
                 </div>
             </div>
         </div>
+        <AdminCoursePublishReviewModal
+            v-model="showPublishModal"
+            :kind="reviewKind"
+            :course="course"
+            :action="publishAction"
+            @updated="onPublishUpdated"
+        />
         <LoadingComponent v-if="loading" class="" />
     </AdminMasterPage>
 </template>
@@ -190,6 +246,20 @@ import AdminCourseVideos from "@/views/page/admin/course/details/AdminCourseVide
 import AdminCourseAttachments from "@/views/page/admin/course/details/AdminCourseAttachments.vue";
 import AdminCourseLikes from "@/views/page/admin/course/details/AdminCourseLikes.vue";
 import AdminCourseBookmarks from "@/views/page/admin/course/details/AdminCourseBookmarks.vue";
+import AdminCoursePublishReviewModal from "@/views/components/admin/AdminCoursePublishReviewModal.vue";
+import {
+    applyPublishResponse,
+    COURSE_DELETE_PERMS,
+    COURSE_PUBLISH_APPROVE_PERMS,
+    COURSE_PUBLISH_REQUEST_PERMS,
+    deleteStatus,
+    formatReviewDate,
+    publishChipClass,
+    publishLabel,
+    publishStatus,
+    reviewActionLabel,
+    reviewActorLabel,
+} from "@/utils/coursePublish";
 export default {
 		setup() { return { adminCommentsStore: useAdminCommentsStore() } },
     components: {
@@ -208,6 +278,7 @@ export default {
         AdminCourseAttachments,
         AdminCourseLikes,
         AdminCourseBookmarks,
+        AdminCoursePublishReviewModal,
     },
     data() {
         const sections = ['overview', 'users', 'episodes', 'comments', 'quizzes', 'analytics', 'views', 'videos', 'attachments', 'likes', 'bookmarks']
@@ -232,6 +303,10 @@ export default {
             errors: null,
             loading: false,
             unapprovedCommentsCount: 0,
+            showPublishModal: false,
+            publishAction: 'request',
+            reviewKind: 'publish',
+            publishHistory: [],
         };
     },
     computed: {
@@ -244,6 +319,45 @@ export default {
         selectedTabIndex() {
             const idx = this.courseTabs.findIndex(t => t.key === this.selectedSection);
             return idx >= 0 ? idx : 0;
+        },
+        defaultPublishAction() {
+            const status = publishStatus(this.course);
+            if (status === 'pending') {
+                return this.$can(COURSE_PUBLISH_APPROVE_PERMS) ? 'review' : 'cancel';
+            }
+            if (status === 'published') return this.$can(COURSE_PUBLISH_APPROVE_PERMS) ? 'unpublish' : 'request';
+            if (this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'publish';
+            return 'request';
+        },
+        publishActionLabel() {
+            if (!this.course) return '';
+            const status = publishStatus(this.course);
+            if (status === 'pending' && this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'بررسی انتشار';
+            if (status === 'pending' && this.$can(COURSE_PUBLISH_REQUEST_PERMS)) return 'انصراف از انتظار انتشار';
+            if (status === 'published' && this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'لغو انتشار';
+            if ((status === 'draft' || status === 'rejected') && this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'انتشار دوره';
+            if ((status === 'draft' || status === 'rejected') && this.$can(COURSE_PUBLISH_REQUEST_PERMS)) {
+                return status === 'rejected' ? 'ارسال مجدد درخواست' : 'درخواست انتشار';
+            }
+            return '';
+        },
+        hideReviewerName() {
+            return !this.$can(COURSE_PUBLISH_APPROVE_PERMS);
+        },
+        defaultDeleteAction() {
+            if (!this.course || publishStatus(this.course) !== 'published') return null;
+            if (deleteStatus(this.course) === 'pending') {
+                return this.$can(COURSE_PUBLISH_APPROVE_PERMS) ? 'delete-review' : 'delete-cancel';
+            }
+            if (this.$can(COURSE_DELETE_PERMS) && !this.$can(COURSE_PUBLISH_APPROVE_PERMS)) return 'delete-request';
+            return null;
+        },
+        deleteActionLabel() {
+            const action = this.defaultDeleteAction;
+            if (action === 'delete-review') return 'بررسی درخواست حذف';
+            if (action === 'delete-cancel') return 'انصراف از درخواست حذف';
+            if (action === 'delete-request') return deleteStatus(this.course) === 'rejected' ? 'ارسال مجدد درخواست حذف' : 'درخواست حذف دوره';
+            return '';
         },
     },
     methods: {
@@ -276,6 +390,8 @@ export default {
                 .post(`admin/course/${this.courseSlug}/baseDetails`)
                 .then((response) => {
                     this.course = response.data.course;
+                    this.publishHistory = this.course.publish_history || [];
+                    this.fetchPublishHistory();
                 })
                 .catch((error) => {
                     console.error(error.response.data.errors);
@@ -291,7 +407,7 @@ export default {
                     {
                         page: 1,
                         perPage: 1,
-                        approved: false,
+                        status: 'pending',
                         order: 'desc',
                     }
                 );
@@ -308,6 +424,39 @@ export default {
             }
             // Also decrease the Pinia count
             this.adminCommentsStore.decreaseUnapprovedComments();
+        },
+        publishLabel,
+        publishChipClass,
+        publishStatus,
+        reviewActionLabel,
+        reviewActorLabel,
+        formatReviewDate,
+        async fetchPublishHistory() {
+            try {
+                const { data } = await axiosInstance.post(`admin/course/${this.courseSlug}/publish/history`);
+                this.publishHistory = data.history || this.course?.publish_history || [];
+            } catch {
+                this.publishHistory = this.course?.publish_history || [];
+            }
+        },
+        openPublishModal(action, kind = 'publish') {
+            if (kind === 'publish' && !this.publishActionLabel && action !== 'review') return;
+            this.reviewKind = kind;
+            this.publishAction = action || (kind === 'delete' ? this.defaultDeleteAction : this.defaultPublishAction);
+            this.showPublishModal = true;
+        },
+        onPublishUpdated(payload) {
+            if (payload?.deleted) {
+                this.$router.push({ name: 'admin-courses-list' });
+                return;
+            }
+            if (payload) {
+                applyPublishResponse(this.course, payload);
+                if (payload.publish_history) this.publishHistory = payload.publish_history;
+            } else {
+                this.getCourse();
+            }
+            this.fetchPublishHistory();
         },
     },
 

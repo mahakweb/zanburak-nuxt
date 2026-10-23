@@ -6,7 +6,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link :to="{ name: 'admin-courses-list' }" :class="BTN_SECONDARY">
@@ -159,13 +159,16 @@ definePageMeta({
                                         <label for="publish-1"
                                             class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
                                             <div class="block text-xs font-semibold text-center w-full">
-                                                منتشر شده
+                                                {{ canDirectPublish ? 'منتشر شده' : 'ارسال برای تایید' }}
                                             </div>
                                         </label>
                                     </li>
                                 </ul>
-                                <p class="text-xs text-gray-400 mt-1">اگر در حالت "منتشر شده" باشد، دوره برای عموم قابل
-                                    مشاهده خواهد بود.</p>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    {{ canDirectPublish
+                                        ? 'اگر در حالت «منتشر شده» باشد، دوره برای عموم قابل مشاهده خواهد بود.'
+                                        : 'انتشار نهایی فقط پس از تایید مدیر یا تاییدکننده انتشار انجام می‌شود.' }}
+                                </p>
                             </div>
 
                             <div v-if="type !== 'free'" class="md:col-span-2">
@@ -904,6 +907,7 @@ import AsyncSearchSelect from "@/views/components/multiselect/AsyncSearchSelect.
 import PN from "persian-number";
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import axiosInstance from "@/store/axiosInstance";
+import { COURSE_PUBLISH_APPROVE_PERMS } from "@/utils/coursePublish";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
@@ -1122,14 +1126,20 @@ export default {
         },
     },
     computed: {
+        canDirectPublish() {
+            return this.$can(COURSE_PUBLISH_APPROVE_PERMS);
+        },
         confirmSummary() {
             const typeLabels = { free: "رایگان", cash: "نقدی", "cash-vip": "نقدی/VIP" };
+            const publishValue = String(this.publish) === "1"
+                ? (this.canDirectPublish ? "منتشر شده" : "ارسال برای تایید")
+                : "پیش‌نویس";
             return [
                 { label: "عنوان فارسی", value: this.title },
                 { label: "عنوان انگلیسی", value: this.english_title, ltr: true },
                 { label: "نوع دوره", value: typeLabels[this.type] || this.type },
                 { label: "قیمت", value: this.type === "free" ? "رایگان" : (this.formattedPrice ? this.formattedPrice + " تومان" : "") },
-                { label: "انتشار", value: String(this.publish) === "1" ? "منتشر شده" : "پیش‌نویس" },
+                { label: "انتشار", value: publishValue },
                 { label: "گواهینامه", value: this.certificate_enabled ? "فعال" : "غیرفعال" },
                 { label: "گارانتی بازگشت وجه", value: this.has_money_back_guarantee ? "فعال" : "غیرفعال" },
                 { label: "دسته‌بندی‌ها", value: this.selectedCategories?.length ? this.selectedCategories.length + " مورد" : "" },

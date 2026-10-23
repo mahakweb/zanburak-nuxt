@@ -44,11 +44,30 @@ function enrichRouteForAcl(to) {
   return { ...to, meta, matched }
 }
 
-export default defineNuxtRouteMiddleware(async (to) => {
-  const auth = useAuthStore()
+function routeRequiresAuth(to) {
+  const routeLabel = routeName(to)
+  return (
+    to.meta?.requiresAuth === true ||
+    to.meta?.middleware?.includes?.('auth') ||
+    (Array.isArray(to.meta?.middleware) && to.meta.middleware.includes('auth')) ||
+    to.matched?.some((r) => r.meta?.requiresAuth) ||
+    ROUTE_META[routeLabel]?.requiresAuth
+  )
+}
 
-  // Ensure cookie/localStorage session is restored before ACL checks (hard refresh).
-  if (!auth.status.loggedIn) {
+export default defineNuxtRouteMiddleware(async (to) => {
+  // Admin/panel/auth routes are SPA (`ssr: false`). Running the login redirect
+  // on the server paints /auth/login in the first HTML, then the browser
+  // restores the Laravel session and bounces back — a visible login flash.
+  if (import.meta.server) return
+
+  const auth = useAuthStore()
+  const routeLabel = routeName(to)
+  const requiresAuth = routeRequiresAuth(to)
+
+  // Only block navigation when ACL actually needs the session. Public pages
+  // paint immediately; the navbar skeleton covers the in-flight /user request.
+  if (!auth.status.loggedIn && requiresAuth) {
     try {
       await auth.restoreFromStorage()
     } catch (error) {
@@ -57,7 +76,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   const isLoggedIn = auth.status.loggedIn
-  const routeLabel = routeName(to)
 
   if (isLoggedIn && needsMobileVerification(auth.status.userInfo)) {
     if (!MOBILE_VERIFY_ALLOWLIST.has(routeLabel)) {
@@ -67,13 +85,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
       })
     }
   }
-
-  const requiresAuth =
-    to.meta?.requiresAuth === true ||
-    to.meta?.middleware?.includes?.('auth') ||
-    (Array.isArray(to.meta?.middleware) && to.meta.middleware.includes('auth')) ||
-    to.matched?.some((r) => r.meta?.requiresAuth) ||
-    ROUTE_META[routeLabel]?.requiresAuth
 
   if (!requiresAuth) return
 

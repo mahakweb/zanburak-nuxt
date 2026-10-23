@@ -37,7 +37,7 @@
                             <div
                                 v-else-if="cat.icon"
                                 class="category-icon flex h-full w-full items-center justify-center p-3"
-                                v-html="cat.icon" />
+                                v-html="safeHtml(cat.icon)" />
                         </div>
                         <h6
                             class="mt-2 w-24 text-center text-xs font-medium leading-tight text-gray-700 line-clamp-2 dark:text-gray-100">
@@ -70,7 +70,7 @@
                         <div
                             v-else-if="cat.icon"
                             class="category-icon flex h-full w-full items-center justify-center p-4"
-                            v-html="cat.icon" />
+                            v-html="safeHtml(cat.icon)" />
                     </div>
                     <h6
                         class="absolute -bottom-2 mt-2 w-28 text-center text-sm font-medium leading-tight text-gray-700 opacity-0 transition duration-200 line-clamp-1 group-hover:opacity-100 dark:text-gray-100">
@@ -84,6 +84,7 @@
 
 <script>
 import SeoImage from "@/views/components/seo/SeoImage.vue";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 export default {
     name: "HomePopularCategories",
@@ -95,6 +96,9 @@ export default {
         },
     },
     methods: {
+        safeHtml(value) {
+            return sanitizeHtml(value || "");
+        },
         isImageIcon(icon) {
             if (!icon || typeof icon !== "string") return false;
             const value = icon.trim();

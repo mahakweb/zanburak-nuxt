@@ -39,6 +39,12 @@
     "fa": "{time} مطرح شد",
     "en": "Posted {time}"
   },
+  "discuss.common.reportHeading": {
+    "fa": "گزارش تخلف",
+    "en": "Report content",
+    "ar": "الإبلاغ عن محتوى",
+    "tr": "İçerik bildir"
+  },
   "discuss.common.reportTitle": {
     "fa": "لطفاً دلیل خود را برای گزارش این مطلب به عنوان تخلف انتخاب کنید:",
     "en": "Please select a reason for reporting this content:"
@@ -83,6 +89,18 @@
     "fa": "اگر مورد دیگری به نظرتان می‌رسد که شامل هیچ‌یک از دسته‌بندی‌های بالا نمی‌شود، این گزینه را انتخاب کنید",
     "en": "If none of the above categories apply, choose this option"
   },
+  "discuss.common.reportOtherPlaceholder": {
+    "fa": "توضیح کوتاه خود را بنویسید...",
+    "en": "Write a short explanation...",
+    "ar": "اكتب توضيحاً مختصراً...",
+    "tr": "Kısa bir açıklama yazın..."
+  },
+  "discuss.common.reportOtherHint": {
+    "fa": "حداکثر ۲۵۶ کاراکتر",
+    "en": "Maximum 256 characters",
+    "ar": "بحد أقصى 256 حرفاً",
+    "tr": "En fazla 256 karakter"
+  },
   "discuss.common.reportSuccess": {
     "fa": "با تشکر، گزارش تخلف شما در اولین فرصت بررسی خواهد شد",
     "en": "Thank you. Your report will be reviewed as soon as possible."
@@ -123,9 +141,23 @@
     "fa": "فیلتر و دسته بندی ها",
     "en": "Filters & categories"
   },
+  "discuss.list.filterDrawerHint": {
+    "fa": "از منوی زیر برای فیلتر و دسته بندی‌های خود استفاده کنید.",
+    "en": "Use the menu below to filter and categorize."
+  },
+  "discuss.list.showResults": {
+    "fa": "نمایش نتایج",
+    "en": "Show results"
+  },
   "discuss.list.searchPlaceholder": {
     "fa": "جستجوی گفتگو...",
     "en": "Search discussions..."
+  },
+  "discuss.list.searchAction": {
+    "fa": "جستجو",
+    "en": "Search",
+    "ar": "بحث",
+    "tr": "Ara"
   },
   "discuss.list.searchFor": {
     "fa": "جستجو برای:",

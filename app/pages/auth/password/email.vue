@@ -2,6 +2,7 @@
 import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "password-request",
+  middleware: ['guest'],
 })
 </script>
 

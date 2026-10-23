@@ -5,6 +5,7 @@ import { ref, computed, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import moment from "moment-jalaali";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 try {
     if (import.meta.client && localStorage.getItem("direction") === "rtl") {
@@ -52,6 +53,10 @@ const badgeLabel = computed(() => {
     if (!count) return "";
     return count < 100 ? String(count) : "99+";
 });
+
+function safeHtml(value) {
+    return sanitizeHtml(value || "");
+}
 
 function formatTime(dateStr) {
     if (!dateStr) return "";
@@ -331,12 +336,12 @@ watch(
                                     ? 'bg-gray-100 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'
                                     : 'bg-yellow-400/90 border-yellow-300 text-gray-800'
                             "
-                            v-html="getNotificationIcon(notification)"
+                            v-html="safeHtml(getNotificationIcon(notification))"
                         ></div>
 
                         <div class="flex-1 min-w-0">
                             <div
-                                v-html="notification.data?.message"
+                                v-html="safeHtml(notification.data?.message)"
                                 class="text-xs leading-5 line-clamp-1 notification-sheet-message"
                                 :class="
                                     notification.read_at
@@ -369,7 +374,7 @@ watch(
                     <div class="shrink-0 flex items-start gap-3 mb-4">
                         <div
                             class="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center bg-yellow-400/90 text-gray-800 border border-yellow-300"
-                            v-html="getNotificationIcon(selectedNotification)"
+                            v-html="safeHtml(getNotificationIcon(selectedNotification))"
                         ></div>
                         <div class="min-w-0 pt-1 space-y-1">
                             <p class="text-[11px] text-gray-500 dark:text-gray-400">
@@ -412,7 +417,7 @@ watch(
                         class="flex-1 min-h-0 overflow-auto custom-scrollbar"
                     >
                         <div
-                            v-html="selectedNotification.data?.message"
+                            v-html="safeHtml(selectedNotification.data?.message)"
                             class="text-sm leading-7 text-gray-700 dark:text-gray-200 notification-sheet-message rounded-2xl bg-gray-50 dark:bg-gray-800/60 p-4"
                         ></div>
 

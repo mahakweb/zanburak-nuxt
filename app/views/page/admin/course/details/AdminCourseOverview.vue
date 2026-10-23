@@ -147,8 +147,9 @@
                                                     class="text-gray-700 dark:text-gray-100 text-xs font-semibold line-clamp-1">
                                                     {{ comment.user.first_name + ' ' + comment.user.last_name }}
                                                 </router-link>
-                                                <div class="mt-0.5 text-gray-400 dark:text-gray-400 text-xs font-light">
-                                                    {{ timeAgo(comment.created_at) }}
+                                                <div class="mt-0.5 flex items-center gap-2">
+                                                    <span class="text-gray-400 dark:text-gray-400 text-xs font-light">{{ timeAgo(comment.created_at) }}</span>
+                                                    <CommentStatusBadge :comment="comment" />
                                                 </div>
                                             </div>
                                         </div>
@@ -163,30 +164,10 @@
                                                         fill="currentColor"></path>
                                                 </svg>
                                             </button>
-                                            <button v-if="!comment.approved"
-                                                @click.prevent="commentToggleApproval(comment, index)"
-                                                :disabled="loadingComments[index]"
-                                                class="disabled:opacity-60 whitespace-nowrap bg-green-400/20 text-xs font-semibold px-2 py-1 rounded-md text-green-500 flex items-center">
-                                                تاییدکردن
-                                                <svg class="shrink-0 ms-2 w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-
-                                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                                        d="M9.02975 3.3437C10.9834 2.88543 13.0166 2.88543 14.9703 3.3437C17.7916 4.00549 19.9945 6.20842 20.6563 9.02975C21.1146 10.9834 21.1146 13.0166 20.6563 14.9703C19.9945 17.7916 17.7916 19.9945 14.9703 20.6563C13.0166 21.1146 10.9834 21.1146 9.02975 20.6563C6.20842 19.9945 4.0055 17.7916 3.3437 14.9703C2.88543 13.0166 2.88543 10.9834 3.3437 9.02974C4.0055 6.20841 6.20842 4.00549 9.02975 3.3437ZM15.0524 10.4773C15.2689 10.2454 15.2563 9.88195 15.0244 9.6655C14.7925 9.44906 14.4291 9.46159 14.2126 9.6935L11.2678 12.8487L9.77358 11.3545C9.54927 11.1302 9.1856 11.1302 8.9613 11.3545C8.73699 11.5788 8.73699 11.9425 8.9613 12.1668L10.8759 14.0814C10.986 14.1915 11.1362 14.2522 11.2919 14.2495C11.4477 14.2468 11.5956 14.181 11.7019 14.0671L15.0524 10.4773Z"
-                                                        fill="currentColor"></path>
-                                                </svg>
-                                            </button>
-                                            <button v-else @click.prevent="commentToggleApproval(comment, index)"
-                                                :disabled="loadingComments[index]"
-                                                class="disabled:opacity-60 whitespace-nowrap bg-yellow-400 text-xs font-semibold px-2 py-1 rounded-md text-gray-800 flex items-center">
-                                                عدم تایید
-                                                <svg class="shrink-0 ms-1 w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                                        d="M9.02975 3.3437C10.9834 2.88543 13.0166 2.88543 14.9703 3.3437C17.7916 4.00549 19.9945 6.20842 20.6563 9.02975C21.1146 10.9834 21.1146 13.0166 20.6563 14.9703C19.9945 17.7916 17.7916 19.9945 14.9703 20.6563C13.0166 21.1146 10.9834 21.1146 9.02975 20.6563C6.20842 19.9945 4.0055 17.7916 3.3437 14.9703C2.88543 13.0166 2.88543 10.9834 3.3437 9.02974C4.0055 6.20841 6.20842 4.00549 9.02975 3.3437ZM12 10.0854C12.5287 10.0854 12.9573 9.65681 12.9573 9.12812C12.9573 8.59942 12.5287 8.17083 12 8.17083C11.4713 8.17083 11.0427 8.59942 11.0427 9.12812C11.0427 9.65681 11.4713 10.0854 12 10.0854ZM12 10.8034C12.3965 10.8034 12.7179 11.1248 12.7179 11.5213V15.3505C12.7179 15.747 12.3965 16.0684 12 16.0684C11.6035 16.0684 11.282 15.747 11.282 15.3505V11.5213C11.282 11.1248 11.6035 10.8034 12 10.8034Z"
-                                                        fill="currentColor"></path>
-                                                </svg>
-                                            </button>
+                                            <AdminCommentStatusActions
+                                                :comment="comment"
+                                                :disabled="!!loadingComments[index]"
+                                                @set-status="(item, status) => setCommentStatus(item, status, index)" />
                                         </div>
                                     </div>
                                     <hr class="border-t border-dashed border-gray-200 dark:border-opacity-20 my-1.5">
@@ -597,7 +578,14 @@ import AdminInlineLoading from "@/views/components/admin/AdminInlineLoading.vue"
 import EditorComponent from "@/views/components/editor/EditorComponent.vue";
 import FileExtBadgeIcon from "@/views/components/admin/FileExtBadgeIcon.vue";
 import { displayAttachmentTitle } from "@/utils/attachmentDisplay";
+import CommentStatusBadge from "@/views/components/comment/CommentStatusBadge.vue";
+import AdminCommentStatusActions from "@/views/components/admin/comment/AdminCommentStatusActions.vue";
+import commentModerationMixin from "@/utils/commentModerationMixin";
+import { applyCommentStatus } from "@/utils/commentStatus";
+import { useAdminCommentsStore } from "@/stores/adminComments";
 export default {
+    setup() { return { adminCommentsStore: useAdminCommentsStore() } },
+    mixins: [commentModerationMixin],
     emits: ['go-to-attachments'],
     props: {
         courseSlug: {
@@ -612,6 +600,8 @@ export default {
         EditorComponent,
         AdminInlineLoading,
         FileExtBadgeIcon,
+        CommentStatusBadge,
+        AdminCommentStatusActions,
     },
     data() {
         return {
@@ -762,22 +752,6 @@ export default {
             moment.locale("fa");
             return moment(date).fromNow();
         },
-        async commentToggleApproval(comment, index) {
-            this.loadingComments[index] = true;
-            try {
-                const response = await axiosInstance.post(
-                    'admin/comments/toggle-approval', { comment_id: comment.id }
-                );
-                const updatedComment = this.course.recent_activities.comments.find(c => c.id === comment.id);
-                if (updatedComment) {
-                    updatedComment.approved = response.data.comment.approved;
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                this.loadingComments[index] = false;
-            }
-        },
         async commentSendReply() {
             this.errors = null;
             this.replyCommentLoading = true;
@@ -796,8 +770,8 @@ export default {
                 });
 
                 const updatedComment = this.course.recent_activities.comments.find(c => c.id === this.selectedCommentForReply.id);
-                if (updatedComment) {
-                    updatedComment.approved = this.selectedCommentForReplyApprovedCheck;
+                if (updatedComment && this.selectedCommentForReplyApprovedCheck) {
+                    applyCommentStatus(updatedComment, "approved");
                 }
 
                 this.closeReplyCommentModal();

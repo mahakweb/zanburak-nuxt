@@ -312,42 +312,14 @@
             </section>
         </div>
 
-        <BottomSheetDrawer v-model="isOpenReportModal" :initialHeight="0.7" :maxHeight="0.8" :minHeight="0.6" :autoCloseOnMin="true" :closeOnBackdrop="true" :lockScroll="true" :panelClass="'bg-white dark:bg-gray-900 border-t border-gray-500/70 dark:border-gray-700/70 rounded-t-2xl lg:w-[40rem] lg:rounded-b-2xl shadow-[0_-8px_30px_rgba(15,23,42,0.35)]'" :contentClass="'px-4 pb-4 overflow-auto custom-scrollbar'" :backdropClass="'bg-gray-300/30 dark:bg-gray-500/30 backdrop-blur-sm'">
-            <div class="relative w-full max-h-full">
-                <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" viewBox="0 0 20 20" fill="none">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-                <h3 class="mb-2 text-start text-base font-bold text-gray-500 dark:text-gray-200">{{ $t('discuss.common.reportTitle') }}</h3>
-                <div class="flex flex-col space-y-2 my-3">
-                    <div class="flex flex-col space-y-2 text-sm text-start text-gray-700 dark:text-gray-400">
-                        <div class="rounded-lg flex items-start bg-gray-100 dark:bg-gray-700/20 p-2.5">
-                            <input id="article-report-spam" v-model="report" type="radio" class="radio radio-warning bg-gray-300 border-none w-5 h-5 me-3 focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900" value="spam">
-                            <label for="article-report-spam" class="ms-1.5">{{ $t('discuss.common.reportSpamBefore') }} <span class="mx-0.5 font-bold text-gray-800 dark:text-gray-50">{{ $t('discuss.common.reportSpamHighlight') }}</span> {{ $t('discuss.common.reportSpamAfter') }}</label>
-                        </div>
-                        <div class="rounded-lg flex items-start bg-gray-100 dark:bg-gray-700/20 p-2.5">
-                            <input id="article-report-offensive" v-model="report" type="radio" class="radio radio-warning bg-gray-300 border-none w-5 h-5 me-3 focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900" value="offensive-writing">
-                            <label for="article-report-offensive" class="ms-1.5">{{ $t('discuss.common.reportOffensiveBefore') }} <span class="mx-0.5 font-bold text-gray-800 dark:text-gray-50">{{ $t('discuss.common.reportOffensiveHighlight') }}</span> {{ $t('discuss.common.reportOffensiveAfter') }}</label>
-                        </div>
-                        <div class="rounded-lg flex items-start bg-gray-100 dark:bg-gray-700/20 p-2.5">
-                            <input id="article-report-rules" v-model="report" type="radio" class="radio radio-warning bg-gray-300 border-none w-5 h-5 me-3 focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900" value="violation-of-rules">
-                            <label for="article-report-rules" class="ms-1.5">{{ $t('discuss.common.reportRulesBefore') }} <span class="mx-0.5 font-bold text-gray-800 dark:text-gray-50">{{ $t('discuss.common.reportRulesHighlight') }}</span> {{ $t('discuss.common.reportRulesAfter') }}</label>
-                        </div>
-                        <div class="rounded-lg flex items-start bg-gray-100 dark:bg-gray-700/20 p-2.5">
-                            <input id="article-report-other" v-model="report" type="radio" class="radio radio-warning bg-gray-300 border-none w-5 h-5 me-3 focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900" value="other">
-                            <label for="article-report-other" class="ms-1.5">{{ $t('discuss.common.reportOther') }}</label>
-                        </div>
-                    </div>
-                    <span v-if="reportErrors?.report" class="mt-2 text-red-500 text-xs font-semibold">{{ reportErrors.report[0] }}</span>
-                </div>
-                <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
-                    <button type="button" @click="closeReportModal" class="h-9 py-2 px-3 text-sm font-semibold text-gray-500 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">{{ $t('discuss.common.cancel') }}</button>
-                    <button type="button" @click="sendReport" :disabled="reportLoading" class="w-32 h-9 py-2 px-3 text-sm font-semibold text-center text-white bg-red-600 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 disabled:opacity-60">
-                        <svg v-if="reportLoading" class="w-4 h-4 m-auto animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                        <span v-else>{{ $t('discuss.common.reportTitle') }}</span>
-                    </button>
-                </div>
-            </div>
-        </BottomSheetDrawer>
+        <ReportBottomSheet
+            v-model="isOpenReportModal"
+            v-model:reason="report"
+            v-model:description="reportDescription"
+            :loading="reportLoading"
+            :errors="reportErrors"
+            @submit="sendReport"
+        />
     </MasterPage>
 </template>
 
@@ -359,7 +331,7 @@ import CommentsList from "@/views/components/home/CommentsList.vue";
 import ArticleShowSidebar from "@/views/components/articles/ArticleShowSidebar.vue";
 import ArticleShowLoading from "@/views/components/articles/ArticleShowLoading.vue";
 import ArticleRating from "@/views/components/articles/ArticleRating.vue";
-import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
+import ReportBottomSheet from "@/views/components/common/ReportBottomSheet.vue";
 import TagChip from "@/views/components/tag/TagChip.vue";
 import { articleService } from "@/services/article.service";
 import { useSEO, generateArticleSchema, generateBreadcrumbSchema } from "@/composables/useSEO";
@@ -372,7 +344,7 @@ import moment from "moment";
 
 export default {
 		setup() { return { authStore: useAuthStore() } },
-    components: { MasterPage, MarkdownRenderer, CommentsList, ArticleShowSidebar, ArticleShowLoading, ArticleRating, BottomSheetDrawer, TagChip, SeoImage },
+    components: { MasterPage, MarkdownRenderer, CommentsList, ArticleShowSidebar, ArticleShowLoading, ArticleRating, ReportBottomSheet, TagChip, SeoImage },
     props: { articleSlug: String },
     data() {
         return {
@@ -392,6 +364,7 @@ export default {
             tocItems: [],
             isOpenReportModal: false,
             report: null,
+            reportDescription: '',
             reportLoading: false,
             reportErrors: null,
             coursePosterErrors: {},
@@ -628,7 +601,7 @@ export default {
             }, 2500);
         },
         openReportModal() { this.isOpenReportModal = true; },
-        closeReportModal() { this.isOpenReportModal = false; this.report = null; this.reportErrors = null; },
+        closeReportModal() { this.isOpenReportModal = false; this.report = null; this.reportDescription = ''; this.reportErrors = null; },
         async sendReport() {
             if (!this.report || !this.article) return;
             this.reportLoading = true;
@@ -638,6 +611,7 @@ export default {
                     reportable_id: this.article.id,
                     reportable_type: "Article",
                     report: this.report,
+                    description: this.report === 'other' ? String(this.reportDescription || '').trim() : null,
                 });
                 toast.success(this.$t("discuss.common.reportSuccess") || "گزارش ثبت شد", {
                     theme: "colored",

@@ -6,7 +6,7 @@ definePageMeta({
 })
 </script>
 
-﻿<template>
+<template>
     <AdminMasterPage :breadcrumb-title-override="tag ? `#${tag.name}` : ''" :breadcrumb-last-override="tag ? `#${tag.name}` : ''">
         <template #breadcrumb-actions>
             <router-link :to="{ name: 'admin-tags' }"

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BottomSheetDrawer
     :model-value="open"
     :initial-height="0.7"

@@ -12,8 +12,10 @@ export const useAuthStore = defineStore('auth', () => {
   const status = reactive({
     loggedIn: false,
     userInfo: null,
+    ready: false,
   })
   const isAuthenticated = computed(() => status.loggedIn)
+  const isReady = computed(() => status.ready)
   let refreshUserPromise = null
   let restorePromise = null
 
@@ -35,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
   function setSession(data) {
     status.loggedIn = true
     status.userInfo = data.user
+    status.ready = true
     if (data.token) {
       persistAuthToken(data.token)
       applyAxiosAuth(data.token)
@@ -56,7 +59,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (authToken) applyAxiosAuth(authToken)
 
     refreshUserPromise = axiosInstance
-      .get('/user')
+      .get('/user', { skipCancelOnNavigate: true })
       .then((response) => {
         if (response.data) {
           status.loggedIn = true
@@ -125,6 +128,7 @@ export const useAuthStore = defineStore('auth', () => {
       clearAuthToken()
       applyAxiosAuth(null)
       clearSession()
+      status.ready = true
       try {
         const { useNotificationStore } = await import('./notification')
         useNotificationStore().resetFeed()
@@ -140,26 +144,48 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  function isCanceledAuthError(error) {
+    return (
+      error?.code === 'ERR_CANCELED' ||
+      error?.name === 'CanceledError' ||
+      error?.response?.status === 0
+    )
+  }
+
   /**
    * Restore the browser's HttpOnly Laravel session cookie. A legacy Bearer
    * token remains supported for sessions created by older Nuxt deployments.
+   *
+   * A canceled /user call must not resolve as "logged out" — callers (route
+   * middleware) would redirect to login and then bounce back after a retry.
    */
   async function restoreFromStorage() {
     if (restorePromise) return restorePromise
 
     restorePromise = (async () => {
-      const authToken = getAuthToken()
-      if (authToken) applyAxiosAuth(authToken)
+      const maxAttempts = 3
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const authToken = getAuthToken()
+        if (authToken) applyAxiosAuth(authToken)
 
-      try {
-        const user = await refreshUser()
-        if (!user) clearSession()
-      } catch (error) {
-        if (error.response?.status !== 401) console.error('[auth] Failed to restore user profile', error)
-        clearSession()
+        try {
+          const user = await refreshUser()
+          if (!user) clearSession()
+          return
+        } catch (error) {
+          if (isCanceledAuthError(error) && attempt < maxAttempts - 1) {
+            continue
+          }
+          if (!isCanceledAuthError(error) && error.response?.status !== 401) {
+            console.error('[auth] Failed to restore user profile', error)
+          }
+          clearSession()
+          return
+        }
       }
     })().finally(() => {
       restorePromise = null
+      status.ready = true
     })
 
     return restorePromise
@@ -168,6 +194,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     status,
     isAuthenticated,
+    isReady,
     setUserInfo,
     refreshUser,
     getUser: refreshUser,
