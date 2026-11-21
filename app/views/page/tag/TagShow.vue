@@ -404,6 +404,7 @@ export default {
 	},
 	methods: {
 		async loadTag() {
+			if (!this.tagSlug) return;
 			this.loading = true;
 			this.tabStates = { questions: emptyTabState(), courses: emptyTabState(), articles: emptyTabState() };
 			try {

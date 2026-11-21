@@ -1,11 +1,9 @@
 <script setup>
-import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "admin-episode-edit",
   middleware: ['auth'],
 })
 </script>
-
 <template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
@@ -340,91 +338,47 @@ definePageMeta({
                                     @change="handleVideo"
                                 />
                                 <label
-                                    class="flex items-center justify-between mb-1 text-xs font-semibold text-gray-900 dark:text-gray-100 gap-2">
+                                    class="block mb-1.5 text-xs font-semibold text-gray-900 dark:text-gray-100">
                                     ویدیوی جلسه
-                                    <MediaStatusBadge
-                                        v-if="oldVideo || video"
-                                        :status="uploadStatus.video"
-                                        :percent="progress.video.percent"
-                                        :extra="uploadStatus.video === 'processing' && processingProgress != null ? (Math.round(processingProgress) + '٪') : ''"
-                                    />
                                 </label>
 
                                 <div class="flex items-center justify-center w-full">
-                                    <div v-if="oldVideo && video == null" class="relative w-full">
-                                        <div class="relative aspect-video rounded-lg overflow-hidden bg-black">
-                                            <video
-                                                class="absolute inset-0 w-full h-full object-contain bg-black"
-                                                controls>
-                                                <source :src="oldVideo" :type="`video/${oldVideo.split('.').pop()}`">
-                                                Your browser does not support the video tag.
-                                            </video>
-                                            <div
-                                                class="absolute top-2 start-2 z-10 flex items-center gap-2 flex-wrap">
-                                                <button type="button" title="تغییر ویدیوی جلسه"
-                                                    class="h-7 text-white/95 text-xs font-semibold px-2.5 rounded-lg border-0 backdrop-blur-md bg-white/15 hover:bg-white/25 shadow-sm flex items-center gap-1.5 transition"
-                                                    @click.stop="openVideoPicker">
-                                                    <svg class="w-4 h-4" viewBox="0 0 512 512" fill="none" aria-hidden="true">
-                                                        <path fill="currentColor"
-                                                            d="M307.81,212.18c-3.24,0-6.07-2.17-6.91-5.3l-4.82-17.88c-0.84-3.12-3.68-5.3-6.91-5.3h-21.46h-25.44H220.8 c-3.24,0-6.07,2.17-6.91,5.3l-4.82,17.88c-0.84,3.12-3.68,5.3-6.91,5.3H169.5c-3.96,0-7.16,3.21-7.16,7.16v101.78 c0,3.96,3.21,7.16,7.16,7.16h170.95c3.96,0,7.16-3.21,7.16-7.16V219.35c0-3.96-3.21-7.16-7.16-7.16H307.81z M282.33,264.94 c-0.86,13.64-11.93,24.71-25.58,25.58c-16.54,1.05-30.18-12.59-29.14-29.14c0.86-13.64,11.93-24.71,25.58-25.58 C269.74,234.76,283.38,248.4,282.33,264.94z" />
-                                                        <path fill="currentColor"
-                                                            d="M82.95,272.41c3.82,0,7.53-1.53,10.23-4.23l21.23-21.23c4.74-4.74,6.4-11.92,3.73-18.06 c-2.73-6.29-8.88-8.95-18.84-7.57l-0.27,0.27c15.78-71.56,79.7-125.27,155.94-125.27c60.72,0,115.41,33.72,142.73,87.99 c3.58,7.11,12.24,9.97,19.34,6.39c7.11-3.58,9.97-12.24,6.39-19.34c-15.47-30.73-39.05-56.66-68.22-75.01 C325.23,77.47,290.57,67.5,254.98,67.5c-93,0-170.48,67.71-185.75,156.41c-5.38-4.77-13.59-5.18-19.13-0.44 c-6.3,5.39-6.75,14.88-1.13,20.84c0.23,0.24,5.69,6.03,11.41,11.93c3.41,3.51,6.2,6.33,8.3,8.38c4.23,4.13,7.88,7.69,14.07,7.78 C82.81,272.41,82.88,272.41,82.95,272.41z" />
-                                                        <path fill="currentColor"
-                                                            d="M464.28,247.82l-26.5-26.5c-2.75-2.75-6.57-4.3-10.44-4.23c-2.33,0.03-4.29,0.56-6.07,1.42 c-0.26,0.12-0.51,0.26-0.76,0.4c-0.04,0.02-0.08,0.04-0.12,0.06c-0.59,0.33-1.16,0.68-1.69,1.08c-1.88,1.34-3.6,3.03-5.44,4.82 c-2.1,2.05-4.89,4.87-8.3,8.38c-5.72,5.9-11.18,11.68-11.41,11.93c-5.46,5.79-5.19,14.91,0.6,20.36 c5.75,5.42,14.77,5.18,20.24-0.48c-4.72,83.85-74.42,150.62-159.43,150.62c-70.52,0-131.86-45.23-152.62-112.55 c-2.35-7.6-10.41-11.86-18.01-9.52c-7.6,2.34-11.86,10.41-9.52,18.01c11.62,37.68,35.48,71.52,67.19,95.28 c32.8,24.59,71.86,37.58,112.96,37.58c100.11,0,182.23-78.45,188.14-177.1l0.79,0.79c2.81,2.81,6.5,4.22,10.18,4.22 c3.69,0,7.37-1.41,10.18-4.22C469.91,262.57,469.91,253.45,464.28,247.82z" />
-                                                    </svg>
-                                                    تغییر ویدیو
-                                                </button>
-                                                <button @click.prevent="removeFile('video')" title="حذف ویدیوی جلسه"
-                                                    class="h-7 text-rose-50 text-xs font-semibold px-2.5 rounded-lg border-0 backdrop-blur-md bg-rose-500/45 hover:bg-rose-500/60 shadow-sm flex items-center gap-1.5 transition">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                                        <path
-                                                            d="M3 6.38597C3 5.90152 3.34538 5.50879 3.77143 5.50879L6.43567 5.50832C6.96502 5.49306 7.43202 5.11033 7.61214 4.54412C7.61688 4.52923 7.62232 4.51087 7.64185 4.44424L7.75665 4.05256C7.8269 3.81241 7.8881 3.60318 7.97375 3.41617C8.31209 2.67736 8.93808 2.16432 9.66147 2.03297C9.84457 1.99972 10.0385 1.99986 10.2611 2.00002H13.7391C13.9617 1.99986 14.1556 1.99972 14.3387 2.03297C15.0621 2.16432 15.6881 2.67736 16.0264 3.41617C16.1121 3.60318 16.1733 3.81241 16.2435 4.05256L16.3583 4.44424C16.3778 4.51087 16.3833 4.52923 16.388 4.54412C16.5682 5.11033 17.1278 5.49353 17.6571 5.50879H20.2286C20.6546 5.50879 21 5.90152 21 6.38597C21 6.87043 20.6546 7.26316 20.2286 7.26316H3.77143C3.34538 7.26316 3 6.87043 3 6.38597Z"
-                                                            fill="currentColor"></path>
-                                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                                            d="M11.5956 22.0001H12.4044C15.1871 22.0001 16.5785 22.0001 17.4831 21.1142C18.3878 20.2283 18.4803 18.7751 18.6654 15.8686L18.9321 11.6807C19.0326 10.1037 19.0828 9.31524 18.6289 8.81558C18.1751 8.31592 17.4087 8.31592 15.876 8.31592H8.12404C6.59127 8.31592 5.82488 8.31592 5.37105 8.81558C4.91722 9.31524 4.96744 10.1037 5.06788 11.6807L5.33459 15.8686C5.5197 18.7751 5.61225 20.2283 6.51689 21.1142C7.42153 22.0001 8.81289 22.0001 11.5956 22.0001ZM10.2463 12.1886C10.2051 11.7548 9.83753 11.4382 9.42537 11.4816C9.01321 11.525 8.71251 11.9119 8.75372 12.3457L9.25372 17.6089C9.29494 18.0427 9.66247 18.3593 10.0746 18.3159C10.4868 18.2725 10.7875 17.8856 10.7463 17.4518L10.2463 12.1886ZM14.5746 11.4816C14.9868 11.525 15.2875 11.9119 15.2463 12.3457L14.7463 17.6089C14.7051 18.0427 14.3375 18.3593 13.9254 18.3159C13.5132 18.2725 13.2125 17.8856 13.2537 17.4518L13.7537 12.1886C13.7949 11.7548 14.1625 11.4382 14.5746 11.4816Z"
-                                                            fill="currentColor"></path>
-                                                    </svg>
-                                                    حذف ویدیو
-                                                </button>
+                                    <!-- 1. Existing Saved Video on Server (Old Video) or Newly Selected Local Video -->
+                                    <div v-if="oldVideo || video" class="w-full max-w-3xl mx-auto space-y-3">
+                                        <!-- Saved Video on Server -->
+                                        <AdminVideoPlayer
+                                            v-if="oldVideo && video == null"
+                                            :src="oldVideo"
+                                            :poster="videoPreview.thumbnail || ''"
+                                            :title="episode?.title || 'ویدیوی ذخیره‌شده روی سرور'"
+                                            badge-text="ویدیوی ذخیره‌شده"
+                                            @change="openVideoPicker"
+                                            @remove="() => removeFile('video')"
+                                        />
+
+                                        <!-- Newly Selected Local Video (Playable File Object) -->
+                                        <AdminVideoPlayer
+                                            v-else-if="video"
+                                            :src="video"
+                                            :poster="videoPreview.thumbnail"
+                                            :title="videoPreview.name"
+                                            :size="videoPreview.size"
+                                            badge-text="ویدیوی انتخابی جدید"
+                                            @change="openVideoPicker"
+                                            @remove="removeVideo"
+                                        />
+
+                                        <!-- Media Actions & Status Toolbar -->
+                                        <div class="flex items-center justify-between flex-wrap gap-2.5 p-3 rounded-2xl bg-gray-50/90 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">وضعیت ویدیو:</span>
+                                                <MediaStatusBadge
+                                                    :status="uploadStatus.video"
+                                                    :percent="progress.video.percent"
+                                                    :extra="uploadStatus.video === 'processing' && processingProgress != null ? (Math.round(processingProgress) + '٪') : ''"
+                                                />
                                             </div>
-                                        </div>
-                                    </div>
-                                    <label v-else for="video"
-                                        class="relative group flex flex-col items-center justify-center w-full rounded-lg cursor-pointer transition overflow-hidden aspect-video"
-                                        :class="[
-                                            errors && errors.video ? 'ring-2 ring-rose-500' : 'ring-1 ring-gray-300 dark:ring-gray-600',
-                                            videoPreview.thumbnail
-                                                ? 'p-0 bg-black'
-                                                : 'bg-gray-50 dark:bg-gray-800 border-dashed hover:bg-gray-100 dark:hover:bg-gray-700'
-                                        ]" @dragover.prevent @drop.prevent="handleVideo">
-                                        <div v-if="!videoPreview.thumbnail"
-                                            class="flex flex-col items-center justify-center pt-5 pb-6 pointer-events-none">
-                                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                                viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink" fill="none">
-                                                <path
-                                                    d="M24,0 L24,24 L0,24 L0,0 L24,0 Z M12.5934901,23.257841 L12.5819402,23.2595131 L12.5108777,23.2950439 L12.4918791,23.2987469 L12.4918791,23.2987469 L12.4767152,23.2950439 L12.4056548,23.2595131 C12.3958229,23.2563662 12.3870493,23.2590235 12.3821421,23.2649074 L12.3780323,23.275831 L12.360941,23.7031097 L12.3658947,23.7234994 L12.3769048,23.7357139 L12.4804777,23.8096931 L12.4953491,23.8136134 L12.4953491,23.8136134 L12.5071152,23.8096931 L12.6106902,23.7357139 L12.6232938,23.7196733 L12.6232938,23.7196733 L12.6266527,23.7031097 L12.609561,23.275831 C12.6075724,23.2657013 12.6010112,23.2592993 12.5934901,23.257841 L12.5934901,23.257841 Z M12.8583906,23.1452862 L12.8445485,23.1473072 L12.6598443,23.2396597 L12.6498822,23.2499052 L12.6498822,23.2499052 L12.6471943,23.2611114 L12.6650943,23.6906389 L12.6699349,23.7034178 L12.6699349,23.7034178 L12.678386,23.7104931 L12.8793402,23.8032389 C12.8914285,23.8068999 12.9022333,23.8029875 12.9078286,23.7952264 L12.9118235,23.7811639 L12.8776777,23.1665331 C12.8752882,23.1545897 12.8674102,23.1470016 12.8583906,23.1452862 L12.8583906,23.1452862 Z M12.1430473,23.1473072 C12.1332178,23.1423925 12.1221763,23.1452606 12.1156365,23.1525954 L12.1099173,23.1665331 L12.0757714,23.7811639 C12.0751323,23.7926639 12.0828099,23.8018602 12.0926481,23.8045676 L12.108256,23.8032389 L12.3092106,23.7104931 L12.3186497,23.7024347 L12.3186497,23.7024347 L12.3225043,23.6906389 L12.340401,23.2611114 L12.337245,23.2485176 L12.337245,23.2485176 L12.3277531,23.2396597 L12.1430473,23.1473072 Z"
-                                                    id="MingCute" fill-rule="nonzero"> </path>
-                                                <path
-                                                    d="M12,2 C17.5228,2 22,6.47715 22,12 C22,15.2712 20.4293,18.1755 18.001,20 L20,20 C20.5523,20 21,20.4477 21,21 C21,21.5523 20.5523,22 20,22 L12,22 C6.47715,22 2,17.5228 2,12 C2,6.47715 6.47715,2 12,2 Z M12,14 C10.8954,14 10,14.8954 10,16 C10,17.1046 10.8954,18 12,18 C13.1046,18 14,17.1046 14,16 C14,14.8954 13.1046,14 12,14 Z M8,10 C6.89543,10 6,10.8954 6,12 C6,13.1046 6.89543,14 8,14 C9.10457,14 10,13.1046 10,12 C10,10.8954 9.10457,10 8,10 Z M16,10 C14.8954,10 14,10.8954 14,12 C14,13.1046 14.8954,14 16,14 C17.1046,14 18,13.1046 18,12 C18,10.8954 17.1046,10 16,10 Z M12,6 C10.8954,6 10,6.89543 10,8 C10,9.10457 10.8954,10 12,10 C13.1046,10 14,9.10457 14,8 C14,6.89543 13.1046,6 12,6 Z"
-                                                    fill="currentColor"> </path>
-
-                                            </svg>
-                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                                <span class="font-semibold">کلیک برای انتخاب</span> یا کشیدن و رها کردن
-                                            </p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ fileValidationRules.video.extensions.join(', ') }} (حداکثر {{
-                                                    formatFileSize(fileValidationRules.video.maxSize, 0, 'fa') }} )
-                                            </p>
-                                        </div>
-
-                                        <div v-else class="absolute inset-0">
-                                            <img v-if="videoPreview.thumbnail" :src="videoPreview.thumbnail"
-                                                class="w-full h-full object-cover"
-                                                onerror="this.style.display='none'" />
-                                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent pointer-events-none" />
-                                            <div class="z-10 absolute top-3 end-3 flex items-center gap-1.5 flex-wrap justify-end">
+                                            <div class="flex items-center gap-2 flex-wrap">
                                                 <button
                                                     v-if="video && uploadStatus.video === 'uploading'"
                                                     type="button"
@@ -443,23 +397,24 @@ definePageMeta({
                                                     {{ cancellingProcess ? '...' : 'لغو پردازش' }}
                                                 </button>
                                                 <button
-                                                    v-if="video && (uploadStatus.video === 'pending' || uploadStatus.video === 'error')"
+                                                    v-if="uploadStatus.video === 'local-processing'"
                                                     type="button"
-                                                    @click.prevent="removeVideo"
-                                                    title="حذف"
-                                                    class="h-8 px-3 rounded-lg bg-rose-500 text-white text-xs font-semibold shadow hover:bg-rose-600 transition">
-                                                    حذف
+                                                    @click.prevent="cancelLocalProcessing"
+                                                    :disabled="cancellingProcess"
+                                                    title="لغو پردازش محلی"
+                                                    class="h-8 px-3 rounded-lg bg-rose-500 text-white text-xs font-semibold shadow hover:bg-rose-600 transition disabled:opacity-60">
+                                                    {{ cancellingProcess ? '...' : 'لغو پردازش محلی' }}
                                                 </button>
                                                 <button
-                                                    v-if="video && (uploadStatus.video === 'pending' || uploadStatus.video === 'error')"
+                                                    v-if="video && (uploadStatus.video === 'pending' || uploadStatus.video === 'error') && processingMode === 'server'"
                                                     type="button"
                                                     @click.prevent="uploadFile(episode.id, 'video')"
-                                                    title="آپلود مجدد"
-                                                    class="h-8 px-3 rounded-lg bg-white/90 dark:bg-gray-900/90 text-xs font-semibold text-gray-800 dark:text-gray-100 shadow hover:bg-white transition">
-                                                    آپلود
+                                                    title="آپلود به سرور"
+                                                    class="h-8 px-3 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-xs font-bold shadow transition">
+                                                    آپلود به سرور
                                                 </button>
                                                 <button
-                                                    v-if="video_id && ['processing-error', 'uploaded', 'queued', 'failed', 'processed'].includes(uploadStatus.video)"
+                                                    v-if="video_id && ['processing-error', 'uploaded', 'queued', 'failed', 'processed'].includes(uploadStatus.video) && processingMode === 'server'"
                                                     type="button"
                                                     @click.prevent="startProcessing(video_id)"
                                                     :title="uploadStatus.video === 'processed' ? 'پردازش مجدد' : 'شروع پردازش'"
@@ -467,41 +422,148 @@ definePageMeta({
                                                     {{ uploadStatus.video === 'processed' ? 'پردازش مجدد' : 'شروع پردازش' }}
                                                 </button>
                                             </div>
-                                            <div class="absolute bottom-3 start-3 end-3 z-10 flex items-center gap-2 text-white text-xs font-medium">
-                                                <span class="bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1" dir="ltr">{{ formatFileSize(videoPreview.size) }}</span>
-                                                <span class="bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1" dir="ltr">{{ videoPreview.duration }}</span>
-                                                <span class="bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1 line-clamp-1 flex-1">{{ videoPreview.name }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. No Video - Upload Dropzone with 16:9 Aspect Ratio -->
+                                    <div
+                                        v-else
+                                        class="relative border-2 border-dashed flex flex-col items-center justify-center w-full max-w-3xl mx-auto rounded-2xl cursor-pointer transition overflow-hidden aspect-video group/drop"
+                                        :class="[
+                                            errors && errors.video ? 'border-rose-500 bg-rose-50/20' : 'border-gray-300 dark:border-gray-700 hover:border-yellow-500 dark:hover:border-yellow-400 bg-gray-50/70 dark:bg-gray-800/40 hover:bg-gray-100/70 dark:hover:bg-gray-800/70',
+                                        ]"
+                                        @dragover.prevent
+                                        @drop.prevent="handleVideo"
+                                        @click="openVideoPicker"
+                                    >
+                                        <div class="flex flex-col items-center justify-center p-6 text-center pointer-events-none">
+                                            <div class="w-16 h-16 rounded-2xl bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center mb-4 text-yellow-500 group-hover/drop:scale-110 transition-transform">
+                                                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
                                             </div>
+                                            <p class="mb-1 text-sm font-bold text-gray-800 dark:text-gray-100">
+                                                کلیک برای انتخاب یا کشیدن و رها کردن ویدیوی جلسه
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-sans">
+                                                {{ fileValidationRules.video.extensions.join(' · ') }} (حداکثر {{ formatFileSize(fileValidationRules.video.maxSize, 0, 'fa') }})
+                                            </p>
+                                            <button
+                                                type="button"
+                                                class="mt-4 rounded-xl px-5 py-2 text-xs font-bold text-gray-900 bg-yellow-400 hover:bg-yellow-500 transition shadow-sm pointer-events-auto"
+                                                @click.stop="openVideoPicker"
+                                            >
+                                                انتخاب فایل ویدیو
+                                            </button>
                                         </div>
-                                        <!-- Progress Bar -->
-                                        <div v-if="video && !progress.video.completed"
-                                            :class="{ 'hidden': ['uploaded', 'processing', 'processed', 'processing-error'].includes(uploadStatus.video) }"
-                                            class="absolute top-0 left-0 h-full flex items-center bg-green-400 bg-opacity-20 border-r-2 border-green-400/40 transition-all duration-500"
-                                            :style="`width: ${progress.video.percent}%`">
-                                            <div class="z-20 -mr-2 flex items-center justify-center text-center bg-green-400 text-white rounded-md py-2 text-xs font-medium font-serif"
-                                                :class="{ '-mr-4': progress.video.percent <= 2, 'mr-0': progress.video.percent >= 99 }"
-                                                style="writing-mode: vertical-rl!important;">
-                                                {{ progress.video.percent }}% completed
-                                            </div>
-                                        </div>
-                                        <!-- Error Overlay -->
-                                        <div v-if="errors && errors.video"
-                                            class="absolute top-0 left-0 h-full w-full flex items-center bg-rose-400 bg-opacity-20 transition-all duration-500">
-                                        </div>
-                                    </label>
+                                    </div>
                                 </div>
                                 <span v-if="errors && errors.video" class="mt-1 text-rose-500 text-xs font-medium block">
                                     {{ errors.video[0] }}
                                 </span>
 
+                                <!-- Processing Mode Selected Badge & Switcher Trigger -->
+                                <div v-if="video || oldVideo" class="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/80 px-3 py-2 text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-500 dark:text-gray-400">شیوه پردازش:</span>
+                                        <span class="inline-flex items-center gap-1.5 font-bold text-gray-800 dark:text-gray-200">
+                                            <span class="w-2 h-2 rounded-full" :class="processingMode === 'local' ? 'bg-sky-500' : 'bg-amber-500'"></span>
+                                            {{ processingMode === 'local' ? 'پردازش روی این کامپیوتر (Local Video Processor)' : 'پردازش روی سرور ورکر' }}
+                                        </span>
+                                        <span class="text-[11px] text-gray-400">({{ processOptions?.storage_disk || storageDisk }})</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        @click.prevent="showProcessingModeSheet = true"
+                                        class="text-xs font-bold text-yellow-600 dark:text-yellow-400 hover:underline">
+                                        تغییر شیوه یا دیسک
+                                    </button>
+                                </div>
+
                                 <div v-if="video_id || video || oldVideo" class="mt-4 space-y-3">
+                                    <!-- Local Processor Info Card -->
+                                    <div v-if="processingMode === 'local'" class="rounded-2xl border border-sky-200 bg-sky-50/70 dark:border-sky-800/50 dark:bg-sky-950/20 p-3.5 space-y-3">
+                                        <div class="flex items-start justify-between gap-3 text-xs">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-400 font-bold shrink-0">
+                                                    💻
+                                                </div>
+                                                <div>
+                                                    <span class="font-bold text-gray-900 dark:text-white">پردازش محلی با Local Video Processor</span>
+                                                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        آپلود ویدیوی خام به هاست استاتیک و تبدیل کیفیت‌ها مستقیماً روی همین سیستم و بدون دانلود مجدد انجام می‌شود.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <a
+                                                :href="localProcessDownloadUrl"
+                                                target="_blank"
+                                                rel="noopener"
+                                                class="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline shrink-0">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                                دانلود نرم‌افزار
+                                            </a>
+                                        </div>
+
+                                        <!-- Live progress if local processing active -->
+                                        <div v-if="uploadStatus.video === 'local-processing'" class="rounded-xl bg-white dark:bg-gray-900 p-3 border border-sky-200 dark:border-sky-800 space-y-2">
+                                            <div class="flex items-center justify-between text-xs font-semibold">
+                                                <span class="text-sky-700 dark:text-sky-300 flex items-center gap-2">
+                                                    <svg class="w-3.5 h-3.5 animate-spin text-sky-500" viewBox="0 0 24 24" fill="none">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                                    </svg>
+                                                    {{ localPhaseText }}
+                                                </span>
+                                                <span class="text-sky-600 dark:text-sky-400 font-bold">{{ Math.round(processingProgress || 0) }}%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                                                <div class="bg-sky-500 h-2 rounded-full transition-all duration-300" :style="{ width: `${processingProgress || 0}%` }"></div>
+                                            </div>
+                                            <div class="flex items-center justify-between pt-1">
+                                                <button
+                                                    type="button"
+                                                    @click="reopenLocalApp"
+                                                    class="text-[11px] font-semibold text-sky-600 dark:text-sky-400 hover:underline">
+                                                    برنامه باز نشد؟ کلیک برای اجرای مجدد
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    @click="cancelLocalProcessing"
+                                                    :disabled="cancellingProcess"
+                                                    class="text-[11px] font-semibold text-rose-500 hover:underline">
+                                                    {{ cancellingProcess ? 'در حال لغو...' : 'لغو پردازش' }}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Button to start directly if desired -->
+                                        <div v-else-if="video_id || (video && uploadStatus.video === 'processed')" class="flex flex-wrap items-center gap-2">
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold bg-sky-500 text-white shadow-sm hover:bg-sky-600 transition disabled:opacity-60"
+                                                :disabled="localProcessingLoading || !canStartProcessing"
+                                                @click.prevent="startLocalProcessing">
+                                                <svg v-if="localProcessingLoading" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                                </svg>
+                                                {{ uploadStatus.video === 'processed' ? 'پردازش مجدد با نرم‌افزار محلی' : 'شروع پردازش با نرم‌افزار محلی' }}
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <VideoProcessOptions
                                         v-model="processOptions"
                                         v-model:watermark-file="watermarkFile"
                                         :source-height="sourceHeight"
                                         :preview-file="video"
                                     />
-                                    <div class="flex flex-wrap items-center gap-2">
+
+                                    <!-- Server mode controls -->
+                                    <div v-if="processingMode === 'server'" class="flex flex-wrap items-center gap-2">
                                         <button
                                             v-if="video_id && ['queued', 'processing'].includes(uploadStatus.video)"
                                             type="button"
@@ -544,26 +606,157 @@ definePageMeta({
                     </section>
                     <section
                         v-show="currentStepId === 'confirm'"
-                        class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 shadow-sm"
+                        class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 sm:p-6 shadow-sm space-y-6"
                     >
-                        <div class="mb-5">
-                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">بررسی نهایی</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">اطلاعات جلسه را بررسی و ذخیره کنید</p>
-                        </div>
-                        <div class="grid gap-3 grid-cols-1 sm:grid-cols-2">
-                            <div
-                                v-for="item in confirmSummary"
-                                :key="item.label"
-                                class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60 p-3"
-                            >
-                                <p class="text-[10px] font-medium text-gray-400 mb-1">{{ item.label }}</p>
-                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" :style="item.ltr ? 'direction: ltr' : ''">
-                                    {{ item.value || '—' }}
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-gray-100 dark:border-gray-800">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <h3 class="text-base font-bold text-gray-900 dark:text-white">بررسی نهایی و ذخیره تغییرات</h3>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    اطلاعات جلسه و ویدیو را بازبینی کنید؛ می‌توانید ویدیو را مستقیماً در پلیر زیر پخش و ارزیابی نمایید
                                 </p>
                             </div>
+                            <span class="self-start sm:self-auto text-xs font-semibold px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-700 dark:text-yellow-400 border border-yellow-400/30">
+                                مرحله ۴ از ۴: بررسی نهایی
+                            </span>
                         </div>
-                        <div v-if="video && uploadStatus.video === 'pending'" class="mt-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 p-3">
-                            <p class="text-xs text-amber-800 dark:text-amber-200">با رفتن به مرحله بعد یا ثبت، آپلود ویدیو در پس‌زمینه آغاز می‌شود.</p>
+
+                        <!-- Playable Video in Confirm Step (Either newly selected file or existing server video) -->
+                        <div v-if="video || oldVideo" class="space-y-2">
+                            <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300 px-1 font-semibold">
+                                <span class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    پیش‌نمایش زنده ویدیو
+                                </span>
+                                <span class="text-slate-400 font-normal text-[11px]">با دکمه پخش، از صحت ویدیو اطمینان حاصل کنید</span>
+                            </div>
+                            <AdminVideoPlayer
+                                :src="video || oldVideo"
+                                :poster="videoPreview.thumbnail || ''"
+                                :title="video ? videoPreview.name : (title || episode?.title)"
+                                :size="video ? videoPreview.size : 0"
+                                :allow-change="false"
+                                :allow-remove="false"
+                                :badge-text="video ? 'ویدیوی جدید انتخابی' : 'ویدیوی ذخیره‌شده'"
+                            />
+                        </div>
+
+                        <!-- Graphical Review Cards Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Card 1: Episode Details & Access -->
+                            <div class="rounded-2xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 p-4 space-y-3">
+                                <div class="flex items-center gap-2 pb-2.5 border-b border-gray-200/60 dark:border-gray-700/60">
+                                    <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="text-xs font-bold text-gray-900 dark:text-white">مشخصات جلسه و دسترسی</h4>
+                                </div>
+
+                                <div class="space-y-2 text-xs">
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                        <span class="text-gray-500 dark:text-gray-400">عنوان فارسی:</span>
+                                        <span class="font-bold text-gray-900 dark:text-gray-100 text-end">{{ title || '—' }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                        <span class="text-gray-500 dark:text-gray-400">عنوان انگلیسی:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200 text-end" dir="ltr">{{ english_title || '—' }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                        <span class="text-gray-500 dark:text-gray-400">فصل انتخابی:</span>
+                                        <span class="font-semibold text-gray-800 dark:text-gray-200 text-end">{{ selectedSection?.title || '—' }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                        <span class="text-gray-500 dark:text-gray-400">شماره ترتیب جلسه:</span>
+                                        <span class="px-2 py-0.5 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold">جلسه {{ selectedOrder }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1">
+                                        <span class="text-gray-500 dark:text-gray-400">وضعیت و دسترسی:</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="px-2 py-0.5 rounded-md text-[11px] font-bold" :class="String(publish) === '1' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                                                {{ String(publish) === "1" ? "منتشر شده" : "پیش‌نویس" }}
+                                            </span>
+                                            <span class="px-2 py-0.5 rounded-md text-[11px] font-bold" :class="String(lock) === '1' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'">
+                                                {{ String(lock) === "1" ? "قفل (ویژه اعضا)" : "رایگان / عمومی" }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Video Status & Processing Strategy -->
+                            <div class="rounded-2xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 p-4 space-y-3">
+                                <div class="flex items-center justify-between pb-2.5 border-b border-gray-200/60 dark:border-gray-700/60">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center shrink-0">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <h4 class="text-xs font-bold text-gray-900 dark:text-white">وضعیت رسانه و پردازش</h4>
+                                    </div>
+                                    <button
+                                        v-if="video || oldVideo"
+                                        type="button"
+                                        class="text-[11px] font-bold text-yellow-600 dark:text-yellow-400 hover:underline"
+                                        @click="showProcessingModeSheet = true"
+                                    >
+                                        تغییر شیوه
+                                    </button>
+                                </div>
+
+                                <div class="space-y-2 text-xs">
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                        <span class="text-gray-500 dark:text-gray-400">وضعیت فعلی ویدیو:</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <MediaStatusBadge
+                                                v-if="oldVideo || video"
+                                                :status="uploadStatus.video"
+                                                :percent="progress.video.percent"
+                                                :extra="uploadStatus.video === 'processing' && processingProgress != null ? (Math.round(processingProgress) + '٪') : ''"
+                                            />
+                                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ videoStatusLabel }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                        <span class="text-gray-500 dark:text-gray-400">روش پردازش:</span>
+                                        <span
+                                            class="px-2 py-0.5 rounded-lg text-[11px] font-bold"
+                                            :class="processingMode === 'local' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400' : 'bg-yellow-400/20 text-yellow-700 dark:text-yellow-400'"
+                                        >
+                                            {{ processingMode === 'local' ? 'کامپیوتر شما (Local Video Processor)' : 'سرور ورکر' }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                        <span class="text-gray-500 dark:text-gray-400">محل ذخیره‌سازی:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200">
+                                            {{ (processOptions?.storage_disk || storageDisk) === 'static' ? 'هاست استاتیک (static.zanburak.ir)' : (processOptions?.storage_disk || storageDisk) === 'dl' ? 'هاست دانلود (dl.zanburak.ir)' : 'دیسک ورکر' }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1">
+                                        <span class="text-gray-500 dark:text-gray-400">فایل‌های پیوست:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200">{{ attachmentSummaryLabel }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending action notices -->
+                        <div v-if="video && uploadStatus.video === 'pending'" class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 p-3.5 flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-400/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <p class="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                                ویدیوی جدیدی برای این جلسه انتخاب شده است. با ثبت نهایی، فرآیند آپلود یا انتقال به برنامه پردازشگر محلی در پس‌زمینه آغاز خواهد شد.
+                            </p>
                         </div>
                     </section>
                     </div>
@@ -617,6 +810,9 @@ definePageMeta({
                         <span v-else-if="uploadStatus.video === 'uploading'">ویدیو</span>
                         <span v-else>فایل پیوست</span>
                         ...
+                    </p>
+                    <p v-else-if="uploadStatus.video === 'local-processing'" class="mt-4 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                        {{ localPhaseText }} ({{ Math.round(processingProgress || 0) }}%)
                     </p>
                     <p v-else-if="['queued', 'processing', 'uploaded'].includes(uploadStatus.video)" class="mt-4 text-sm font-semibold text-gray-500 dark:text-gray-400">
                         ویدیو آپلود شده و در حال پردازش است...
@@ -758,9 +954,59 @@ definePageMeta({
                                     </div>
                                 </div>
         </BottomSheetDrawer>
+
+        <!-- Processing Mode Selection Sheet (Local vs Server) -->
+        <EpisodeProcessingModeSheet
+            v-model="showProcessingModeSheet"
+            :options="processOptions"
+            @start="onProcessingModeSelected"
+        />
+
+        <!-- Leave Confirmation Modal when transfer or processing is active -->
+        <BottomSheetDrawer
+            v-model="showLeaveConfirmModal"
+            :initialHeight="0.48"
+            :maxHeight="0.65"
+            :minHeight="0.35"
+            :autoCloseOnMin="true"
+            :closeOnBackdrop="false"
+            :lockScroll="true"
+            :panelClass="'bg-white dark:bg-gray-900 border-t border-gray-500/70 dark:border-gray-700/70 rounded-t-2xl lg:rounded-b-2xl lg:w-[32rem] shadow-[0_-8px_30px_rgba(15,23,42,0.35)]'"
+            :contentClass="'px-4 pb-4 overflow-auto custom-scrollbar'"
+            :backdropClass="'bg-gray-300/30 dark:bg-gray-500/30 backdrop-blur-sm'"
+        >
+            <div class="relative p-5 text-center" dir="rtl">
+                <div class="rounded-2xl bg-rose-500/15 p-2.5 mb-3 mx-auto w-max text-rose-500">
+                    <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="mb-2 text-base font-bold text-gray-900 dark:text-white">
+                    آیا از خروج از این صفحه مطمئن هستید؟
+                </h3>
+                <p class="mb-5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    {{ leaveWarningMessage }}
+                </p>
+                <div class="flex justify-center gap-3">
+                    <button
+                        type="button"
+                        class="h-10 px-5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 rounded-xl transition"
+                        @click="cancelLeavePage">
+                        انصراف و ماندن در صفحه
+                    </button>
+                    <button
+                        type="button"
+                        class="h-10 px-5 text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-xl transition shadow-sm"
+                        @click="confirmLeavePage">
+                        تایید و خروج از صفحه
+                    </button>
+                </div>
+            </div>
+        </BottomSheetDrawer>
     </AdminMasterPage>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import AdminMasterPage from "@/views/page/admin/layouts/AdminMasterPage.vue";
 import AdminFormStepperNav from "@/views/components/admin/AdminFormStepperNav.vue";
 import { createStepperMixin, BTN_SECONDARY } from "@/views/components/admin/adminFormStepperMixin.js";
@@ -773,12 +1019,14 @@ import "vue3-toastify/dist/index.css";
 import EditorComponent from "@/views/components/editor/EditorComponent.vue";
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
-import { COURSE_PUBLISH_APPROVE_PERMS } from "@/utils/coursePublish";
 import { consumePendingEpisodeVideo } from "@/utils/episodeUploadBridge.js";
 import VideoProcessOptions from "@/views/components/admin/VideoProcessOptions.vue";
 import AdminAttachmentsField from "@/views/components/admin/AdminAttachmentsField.vue";
 import MediaStatusBadge from "@/views/components/admin/MediaStatusBadge.vue";
+import EpisodeProcessingModeSheet from "@/views/components/admin/episode/EpisodeProcessingModeSheet.vue";
+import AdminVideoPlayer from "@/views/components/admin/episode/AdminVideoPlayer.vue";
 import { defaultProcessOptions, buildProcessRequestBody } from "@/utils/videoProcessOptions.js";
+import { COURSE_PUBLISH_APPROVE_PERMS } from "@/utils/coursePublish";
 
 const FORM_STEPS = [
     { id: "basic", label: "اطلاعات کلی", hint: "عنوان و انتشار" },
@@ -802,6 +1050,8 @@ export default {
         VideoProcessOptions,
         AdminAttachmentsField,
         MediaStatusBadge,
+        EpisodeProcessingModeSheet,
+        AdminVideoPlayer,
     },
     data() {
         return {
@@ -830,9 +1080,10 @@ export default {
             episodeSlug: this.$route.params.episodeSlug,
             createdCourse: null,
             video_id: null,
-            sourceHeight: 720,
+            sourceHeight: null,
+            sourceWidth: null,
             watermarkFile: null,
-            processOptions: defaultProcessOptions(720),
+            processOptions: defaultProcessOptions(null),
             errors: null,
             title: "",
             english_title: "",
@@ -881,6 +1132,20 @@ export default {
             processingStatus: {
                 video: 'idle',
             },
+            processingMode: 'local',
+            storageDisk: 'static',
+            localProcessingLoading: false,
+            isLaunchingApp: false,
+            localProcessTaskUuid: null,
+            localProcessDeepLink: '',
+            localProcessDownloadUrl: 'https://cdn.zanburak.ir/apps/local-video-processor-setup.exe',
+            localProcessPhase: '',
+            localProcessTaskStatus: 'idle',
+            showProcessingModeSheet: false,
+            showLeaveConfirmModal: false,
+            pendingLeaveNext: null,
+            pendingLeaveTarget: null,
+            allowLeave: false,
             processingProgress: null,
             cancellingProcess: false,
             workerToken: null,
@@ -969,7 +1234,7 @@ export default {
     },
     computed: {
         canDirectPublish() {
-            return this.$can(COURSE_PUBLISH_APPROVE_PERMS);
+            return this.$can ? this.$can(COURSE_PUBLISH_APPROVE_PERMS) : true;
         },
         confirmSummary() {
             return [
@@ -984,6 +1249,10 @@ export default {
             ];
         },
         videoStatusLabel() {
+            if (this.uploadStatus.video === "local-processing") {
+                return `در حال پردازش محلی... ${Math.round(this.processingProgress || 0)}%`;
+            }
+            if (this.uploadStatus.video === "local-pending") return "آماده پردازش محلی";
             if (this.uploadStatus.video === "processed") return "آپلود و پردازش شده";
             if (this.uploadStatus.video === "processing") {
                 return typeof this.processingProgress === 'number'
@@ -997,6 +1266,41 @@ export default {
             if (this.oldVideo && !this.video) return "ویدیوی موجود";
             if (this.video) return this.videoPreview.name || "انتخاب شده";
             return "—";
+        },
+        localPhaseText() {
+            switch (this.localProcessPhase) {
+                case 'upload_raw':
+                case 'raw_uploading':
+                    return 'مرحله ۱ از ۳: آپلود ویدیوی خام به هاست استاتیک...';
+                case 'encode':
+                case 'encoding':
+                    return 'مرحله ۲ از ۳: فشرده‌سازی و تبدیل کیفیت‌ها با FFmpeg محلی...';
+                case 'preparing_files':
+                    return 'آماده‌سازی بسته‌های خروجی...';
+                case 'upload_stream':
+                case 'uploading':
+                    return 'مرحله ۳ از ۳: آپلود خروجی‌های تبدیل‌شده و استریم HLS...';
+                case 'complete':
+                case 'completed':
+                    return 'پردازش با موفقیت پایان یافت.';
+                default:
+                    return 'در حال پردازش با Local Video Processor...';
+            }
+        },
+        leaveWarningMessage() {
+            if (this.uploadStatus.video === 'local-processing') {
+                return 'ویدیو توسط نرم‌افزار Local Video Processor در حال پردازش و آپلود مستقیم به هاست استاتیک است. خروج از این صفحه ممکن است مشاهده پیشرفت زنده را مختل کند.';
+            }
+            if (this.uploadStatus.video === 'uploading') {
+                return 'ویدیو هم‌اکنون در حال آپلود به سرور است. با خروج از این صفحه، فرآیند آپلود متوقف و لغو خواهد شد.';
+            }
+            if (['queued', 'processing'].includes(this.uploadStatus.video)) {
+                return 'ویدیو در حال حاضر روی سرور ورکر در حال پردازش است. در صورت خروج از صفحه، پیگیری زنده وضعیت متوقف می‌شود.';
+            }
+            if (this.attachmentUploading) {
+                return 'فایل پیوست در حال آپلود است. با خروج از صفحه فرآیند آپلود لغو می‌شود.';
+            }
+            return 'فرآیند انتقال یا پردازش فایل در حال انجام است. آیا واقعاً می‌خواهید خارج شوید؟';
         },
         canStartProcessing() {
             const outs = this.processOptions?.outputs || [];
@@ -1017,7 +1321,7 @@ export default {
             return true;
         },
         hasActiveFileTransfer() {
-            const videoActive = this.video && ["uploading", "queued", "processing", "uploaded"].includes(this.uploadStatus.video);
+            const videoActive = this.video && ["uploading", "queued", "processing", "uploaded", "local-processing"].includes(this.uploadStatus.video);
             return videoActive || this.attachmentUploading;
         },
         attachmentSummaryLabel() {
@@ -1032,7 +1336,13 @@ export default {
         },
         uploadProgressSubtitle() {
             if (this.formSubmited) {
+                if (this.uploadStatus.video === "local-processing") {
+                    return "پردازش و آپلود توسط نرم‌افزار محلی در حال انجام است؛ صفحه را باز نگه دارید.";
+                }
                 return "آپلود و پردازش در پس‌زمینه ادامه دارد.";
+            }
+            if (this.uploadStatus.video === "local-processing") {
+                return "ویدیو توسط نرم‌افزار محلی در حال پردازش و آپلود مستقیم به هاست استاتیک است.";
             }
             if (["queued", "processing", "uploaded"].includes(this.uploadStatus.video)) {
                 return "ویدیو در حال پردازش است؛ می‌توانید سایر فیلدها را تکمیل کنید.";
@@ -1085,15 +1395,32 @@ export default {
             const pending = consumePendingEpisodeVideo();
             if (!pending) return;
             this.video = pending.file;
-            this.uploadStatus.video = "pending";
             if (pending.preview) {
                 this.videoPreview = { ...pending.preview };
             }
+            const opts = pending.options || {};
+            this.processingMode = opts.processingMode || 'local';
+            this.storageDisk = opts.storageDisk || 'static';
+            if (this.processOptions) {
+                this.processOptions.storage_disk = this.storageDisk;
+            }
+            this.uploadStatus.video = this.processingMode === 'local' ? 'local-pending' : 'pending';
             if (this.episode?.id) {
                 this.currentStep = this.FORM_STEPS.findIndex((s) => s.id === "media");
-                this.uploadFile(this.episode.id, "video");
-                this.showToast("ویدیو در پس‌زمینه در حال آپلود است؛ می‌توانید سایر فیلدها را تکمیل کنید.");
             }
+        },
+        onProcessingModeSelected(data) {
+            const { mode, storageDisk } = data;
+            this.processingMode = mode || 'local';
+            this.storageDisk = storageDisk || 'static';
+            if (this.processOptions) {
+                this.processOptions.storage_disk = this.storageDisk;
+            }
+            this.showProcessingModeSheet = false;
+            if (this.video) {
+                this.uploadStatus.video = this.processingMode === 'local' ? 'local-pending' : 'pending';
+            }
+            this.showToast(`شیوه پردازش بر روی ${this.processingMode === 'local' ? 'پردازش محلی (Local Video Processor)' : 'سرور ورکر (Server Worker)'} تنظیم شد.`);
         },
         goToStep(index) {
             const steps = this.FORM_STEPS;
@@ -1113,16 +1440,12 @@ export default {
         startPendingMediaUploads() {
             if (!this.episode?.id || this.currentStepId !== "media") return;
             let started = false;
-            if (this.video && this.uploadStatus.video === "pending") {
-                this.uploadFile(this.episode.id, "video");
-                started = true;
-            }
             if (this.pendingAttachmentCount()) {
                 this.uploadPendingAttachments(this.episode.id);
                 started = true;
             }
             if (started) {
-                this.showToast("آپلود در پس‌زمینه ادامه دارد؛ می‌توانید به مراحل بعدی بروید.");
+                this.showToast("آپلود پیوست‌ها در پس‌زمینه ادامه دارد؛ می‌توانید به مراحل بعدی بروید.");
             }
         },
         async initFromSlug() {
@@ -1337,16 +1660,24 @@ export default {
             }
 
             this.video = file;
-            this.uploadStatus.video = 'pending';
+            this.processingMode = this.processingMode || 'local';
+            this.storageDisk = this.storageDisk || 'static';
+            this.uploadStatus.video = this.processingMode === 'local' ? 'local-pending' : 'pending';
             this.processingStatus.video = 'idle';
-
-            this.continueToCreateModal = true;
+            this.showProcessingModeSheet = true;
 
             const url = URL.createObjectURL(file);
             const video = document.createElement("video");
             video.src = url;
             video.currentTime = 1;
             video.muted = true;
+
+            video.addEventListener("loadedmetadata", () => {
+                if (video.videoHeight > 0) {
+                    this.sourceHeight = video.videoHeight;
+                    this.sourceWidth = video.videoWidth;
+                }
+            });
 
             video.addEventListener("loadeddata", () => {
                 const canvas = document.createElement("canvas");
@@ -1358,6 +1689,7 @@ export default {
 
                 if (video.videoHeight > 0) {
                     this.sourceHeight = video.videoHeight;
+                    this.sourceWidth = video.videoWidth;
                 }
 
                 this.videoPreview = {
@@ -1439,21 +1771,6 @@ export default {
                 this.currentStep = 0;
                 return;
             }
-
-            const hasPendingVideo = this.video && this.uploadStatus.video === "pending";
-            const hasPendingAttach = this.pendingAttachmentCount() > 0;
-            const videoInProgress = this.video && ["uploading", "queued", "processing", "uploaded"].includes(this.uploadStatus.video);
-            const attachInProgress = this.attachmentUploading;
-
-            if (hasPendingVideo || hasPendingAttach) {
-                this.showSubmitWarningModal = true;
-                return;
-            }
-
-            if (videoInProgress || attachInProgress) {
-                this.showUploadProgressModal = true;
-            }
-
             this.doSubmit();
         },
         doSubmit() {
@@ -1480,25 +1797,31 @@ export default {
                 section_id: this.selectedSection.id,
                 episode_id: this.episode.id,
             }).then((response) => {
-                console.log(response.data)
+                this.formSubmited = true;
 
-                // Start uploads for files that are selected but not yet uploaded
-                if (this.video && !["uploaded", "processed", "uploading", "queued", "processing"].includes(this.uploadStatus.video)) {
-                    this.uploadFile(this.episode.id, "video");
+                // Start uploads/processing for video that is selected but not yet uploaded/processed
+                const hasPendingVideo = this.video && (this.uploadStatus.video === 'pending' || this.uploadStatus.video === 'local-pending');
+
+                if (hasPendingVideo) {
+                    if (this.processingMode === 'local') {
+                        this.startLocalProcessing();
+                    } else {
+                        this.uploadFile(this.episode.id, "video");
+                    }
                 }
+
                 if (this.pendingAttachmentCount()) {
                     this.uploadPendingAttachments(this.episode.id);
                 }
 
-                this.formSubmited = true;
-                const willUploadVideo = this.video && !["uploaded", "processed", "uploading", "queued", "processing"].includes(this.uploadStatus.video);
+                const willUploadVideo = hasPendingVideo;
                 const willUploadAttach = this.pendingAttachmentCount() > 0 || this.attachmentUploading;
-                const transferInProgress = (this.video && ["uploading", "queued", "processing", "uploaded"].includes(this.uploadStatus.video))
+                const transferInProgress = (this.video && ["uploading", "queued", "processing", "uploaded", "local-processing"].includes(this.uploadStatus.video))
                     || this.attachmentUploading;
 
                 if (willUploadVideo || willUploadAttach || transferInProgress) {
                     this.showUploadProgressModal = true;
-                    this.showToast("فایل‌های جلسه در حال آپلود هستند؛ می‌توانید وضعیت را از باتم‌شیت ببینید.");
+                    this.showToast("جلسه با موفقیت ذخیره شد؛ فرآیند آپلود و پردازش آغاز گردید.");
                 } else {
                     this.showToast("ویرایش با موفقیت انجام شد.");
                     if (!this.video && !this.pendingAttachmentCount()) {
@@ -1511,12 +1834,13 @@ export default {
                 this.errors = {
                     ...this.errors,
                     ...error.response?.data?.errors
-                }
+                };
                 console.error('Episode update failed:', this.errors);
+                this.showToast("خطا در ذخیره جلسه", true);
             }).finally(() => {
                 this.updateLoading = false;
                 this.loading = false;
-            })
+            });
         },
         confirmSubmitWithUpload() {
             this.showSubmitWarningModal = false;
@@ -1539,20 +1863,16 @@ export default {
             try {
                 await field.uploadAll(async (item, onProgress) => {
                     const file = item.file;
-                    const initRes = await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, {
-                        episode_id: episodeId,
-                        filename: file.name,
-                        mime: file.type || 'application/octet-stream',
-                        size: file.size,
-                        title: item.title || file.name,
-                    });
-                    const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
                     const formData = new FormData();
-                    formData.append('path', uploadPath);
+                    formData.append('episode_id', episodeId);
                     formData.append('file', file);
-                    await axios.post(workerUploadUrl, formData, {
+                    formData.append('title', item.title || file.name);
+                    formData.append('filename', file.name);
+                    formData.append('mime', file.type || 'application/octet-stream');
+                    formData.append('size', file.size);
+                    await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
                         timeout: 3600 * 1000,
-                        headers: { Authorization: `Bearer ${uploadToken}` },
                         onUploadProgress: (progressEvent) => {
                             const { loaded, total } = progressEvent;
                             onProgress(total ? Math.round((loaded * 100) / total) : 0);
@@ -1617,6 +1937,33 @@ export default {
             this.uploadStatus[fileType] = 'uploading';
 
             try {
+                let workerRes;
+                if (fileType === 'attached_file') {
+                    // Direct upload to main server for attachments
+                    const formData = new FormData();
+                    formData.append('episode_id', episodeId);
+                    formData.append('file', file);
+                    formData.append('title', file.name);
+                    formData.append('filename', file.name);
+                    formData.append('mime', file.type || 'application/octet-stream');
+                    formData.append('size', file.size);
+                    workerRes = await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        timeout: 3600 * 1000,
+                        signal: controller.signal,
+                        onUploadProgress: (progressEvent) => {
+                            const { loaded, total } = progressEvent;
+                            this.progress[fileType] = {
+                                percent: total ? Math.round((loaded * 100) / total) : 0,
+                                uploaded: loaded,
+                                total: total,
+                                speed: '',
+                                lastTime: Date.now(),
+                                lastUploaded: loaded,
+                            };
+                        },
+                    });
+                } else {
                 // 1) Init-upload on backend
                 let initUrl = '';
                 let initBody = { filename: file.name, mime: file.type, size: file.size };
@@ -1625,9 +1972,6 @@ export default {
                     initBody.course_id = this.course.id;
                     initBody.episode_id = episodeId;
                     initBody.storage_disk = this.processOptions?.storage_disk || 'dl';
-                } else if (fileType === 'attached_file') {
-                    initUrl = `admin/course/${this.course.slug}/episode/uploadAttachedFile`;
-                    initBody.episode_id = episodeId;
                 }
 
                 const initRes = await axiosInstance.post(initUrl, initBody);
@@ -1637,7 +1981,6 @@ export default {
                     try { this.workerOrigin = new URL(workerUploadUrl).origin; } catch (e) { this.workerOrigin = ''; }
                 }
 
-                let workerRes;
                 if (fileType === 'video') {
                     const { uploadVideoInChunks } = await import('@/utils/chunkedVideoUpload.js');
                     const data = await uploadVideoInChunks({
@@ -1663,33 +2006,7 @@ export default {
                         },
                     });
                     workerRes = { data };
-                } else {
-                    // 2) Upload to worker (attachments stay single-request)
-                    const formData = new FormData();
-                    formData.append('path', uploadPath);
-                    formData.append('file', file);
-
-                    workerRes = await axios.post(workerUploadUrl, formData, {
-                        timeout: 3600 * 1000,
-                        headers: { 'Authorization': `Bearer ${uploadToken}` },
-                        signal: controller.signal,
-                        onUploadProgress: (progressEvent) => {
-                            const { loaded, total } = progressEvent;
-                            const percentCompleted = Math.round((loaded * 100) / total);
-                            const now = Date.now();
-                            const timeElapsed = (now - (this.progress[fileType]?.lastTime || now)) / 1000;
-                            const bytesUploaded = loaded - (this.progress[fileType]?.lastUploaded || 0);
-                            const speed = bytesUploaded / timeElapsed;
-                            this.progress[fileType] = {
-                                percent: percentCompleted,
-                                uploaded: loaded,
-                                total: total,
-                                speed: this.formatFileSize(speed) + '/s',
-                                lastTime: now,
-                                lastUploaded: loaded,
-                            };
-                        },
-                    });
+                }
                 }
 
                 this.progress[fileType].completed = true;
@@ -1964,7 +2281,9 @@ export default {
         },
 
         reprocessVideo() {
-            if (this.video_id) {
+            if (this.processingMode === 'local') {
+                this.startLocalProcessing();
+            } else if (this.video_id) {
                 this.startProcessing(this.video_id);
             }
         },
@@ -1974,13 +2293,14 @@ export default {
             this.video = null;
             this.uploadStatus.video = 'idle';
             this.processingStatus.video = 'idle';
+            this.localProcessTaskStatus = 'idle';
+            this.localProcessPhase = '';
             this.videoPreview = { name: '', duration: '', size: '', thumbnail: '', url: '' };
             if (this.statusTimer) {
                 clearInterval(this.statusTimer);
                 this.statusTimer = null;
             }
             if (this.$refs.video) this.$refs.video.value = null;
-
         },
 
         async removeFile(fileType) {
@@ -2069,11 +2389,246 @@ export default {
 
             this.errors[type] = null;
             return true;
+        },
+
+        async startLocalProcessing() {
+            if (!this.episode?.id) return;
+            if (!this.video && !this.video_id) {
+                this.showToast('ابتدا فایل ویدیو را انتخاب کنید.', true);
+                return;
+            }
+
+            this.localProcessingLoading = true;
+            try {
+                let res;
+                const rawBody = buildProcessRequestBody(this.processOptions, this.watermarkFile);
+                let payload;
+                let reqConfig = {};
+
+                const filename = this.video?.name || this.oldVideo?.name || this.episode?.video?.title || '';
+                const mime = this.video?.type || 'video/mp4';
+                const size = String(this.video?.size || this.oldVideo?.size || 0);
+                const storageDisk = this.processOptions?.storage_disk || this.storageDisk || 'static';
+
+                if (rawBody instanceof FormData) {
+                    payload = rawBody;
+                    payload.append('course_id', this.course.id);
+                    payload.append('episode_id', this.episode.id);
+                    payload.append('filename', filename);
+                    payload.append('mime', mime);
+                    payload.append('size', size);
+                    payload.append('storage_disk', storageDisk);
+                    reqConfig = {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    };
+                } else {
+                    payload = {
+                        ...rawBody,
+                        course_id: this.course.id,
+                        episode_id: this.episode.id,
+                        filename,
+                        mime,
+                        size,
+                        storage_disk: storageDisk,
+                    };
+                }
+
+                if (this.video && (!this.video_id || this.uploadStatus.video === 'local-pending' || this.uploadStatus.video === 'pending')) {
+                    res = await axiosInstance.post('admin/video/local-process/init', payload, reqConfig);
+                } else if (this.video_id) {
+                    res = await axiosInstance.post(`admin/video/local-process/${this.video_id}`, payload, reqConfig);
+                }
+
+                if (!res?.data) throw new Error('پاسخی از سرور دریافت نشد.');
+
+                const data = res.data;
+                this.video_id = data.video_id;
+                this.localProcessTaskUuid = data.task_id;
+                this.localProcessDeepLink = data.deep_link;
+                if (data.app_download_url) {
+                    this.localProcessDownloadUrl = data.app_download_url;
+                }
+
+                this.uploadStatus.video = 'local-processing';
+                this.processingStatus.video = 'processing';
+                this.localProcessTaskStatus = data.task_status || 'pending';
+                this.localProcessPhase = data.phase || 'raw_uploading';
+
+                if (this.localProcessDeepLink) {
+                    this.launchLocalApp(this.localProcessDeepLink);
+                    this.showToast('نرم‌افزار پردازش محلی فراخوانی شد؛ در صورت نیاز همان فایل را در پنجره نرم‌افزار تایید کنید.');
+                }
+
+                this.showUploadProgressModal = true;
+                this.startLocalStatusPolling(this.video_id);
+
+            } catch (error) {
+                console.error('Failed to start local processing:', error);
+                this.showToast(error?.response?.data?.message || 'خطا در شروع پردازش محلی', true);
+                this.uploadStatus.video = 'error';
+            } finally {
+                this.localProcessingLoading = false;
+            }
+        },
+
+        launchLocalApp(url) {
+            if (!url) return;
+            this.isLaunchingApp = true;
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = url;
+                document.body.appendChild(iframe);
+                setTimeout(() => {
+                    try {
+                        if (iframe.parentNode) {
+                            iframe.parentNode.removeChild(iframe);
+                        }
+                    } catch (e) {}
+                    this.isLaunchingApp = false;
+                }, 3000);
+            } catch (e) {
+                this.isLaunchingApp = false;
+                window.location.href = url;
+            }
+        },
+
+        reopenLocalApp() {
+            if (this.localProcessDeepLink) {
+                this.launchLocalApp(this.localProcessDeepLink);
+            }
+        },
+
+        async cancelLocalProcessing() {
+            if (!this.video_id) return;
+            this.cancellingProcess = true;
+            try {
+                await axiosInstance.post(`admin/video/local-process/${this.video_id}/cancel`);
+                this.uploadStatus.video = 'local-pending';
+                this.processingStatus.video = 'idle';
+                this.localProcessTaskStatus = 'cancelled';
+                this.processingProgress = null;
+                if (this.statusTimer) {
+                    clearInterval(this.statusTimer);
+                    this.statusTimer = null;
+                }
+                this.showToast('پردازش محلی لغو شد.');
+            } catch (e) {
+                this.showToast(e?.response?.data?.message || 'لغو پردازش ناموفق بود', true);
+            } finally {
+                this.cancellingProcess = false;
+            }
+        },
+
+        startLocalStatusPolling(videoId) {
+            if (!videoId) return;
+            if (this.statusTimer) clearInterval(this.statusTimer);
+
+            const pollOnce = async () => {
+                try {
+                    const res = await axiosInstance.get(`admin/video/local-process/${videoId}/status`, { timeout: 10000 });
+                    const data = res.data;
+                    if (!data) return;
+
+                    if (typeof data.progress === 'number') {
+                        this.processingProgress = data.progress;
+                    }
+                    this.localProcessPhase = data.phase;
+                    this.localProcessTaskStatus = data.task_status;
+
+                    if (data.task_status === 'completed' || data.status === 'processed') {
+                        this.uploadStatus.video = 'processed';
+                        this.processingStatus.video = 'processed';
+                        this.localProcessTaskStatus = 'completed';
+                        clearInterval(this.statusTimer);
+                        this.statusTimer = null;
+                        this.showToast('پردازش و آپلود محلی با موفقیت به پایان رسید!');
+                    } else if (data.task_status === 'failed' || data.task_status === 'expired') {
+                        this.uploadStatus.video = 'processing-error';
+                        this.processingStatus.video = 'failed';
+                        this.localProcessTaskStatus = 'failed';
+                        clearInterval(this.statusTimer);
+                        this.statusTimer = null;
+                        this.showToast(data.error_message || 'پردازش محلی با خطا متوقف شد.', true);
+                    } else if (data.task_status === 'cancelled') {
+                        this.uploadStatus.video = 'local-pending';
+                        this.processingStatus.video = 'idle';
+                        this.localProcessTaskStatus = 'cancelled';
+                        clearInterval(this.statusTimer);
+                        this.statusTimer = null;
+                    } else {
+                        this.uploadStatus.video = 'local-processing';
+                        this.processingStatus.video = 'processing';
+                    }
+                } catch (e) {
+                    // keep trying
+                }
+            };
+
+            pollOnce();
+            this.statusTimer = setInterval(pollOnce, 3000);
+        },
+
+        handleBeforeUnload(e) {
+            if (this.isLaunchingApp) return;
+            const isBusy = (this.video && ['uploading', 'queued', 'processing', 'local-processing'].includes(this.uploadStatus.video)) || this.attachmentUploading;
+            if (isBusy && !this.allowLeave) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        },
+
+        confirmLeavePage() {
+            this.allowLeave = true;
+            this.showLeaveConfirmModal = false;
+            if (typeof this.pendingLeaveNext === 'function') {
+                this.pendingLeaveNext();
+                this.pendingLeaveNext = null;
+            } else if (this.pendingLeaveTarget) {
+                this.$router.push(this.pendingLeaveTarget);
+                this.pendingLeaveTarget = null;
+            } else {
+                this.$router.back();
+            }
+        },
+
+        cancelLeavePage() {
+            this.showLeaveConfirmModal = false;
+            this.pendingLeaveNext = null;
+            this.pendingLeaveTarget = null;
         }
+    },
+    beforeRouteLeave(to, from, next) {
+        if (this.isLaunchingApp) {
+            next(false);
+            return;
+        }
+        if (this.allowLeave) {
+            next();
+            return;
+        }
+        const isBusy = (this.video && ['uploading', 'queued', 'processing', 'local-processing'].includes(this.uploadStatus.video)) || this.attachmentUploading;
+        if (isBusy) {
+            this.pendingLeaveNext = next;
+            this.pendingLeaveTarget = to;
+            this.showLeaveConfirmModal = true;
+            next(false);
+            return;
+        }
+        next();
     },
     mounted() {
         document.title = "ویرایش جلسه";
+        window.addEventListener('beforeunload', this.handleBeforeUnload);
         this.initFromSlug();
+    },
+    beforeUnmount() {
+        window.removeEventListener('beforeunload', this.handleBeforeUnload);
+        if (this.statusTimer) {
+            clearInterval(this.statusTimer);
+            this.statusTimer = null;
+        }
     }
 };
 </script>

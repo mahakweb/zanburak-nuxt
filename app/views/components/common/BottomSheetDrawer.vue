@@ -73,6 +73,13 @@ const props = defineProps({
         type: [String, Array, Object],
         default: "",
     },
+    /**
+     * کلاس عرض دراور
+     */
+    maxWidthClass: {
+        type: String,
+        default: "max-w-full sm:max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg",
+    },
 
     showHandle: {
         type: Boolean,
@@ -672,7 +679,8 @@ watch(
             @after-leave="onPanelAfterLeave"
         >
             <div v-if="isOpen" ref="panelRef" :class="[
-                'bottom-sheet-panel fixed inset-x-0 bottom-0 md:bottom-3 mx-auto w-full max-w-full sm:max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg overflow-hidden flex flex-col',
+                'bottom-sheet-panel fixed inset-x-0 bottom-0 md:bottom-3 mx-auto w-full overflow-hidden flex flex-col',
+                maxWidthClass,
                 isDragging && 'bottom-sheet-panel--dragging',
                 panelZClass,
                 panelClass && panelClass.length !== 0

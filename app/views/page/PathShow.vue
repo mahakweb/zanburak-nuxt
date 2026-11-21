@@ -955,7 +955,8 @@ export default {
         },
     },
     watch: {
-        "$route.params.pathSlug": function (newSlug) {
+        "$route.params.pathSlug": function (newSlug, oldSlug) {
+            if (!newSlug || newSlug === oldSlug) return;
             this.pathSlug = newSlug;
             this.path = {};
             this.getPathDetails();
@@ -1064,7 +1065,9 @@ export default {
                         const status = error?.response?.status
                         console.error(error)
                         if (status === 404) {
-                            this.$router.push({ name: 'NotFound' })
+                            if (this.$route.name === 'path.show' && this.$route.params.pathSlug === slug) {
+                                this.$router.push({ name: 'NotFound' })
+                            }
                         }
                     }
                 )

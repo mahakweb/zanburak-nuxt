@@ -52,6 +52,10 @@ export const EDITOR_TOOLBAR_ICONS = [
         svg: toolbarIcon('<path d="m9 11-6 6v3h9l-3-9"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>'),
     },
     {
+        type: 'font-size',
+        svg: toolbarIcon('<polyline points="4 7 4 4 14 4 14 7"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="6" y1="20" x2="12" y2="20"/><polyline points="15 11 15 9 21 9 21 11"/><line x1="18" y1="9" x2="18" y2="20"/><line x1="16" y1="20" x2="20" y2="20"/>'),
+    },
+    {
         type: 'uploadImage',
         svg: toolbarIcon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
     },

@@ -164,3 +164,9 @@ export function insertStyledSpan(cm, style, placeholder) {
         insertWithSelection(cm, `[c:${color}]`, '[/c]', text);
     }
 }
+
+export function insertFontSize(cm, size, placeholder) {
+    const text = cm.getSelection() || placeholder;
+    const cleanSize = String(size).replace(/px$/i, '').trim();
+    insertWithSelection(cm, `[size:${cleanSize}]`, '[/size]', text);
+}

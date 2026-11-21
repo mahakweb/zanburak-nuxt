@@ -116,6 +116,7 @@
 	"editor.textColor": { "fa": "رنگ متن", "en": "Text color" },
 	"editor.bgColor": { "fa": "رنگ پس‌زمینه", "en": "Background color" },
 	"editor.applyColor": { "fa": "اعمال", "en": "Apply" },
+	"editor.applyFontSize": { "fa": "اعمال اندازه", "en": "Apply size" },
 	"editor.noImageSelected": { "fa": "لطفاً یک تصویر انتخاب کنید", "en": "Please select an image" },
 	"editor.sampleText": { "fa": "متن نمونه", "en": "sample text" },
 	"editor.sampleLink": { "fa": "عنوان لینک", "en": "link title" },

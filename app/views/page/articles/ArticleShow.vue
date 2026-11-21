@@ -439,6 +439,7 @@ export default {
             }
         },
         async loadArticle() {
+            if (!this.articleSlug) return;
             this.readingProgress = 0;
             this.loading = true;
             try {

@@ -995,6 +995,7 @@ export default {
                 });
         },
         async getQuestion() {
+            if (!this.questionSlug) return;
             try {
                 const response = await axiosInstance.post('/discuss/' + this.questionSlug);
                 this.question = response.data.question;
@@ -1042,7 +1043,9 @@ export default {
                 });
             } catch (error) {
                 console.error("Error loading questions:", error);
-                this.$router.push({ name: 'NotFound' });
+                if (error?.response?.status === 404 && this.$route.params.questionSlug === this.questionSlug) {
+                    this.$router.push({ name: 'NotFound' });
+                }
             } finally {
                 this.loading = false;
             }

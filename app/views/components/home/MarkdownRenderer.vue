@@ -19,6 +19,7 @@ import MarkdownItTasklists from 'markdown-it-task-lists';
 import MarkdownItTOC from 'markdown-it-toc-done-right';
 import { preprocessGfmTables } from '@/utils/markdownGfmTable';
 import { preprocessColorSyntax } from '@/utils/markdownColorSyntax';
+import { preprocessFontSizeSyntax } from '@/utils/markdownFontSizeSyntax';
 import { preprocessLineHeightSyntax } from '@/utils/markdownLineHeightSyntax';
 import { setupCodeBlockChrome } from '@/utils/codeBlockChrome';
 import { extractLineHeight, stripContentMeta } from '@/utils/articleContentMeta';
@@ -83,7 +84,7 @@ const contentLineHeight = computed(() => extractLineHeight(props.source));
 
 const processedSource = computed(() => {
     const stripped = stripContentMeta(props.source || '');
-    return preprocessLineHeightSyntax(preprocessColorSyntax(preprocessGfmTables(linkifyTimestamps(stripped))));
+    return preprocessLineHeightSyntax(preprocessFontSizeSyntax(preprocessColorSyntax(preprocessGfmTables(linkifyTimestamps(stripped)))));
 });
 const renderedHtml = computed(() => sanitizeHtml(markdown.render(processedSource.value)));
 

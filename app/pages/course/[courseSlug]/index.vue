@@ -2037,7 +2037,9 @@ async function getCourse() {
         applyCoursePayload(data);
     } catch (error) {
         if (error.response?.status === 404) {
-            router.push({ name: "NotFound" });
+            if (route.name === 'course.show' && route.params.courseSlug === slug) {
+                router.push({ name: "NotFound" });
+            }
         }
         console.error(error.response?.statusText);
     }
@@ -2147,15 +2149,14 @@ const toggleBookmark = async () => {
 
 watch(
     () => route.params.courseSlug,
-    () => {
-        courseSlug.value = route.params.courseSlug;
+    (newSlug, oldSlug) => {
+        if (!newSlug || newSlug === oldSlug) return;
+        courseSlug.value = newSlug;
         course.value = null;
         userCanSeeCourse.value = false;
+        getCourse();
     }
 );
-onUpdated(() => {
-    getCourse();
-});
 function onDescExpandedChange() {
     setTimeout(refreshScrollSpy, 300);
 }

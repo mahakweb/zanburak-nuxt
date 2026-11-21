@@ -321,6 +321,46 @@
                 </button>
             </div>
         </div>
+
+        <div
+            v-if="isFontSizePopoverOpen"
+            ref="fontSizePopoverRef"
+            class="zan-editor-popover absolute z-[1200] w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-xl custom-scrollbar dark:border-gray-700 dark:bg-gray-900"
+            :style="fontSizePopoverStyle"
+        >
+            <p class="mb-2 text-xs font-bold text-gray-600 dark:text-gray-300">{{ $t('editor.fontSize') }}</p>
+            <div class="grid grid-cols-4 gap-1.5">
+                <button
+                    v-for="size in FONT_SIZE_OPTIONS"
+                    :key="'fs-' + size"
+                    type="button"
+                    class="rounded-lg border border-gray-200 py-1.5 text-xs font-semibold text-gray-700 transition hover:border-yellow-400 hover:bg-yellow-50 dark:border-gray-600 dark:text-gray-200 dark:hover:border-yellow-500 dark:hover:bg-yellow-500/10"
+                    dir="ltr"
+                    @click="applyFontSize(size)"
+                >
+                    {{ size }}px
+                </button>
+            </div>
+            <div class="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-gray-700">
+                <input
+                    v-model.number="customFontSize"
+                    type="number"
+                    min="9"
+                    max="72"
+                    class="w-20 rounded-md border border-gray-200 px-2 py-1.5 text-center text-xs dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                    dir="ltr"
+                    placeholder="18"
+                    @keydown.enter.prevent="applyFontSize(customFontSize)"
+                />
+                <button
+                    type="button"
+                    class="flex-1 rounded-lg bg-yellow-400 px-2 py-1.5 text-xs font-semibold text-gray-900 transition hover:bg-yellow-300"
+                    @click="applyFontSize(customFontSize)"
+                >
+                    {{ $t('editor.applyFontSize') }}
+                </button>
+            </div>
+        </div>
     </Teleport>
 </template>
 
@@ -334,6 +374,7 @@ import MarkdownRenderer from "@/views/components/home/MarkdownRenderer.vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import { preprocessGfmTables } from "@/utils/markdownGfmTable";
 import { preprocessColorSyntax } from "@/utils/markdownColorSyntax";
+import { preprocessFontSizeSyntax } from "@/utils/markdownFontSizeSyntax";
 import { EDITOR_TOOLBAR_ICONS } from "@/utils/editorToolbarIcons";
 import { preprocessLineHeightSyntax } from "@/utils/markdownLineHeightSyntax";
 import { extractLineHeight, stripContentMeta } from "@/utils/articleContentMeta";
@@ -357,6 +398,7 @@ import {
     insertTableSized,
     insertAlignBlock,
     insertStyledSpan,
+    insertFontSize,
     insertHeading,
     insertLineHeightBlock,
 } from "@/utils/editorInsert";
@@ -387,7 +429,7 @@ const previewMarkdown = new MarkdownIt({ html: true, linkify: true, breaks: true
 
 function renderEditorPreviewHtml(src) {
     const lineHeight = extractLineHeight(src);
-    const processed = preprocessLineHeightSyntax(preprocessColorSyntax(preprocessGfmTables(stripContentMeta(src || ''))));
+    const processed = preprocessLineHeightSyntax(preprocessFontSizeSyntax(preprocessColorSyntax(preprocessGfmTables(stripContentMeta(src || '')))));
     const style = lineHeight ? ` style="line-height:${lineHeight}"` : '';
     const html = `<div class="zan-md-content"${style}>${sanitizeHtml(previewMarkdown.render(processed))}</div>`;
     if (typeof document !== 'undefined') {
@@ -453,6 +495,12 @@ let colorAnchorEl = null;
 let tableAnchorEl = null;
 let headingAnchorEl = null;
 let lineHeightAnchorEl = null;
+let fontSizeAnchorEl = null;
+const FONT_SIZE_OPTIONS = [10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48];
+const isFontSizePopoverOpen = ref(false);
+const fontSizePopoverStyle = ref({ top: '0px', left: '0px' });
+const fontSizePopoverRef = ref(null);
+const customFontSize = ref(18);
 
 const TEXT_COLORS = ['#dc2626', '#ea580c', '#ca8a04', '#16a34a', '#0891b2', '#2563eb', '#7c3aed', '#db2777', '#111827', '#ffffff'];
 const BG_COLORS = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#fecaca', '#e9d5ff', '#fed7aa', '#f3f4f6', '#374151', '#000000'];
@@ -552,6 +600,7 @@ function openEmojiPopover(mde) {
     closeColorPopover();
     closeHeadingPopover();
     closeLineHeightPopover();
+    closeFontSizePopover();
     emojiAnchorEl = mde.toolbarElements?.emoji || null;
     suppressOutsideClose = true;
     isEmojiPopupOpen.value = true;
@@ -583,6 +632,7 @@ function openTablePopover(mde) {
     closeEmojiPopover();
     closeHeadingPopover();
     closeLineHeightPopover();
+    closeFontSizePopover();
     suppressOutsideClose = true;
     tableAnchorEl = mde.toolbarElements?.['draw-table'] || null;
     resetTableHover();
@@ -618,6 +668,7 @@ function openHeadingPopover(mde) {
     closeEmojiPopover();
     closeTablePopover();
     closeLineHeightPopover();
+    closeFontSizePopover();
     headingAnchorEl = mde.toolbarElements?.heading || null;
     suppressOutsideClose = true;
     isHeadingPopoverOpen.value = true;
@@ -650,6 +701,7 @@ function openLineHeightPopover(mde) {
     closeEmojiPopover();
     closeTablePopover();
     closeHeadingPopover();
+    closeFontSizePopover();
     lineHeightAnchorEl = mde.toolbarElements?.['line-height'] || null;
     suppressOutsideClose = true;
     isLineHeightPopoverOpen.value = true;
@@ -734,6 +786,43 @@ const selectedVideoSizeFormatted = computed(() => {
     if (!selectedVideoFile.value) return '';
     return formatFileSize(selectedVideoFile.value.size, 1, locale.value === 'fa' ? 'fa' : 'en');
 });
+
+function closeFontSizePopover() {
+    isFontSizePopoverOpen.value = false;
+    fontSizeAnchorEl = null;
+}
+
+function openFontSizePopover(mde) {
+    setEditor(mde);
+    ensurePopoverHost(markdownEditor.value?.$el?.querySelector('.zan-editor-toolbar-wrap'));
+    closeColorPopover();
+    closeEmojiPopover();
+    closeTablePopover();
+    closeHeadingPopover();
+    closeLineHeightPopover();
+    fontSizeAnchorEl = mde.toolbarElements?.['font-size'] || null;
+    suppressOutsideClose = true;
+    isFontSizePopoverOpen.value = true;
+    nextTick(() => {
+        if (fontSizeAnchorEl) {
+            positionPopoverToAnchor(fontSizeAnchorEl, fontSizePopoverStyle, {
+                popoverEl: fontSizePopoverRef.value,
+                fallbackWidth: 256,
+            });
+        }
+    });
+    setTimeout(() => { suppressOutsideClose = false; }, 0);
+}
+
+function applyFontSize(size) {
+    if (!editor.value || !size) return;
+    const num = parseInt(size, 10);
+    if (Number.isNaN(num) || num <= 0) return;
+    const cm = getCodeMirror(editor.value);
+    insertFontSize(cm, num, ph().text);
+    closeFontSizePopover();
+    onContentUpdate();
+}
 
 function openColorPopover(type, mde) {
     setEditor(mde);
@@ -1012,6 +1101,18 @@ const configs = {
             className: "bg-color",
             title: t("editor.bgColor"),
         },
+        {
+            name: "font-size",
+            action: function (mde) {
+                if (isFontSizePopoverOpen.value) {
+                    closeFontSizePopover();
+                    return;
+                }
+                openFontSizePopover(mde);
+            },
+            className: "font-size",
+            title: t("editor.fontSize"),
+        },
         "|",
         {
             name: "emoji",
@@ -1165,6 +1266,13 @@ function handleOutsideClick(e) {
         const lineHeightBtn = markdownEditor.value?.$el?.querySelector('.editor-toolbar button.line-height');
         if (!popover?.contains(e.target) && !lineHeightBtn?.contains(e.target)) {
             closeLineHeightPopover();
+        }
+    }
+    if (isFontSizePopoverOpen.value) {
+        const popover = fontSizePopoverRef.value;
+        const fontSizeBtn = markdownEditor.value?.$el?.querySelector('.editor-toolbar button.font-size');
+        if (!popover?.contains(e.target) && !fontSizeBtn?.contains(e.target)) {
+            closeFontSizePopover();
         }
     }
 }
@@ -1876,12 +1984,64 @@ function emojiClick(emoji) {
     border-radius: 8px !important;
     outline: none !important;
     background-color: #f9fafb !important;
+    color: #1f2937 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.625 !important;
     transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.CodeMirror pre.CodeMirror-line,
+.CodeMirror pre.CodeMirror-line-like {
+    font-size: 0.875rem !important;
+    line-height: 1.625 !important;
 }
 
 .dark .CodeMirror {
     border-color: #374151 !important;
     background-color: rgba(31, 41, 55, 0.6) !important;
+    color: #f3f4f6 !important;
+}
+
+.dark .CodeMirror pre.CodeMirror-line,
+.dark .CodeMirror pre.CodeMirror-line-like,
+.dark .CodeMirror-line,
+.dark .CodeMirror-lines,
+.dark .CodeMirror-line > span {
+    color: #f3f4f6 !important;
+}
+
+.dark .CodeMirror .CodeMirror-placeholder {
+    color: #64748b !important;
+}
+
+.dark .cm-s-easymde .cm-header,
+.dark .cm-s-easymde .cm-header-1,
+.dark .cm-s-easymde .cm-header-2,
+.dark .cm-s-easymde .cm-header-3,
+.dark .cm-s-easymde .cm-header-4,
+.dark .cm-s-easymde .cm-header-5,
+.dark .cm-s-easymde .cm-header-6 {
+    color: #ffffff !important;
+}
+
+.dark .cm-s-easymde .cm-quote {
+    color: #94a3b8 !important;
+}
+
+.dark .cm-s-easymde .cm-link {
+    color: #60a5fa !important;
+}
+
+.dark .cm-s-easymde .cm-url {
+    color: #93c5fd !important;
+}
+
+.dark .cm-s-easymde .cm-string {
+    color: #93c5fd !important;
+}
+
+.dark .cm-s-easymde .cm-comment {
+    color: #94a3b8 !important;
 }
 
 .CodeMirror.zan-cm-focused {
@@ -1895,6 +2055,7 @@ function emojiClick(emoji) {
 .dark .CodeMirror.zan-cm-focused {
     border-color: #fed700 !important;
     background-color: rgb(31, 41, 55) !important;
+    color: #f3f4f6 !important;
 }
 
 .CodeMirror.zan-cm-error {
@@ -1979,6 +2140,13 @@ span.CodeMirror-selectedtext {
 .editor-preview-active {
     direction: rtl;
     text-align: right;
+    font-size: 0.875rem;
+}
+
+.dark .editor-preview,
+.dark .editor-preview-active {
+    background-color: rgb(17, 24, 39) !important;
+    color: rgb(243, 244, 246) !important;
 }
 
 .editor-preview-active.custom-scrollbar,

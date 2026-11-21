@@ -1,3 +1,9 @@
+<script setup>
+definePageMeta({
+  name: "admin-episode-edit",
+  middleware: ['auth'],
+})
+</script>
 <template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
@@ -189,11 +195,12 @@
                                     </li>
                                     <li>
                                         <input v-model="publish" type="radio" id="publish-1" name="publish" :value="1"
-                                            class="hidden peer">
+                                            class="hidden peer" :disabled="!canDirectPublish">
                                         <label for="publish-1"
-                                            class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
+                                            class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400"
+                                            :class="{ 'opacity-50 cursor-not-allowed': !canDirectPublish }">
                                             <div class="block text-xs font-semibold text-center w-full">
-                                                منتشر شود
+                                                {{ canDirectPublish ? 'منتشر شود' : 'ارسال برای تایید' }}
                                             </div>
                                         </label>
                                     </li>
@@ -201,6 +208,11 @@
                                 <span v-if="errors && errors.publish" class="mt-1 text-rose-500 text-xs font-medium">
                                     {{ errors.publish[0] }}
                                 </span>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    {{ canDirectPublish
+                                        ? 'اگر منتشر شود، جلسه برای دانشجویان قابل مشاهده خواهد بود.'
+                                        : 'برای انتشار از صفحه جلسه درخواست بفرستید. لغو انتشار فقط توسط بررسی‌کننده انجام می‌شود.' }}
+                                </p>
 
                             </div>
 
@@ -326,14 +338,8 @@
                                     @change="handleVideo"
                                 />
                                 <label
-                                    class="flex items-center justify-between mb-1 text-xs font-semibold text-gray-900 dark:text-gray-100 gap-2">
+                                    class="block mb-1.5 text-xs font-semibold text-gray-900 dark:text-gray-100">
                                     ویدیوی جلسه
-                                    <MediaStatusBadge
-                                        v-if="oldVideo || video"
-                                        :status="uploadStatus.video"
-                                        :percent="progress.video.percent"
-                                        :extra="uploadStatus.video === 'processing' && processingProgress != null ? (Math.round(processingProgress) + '٪') : ''"
-                                    />
                                 </label>
 
                                 <div class="flex items-center justify-center w-full">
@@ -429,7 +435,7 @@
                                                     {{ cancellingProcess ? '...' : 'لغو پردازش' }}
                                                 </button>
                                                 <button
-                                                    v-if="video && (uploadStatus.video === 'pending' || uploadStatus.video === 'error')"
+                                                    v-if="video && (uploadStatus.video === 'pending' || uploadStatus.video === 'error' || uploadStatus.video === 'local-pending')"
                                                     type="button"
                                                     @click.prevent="removeVideo"
                                                     title="حذف"
@@ -437,15 +443,24 @@
                                                     حذف
                                                 </button>
                                                 <button
-                                                    v-if="video && (uploadStatus.video === 'pending' || uploadStatus.video === 'error')"
+                                                    v-if="uploadStatus.video === 'local-processing'"
                                                     type="button"
-                                                    @click.prevent="uploadFile(episode.id, 'video')"
-                                                    title="آپلود مجدد"
-                                                    class="h-8 px-3 rounded-lg bg-white/90 dark:bg-gray-900/90 text-xs font-semibold text-gray-800 dark:text-gray-100 shadow hover:bg-white transition">
-                                                    آپلود
+                                                    @click.prevent="cancelLocalProcessing"
+                                                    :disabled="cancellingProcess"
+                                                    title="لغو پردازش محلی"
+                                                    class="h-8 px-3 rounded-lg bg-rose-500 text-white text-xs font-semibold shadow hover:bg-rose-600 transition disabled:opacity-60">
+                                                    {{ cancellingProcess ? '...' : 'لغو پردازش محلی' }}
                                                 </button>
                                                 <button
-                                                    v-if="video_id && ['processing-error', 'uploaded', 'queued', 'failed', 'processed'].includes(uploadStatus.video)"
+                                                    v-if="video && (uploadStatus.video === 'pending' || uploadStatus.video === 'error') && processingMode === 'server'"
+                                                    type="button"
+                                                    @click.prevent="uploadFile(episode.id, 'video')"
+                                                    title="آپلود به سرور"
+                                                    class="h-8 px-3 rounded-lg bg-white/90 dark:bg-gray-900/90 text-xs font-semibold text-gray-800 dark:text-gray-100 shadow hover:bg-white transition">
+                                                    آپلود به سرور
+                                                </button>
+                                                <button
+                                                    v-if="video_id && ['processing-error', 'uploaded', 'queued', 'failed', 'processed'].includes(uploadStatus.video) && processingMode === 'server'"
                                                     type="button"
                                                     @click.prevent="startProcessing(video_id)"
                                                     :title="uploadStatus.video === 'processed' ? 'پردازش مجدد' : 'شروع پردازش'"
@@ -461,7 +476,7 @@
                                         </div>
                                         <!-- Progress Bar -->
                                         <div v-if="video && !progress.video.completed"
-                                            :class="{ 'hidden': ['uploaded', 'processing', 'processed', 'processing-error'].includes(uploadStatus.video) }"
+                                            :class="{ 'hidden': ['uploaded', 'processing', 'processed', 'processing-error', 'local-pending', 'local-processing'].includes(uploadStatus.video) }"
                                             class="absolute top-0 left-0 h-full flex items-center bg-green-400 bg-opacity-20 border-r-2 border-green-400/40 transition-all duration-500"
                                             :style="`width: ${progress.video.percent}%`">
                                             <div class="z-20 -mr-2 flex items-center justify-center text-center bg-green-400 text-white rounded-md py-2 text-xs font-medium font-serif"
@@ -480,14 +495,109 @@
                                     {{ errors.video[0] }}
                                 </span>
 
+                                <!-- Processing Mode Selected Badge & Switcher Trigger -->
+                                <div v-if="video || oldVideo" class="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/80 px-3 py-2 text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-500 dark:text-gray-400">شیوه پردازش:</span>
+                                        <span class="inline-flex items-center gap-1.5 font-bold text-gray-800 dark:text-gray-200">
+                                            <span class="w-2 h-2 rounded-full" :class="processingMode === 'local' ? 'bg-sky-500' : 'bg-amber-500'"></span>
+                                            {{ processingMode === 'local' ? 'پردازش روی این کامپیوتر (Local Video Processor)' : 'پردازش روی سرور ورکر' }}
+                                        </span>
+                                        <span class="text-[11px] text-gray-400 font-mono">({{ processOptions?.storage_disk || storageDisk }})</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        @click.prevent="showProcessingModeSheet = true"
+                                        class="text-xs font-bold text-yellow-600 dark:text-yellow-400 hover:underline">
+                                        تغییر شیوه یا دیسک
+                                    </button>
+                                </div>
+
                                 <div v-if="video_id || video || oldVideo" class="mt-4 space-y-3">
+                                    <!-- Local Processor Info Card -->
+                                    <div v-if="processingMode === 'local'" class="rounded-2xl border border-sky-200 bg-sky-50/70 dark:border-sky-800/50 dark:bg-sky-950/20 p-3.5 space-y-3">
+                                        <div class="flex items-start justify-between gap-3 text-xs">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-400 font-bold shrink-0">
+                                                    💻
+                                                </div>
+                                                <div>
+                                                    <span class="font-bold text-gray-900 dark:text-white">پردازش محلی با Local Video Processor</span>
+                                                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        آپلود ویدیوی خام به هاست استاتیک و تبدیل کیفیت‌ها مستقیماً روی همین سیستم و بدون دانلود مجدد انجام می‌شود.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <a
+                                                :href="localProcessDownloadUrl"
+                                                target="_blank"
+                                                rel="noopener"
+                                                class="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline shrink-0">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                                دانلود نرم‌افزار
+                                            </a>
+                                        </div>
+
+                                        <!-- Live progress if local processing active -->
+                                        <div v-if="uploadStatus.video === 'local-processing'" class="rounded-xl bg-white dark:bg-gray-900 p-3 border border-sky-200 dark:border-sky-800 space-y-2">
+                                            <div class="flex items-center justify-between text-xs font-semibold">
+                                                <span class="text-sky-700 dark:text-sky-300 flex items-center gap-2">
+                                                    <svg class="w-3.5 h-3.5 animate-spin text-sky-500" viewBox="0 0 24 24" fill="none">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                                    </svg>
+                                                    {{ localPhaseText }}
+                                                </span>
+                                                <span class="text-sky-600 dark:text-sky-400 font-mono font-bold">{{ Math.round(processingProgress || 0) }}%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                                                <div class="bg-sky-500 h-2 rounded-full transition-all duration-300" :style="{ width: `${processingProgress || 0}%` }"></div>
+                                            </div>
+                                            <div class="flex items-center justify-between pt-1">
+                                                <button
+                                                    type="button"
+                                                    @click="reopenLocalApp"
+                                                    class="text-[11px] font-semibold text-sky-600 dark:text-sky-400 hover:underline">
+                                                    برنامه باز نشد؟ کلیک برای اجرای مجدد
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    @click="cancelLocalProcessing"
+                                                    :disabled="cancellingProcess"
+                                                    class="text-[11px] font-semibold text-rose-500 hover:underline">
+                                                    {{ cancellingProcess ? 'در حال لغو...' : 'لغو پردازش' }}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Button to start directly if desired -->
+                                        <div v-else-if="video_id || (video && uploadStatus.video === 'processed')" class="flex flex-wrap items-center gap-2">
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold bg-sky-500 text-white shadow-sm hover:bg-sky-600 transition disabled:opacity-60"
+                                                :disabled="localProcessingLoading || !canStartProcessing"
+                                                @click.prevent="startLocalProcessing">
+                                                <svg v-if="localProcessingLoading" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                                </svg>
+                                                {{ uploadStatus.video === 'processed' ? 'پردازش مجدد با نرم‌افزار محلی' : 'شروع پردازش با نرم‌افزار محلی' }}
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <VideoProcessOptions
                                         v-model="processOptions"
                                         v-model:watermark-file="watermarkFile"
                                         :source-height="sourceHeight"
+                                        :source-width="sourceWidth"
                                         :preview-file="video"
                                     />
-                                    <div class="flex flex-wrap items-center gap-2">
+
+                                    <!-- Server mode controls -->
+                                    <div v-if="processingMode === 'server'" class="flex flex-wrap items-center gap-2">
                                         <button
                                             v-if="video_id && ['queued', 'processing'].includes(uploadStatus.video)"
                                             type="button"
@@ -603,6 +713,9 @@
                         <span v-else-if="uploadStatus.video === 'uploading'">ویدیو</span>
                         <span v-else>فایل پیوست</span>
                         ...
+                    </p>
+                    <p v-else-if="uploadStatus.video === 'local-processing'" class="mt-4 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                        {{ localPhaseText }} ({{ Math.round(processingProgress || 0) }}%)
                     </p>
                     <p v-else-if="['queued', 'processing', 'uploaded'].includes(uploadStatus.video)" class="mt-4 text-sm font-semibold text-gray-500 dark:text-gray-400">
                         ویدیو آپلود شده و در حال پردازش است...
@@ -744,6 +857,55 @@
                                     </div>
                                 </div>
         </BottomSheetDrawer>
+
+        <!-- Processing Mode Selection Sheet (Local vs Server) -->
+        <EpisodeProcessingModeSheet
+            v-model="showProcessingModeSheet"
+            :options="processOptions"
+            @start="onProcessingModeSelected"
+        />
+
+        <!-- Leave Confirmation Modal when transfer or processing is active -->
+        <BottomSheetDrawer
+            v-model="showLeaveConfirmModal"
+            :initialHeight="0.48"
+            :maxHeight="0.65"
+            :minHeight="0.35"
+            :autoCloseOnMin="true"
+            :closeOnBackdrop="false"
+            :lockScroll="true"
+            :panelClass="'bg-white dark:bg-gray-900 border-t border-gray-500/70 dark:border-gray-700/70 rounded-t-2xl lg:rounded-b-2xl lg:w-[32rem] shadow-[0_-8px_30px_rgba(15,23,42,0.35)]'"
+            :contentClass="'px-4 pb-4 overflow-auto custom-scrollbar'"
+            :backdropClass="'bg-gray-300/30 dark:bg-gray-500/30 backdrop-blur-sm'"
+        >
+            <div class="relative p-5 text-center" dir="rtl">
+                <div class="rounded-2xl bg-rose-500/15 p-2.5 mb-3 mx-auto w-max text-rose-500">
+                    <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="mb-2 text-base font-bold text-gray-900 dark:text-white">
+                    آیا از خروج از این صفحه مطمئن هستید؟
+                </h3>
+                <p class="mb-5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    {{ leaveWarningMessage }}
+                </p>
+                <div class="flex justify-center gap-3">
+                    <button
+                        type="button"
+                        class="h-10 px-5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 rounded-xl transition"
+                        @click="cancelLeavePage">
+                        انصراف و ماندن در صفحه
+                    </button>
+                    <button
+                        type="button"
+                        class="h-10 px-5 text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-xl transition shadow-sm"
+                        @click="confirmLeavePage">
+                        تایید و خروج از صفحه
+                    </button>
+                </div>
+            </div>
+        </BottomSheetDrawer>
     </AdminMasterPage>
 </template>
 <script>
@@ -764,7 +926,9 @@ import { consumePendingEpisodeVideo } from "@/utils/episodeUploadBridge.js";
 import VideoProcessOptions from "@/views/components/admin/VideoProcessOptions.vue";
 import AdminAttachmentsField from "@/views/components/admin/AdminAttachmentsField.vue";
 import MediaStatusBadge from "@/views/components/admin/MediaStatusBadge.vue";
+import EpisodeProcessingModeSheet from "@/views/components/admin/episode/EpisodeProcessingModeSheet.vue";
 import { defaultProcessOptions, buildProcessRequestBody } from "@/utils/videoProcessOptions.js";
+import { COURSE_PUBLISH_APPROVE_PERMS } from "@/utils/coursePublish";
 
 const FORM_STEPS = [
     { id: "basic", label: "اطلاعات کلی", hint: "عنوان و انتشار" },
@@ -788,6 +952,7 @@ export default {
         VideoProcessOptions,
         AdminAttachmentsField,
         MediaStatusBadge,
+        EpisodeProcessingModeSheet,
     },
     data() {
         return {
@@ -816,9 +981,10 @@ export default {
             episodeSlug: this.$route.params.episodeSlug,
             createdCourse: null,
             video_id: null,
-            sourceHeight: 720,
+            sourceHeight: null,
+            sourceWidth: null,
             watermarkFile: null,
-            processOptions: defaultProcessOptions(720),
+            processOptions: defaultProcessOptions(null),
             errors: null,
             title: "",
             english_title: "",
@@ -867,6 +1033,20 @@ export default {
             processingStatus: {
                 video: 'idle',
             },
+            processingMode: 'local',
+            storageDisk: 'dl',
+            localProcessingLoading: false,
+            isLaunchingApp: false,
+            localProcessTaskUuid: null,
+            localProcessDeepLink: '',
+            localProcessDownloadUrl: 'https://cdn.zanburak.ir/apps/local-video-processor-setup.exe',
+            localProcessPhase: '',
+            localProcessTaskStatus: 'idle',
+            showProcessingModeSheet: false,
+            showLeaveConfirmModal: false,
+            pendingLeaveNext: null,
+            pendingLeaveTarget: null,
+            allowLeave: false,
             processingProgress: null,
             cancellingProcess: false,
             workerToken: null,
@@ -954,6 +1134,9 @@ export default {
         }
     },
     computed: {
+        canDirectPublish() {
+            return this.$can ? this.$can(COURSE_PUBLISH_APPROVE_PERMS) : true;
+        },
         confirmSummary() {
             return [
                 { label: "عنوان فارسی", value: this.title },
@@ -967,6 +1150,10 @@ export default {
             ];
         },
         videoStatusLabel() {
+            if (this.uploadStatus.video === "local-processing") {
+                return `در حال پردازش محلی... ${Math.round(this.processingProgress || 0)}%`;
+            }
+            if (this.uploadStatus.video === "local-pending") return "آماده پردازش محلی";
             if (this.uploadStatus.video === "processed") return "آپلود و پردازش شده";
             if (this.uploadStatus.video === "processing") {
                 return typeof this.processingProgress === 'number'
@@ -980,6 +1167,41 @@ export default {
             if (this.oldVideo && !this.video) return "ویدیوی موجود";
             if (this.video) return this.videoPreview.name || "انتخاب شده";
             return "—";
+        },
+        localPhaseText() {
+            switch (this.localProcessPhase) {
+                case 'upload_raw':
+                case 'raw_uploading':
+                    return 'مرحله ۱ از ۳: آپلود ویدیوی خام به هاست استاتیک...';
+                case 'encode':
+                case 'encoding':
+                    return 'مرحله ۲ از ۳: فشرده‌سازی و تبدیل کیفیت‌ها با FFmpeg محلی...';
+                case 'preparing_files':
+                    return 'آماده‌سازی بسته‌های خروجی...';
+                case 'upload_stream':
+                case 'uploading':
+                    return 'مرحله ۳ از ۳: آپلود خروجی‌های تبدیل‌شده و استریم HLS...';
+                case 'complete':
+                case 'completed':
+                    return 'پردازش با موفقیت پایان یافت.';
+                default:
+                    return 'در حال پردازش با Local Video Processor...';
+            }
+        },
+        leaveWarningMessage() {
+            if (this.uploadStatus.video === 'local-processing') {
+                return 'ویدیو توسط نرم‌افزار Local Video Processor در حال پردازش و آپلود مستقیم به هاست استاتیک است. خروج از این صفحه ممکن است مشاهده پیشرفت زنده را مختل کند.';
+            }
+            if (this.uploadStatus.video === 'uploading') {
+                return 'ویدیو هم‌اکنون در حال آپلود به سرور است. با خروج از این صفحه، فرآیند آپلود متوقف و لغو خواهد شد.';
+            }
+            if (['queued', 'processing'].includes(this.uploadStatus.video)) {
+                return 'ویدیو در حال حاضر روی سرور ورکر در حال پردازش است. در صورت خروج از صفحه، پیگیری زنده وضعیت متوقف می‌شود.';
+            }
+            if (this.attachmentUploading) {
+                return 'فایل پیوست در حال آپلود است. با خروج از صفحه فرآیند آپلود لغو می‌شود.';
+            }
+            return 'فرآیند انتقال یا پردازش فایل در حال انجام است. آیا واقعاً می‌خواهید خارج شوید؟';
         },
         canStartProcessing() {
             const outs = this.processOptions?.outputs || [];
@@ -1000,7 +1222,7 @@ export default {
             return true;
         },
         hasActiveFileTransfer() {
-            const videoActive = this.video && ["uploading", "queued", "processing", "uploaded"].includes(this.uploadStatus.video);
+            const videoActive = this.video && ["uploading", "queued", "processing", "uploaded", "local-processing"].includes(this.uploadStatus.video);
             return videoActive || this.attachmentUploading;
         },
         attachmentSummaryLabel() {
@@ -1015,7 +1237,13 @@ export default {
         },
         uploadProgressSubtitle() {
             if (this.formSubmited) {
+                if (this.uploadStatus.video === "local-processing") {
+                    return "پردازش و آپلود توسط نرم‌افزار محلی در حال انجام است؛ صفحه را باز نگه دارید.";
+                }
                 return "آپلود و پردازش در پس‌زمینه ادامه دارد.";
+            }
+            if (this.uploadStatus.video === "local-processing") {
+                return "ویدیو توسط نرم‌افزار محلی در حال پردازش و آپلود مستقیم به هاست استاتیک است.";
             }
             if (["queued", "processing", "uploaded"].includes(this.uploadStatus.video)) {
                 return "ویدیو در حال پردازش است؛ می‌توانید سایر فیلدها را تکمیل کنید.";
@@ -1068,15 +1296,38 @@ export default {
             const pending = consumePendingEpisodeVideo();
             if (!pending) return;
             this.video = pending.file;
-            this.uploadStatus.video = "pending";
             if (pending.preview) {
                 this.videoPreview = { ...pending.preview };
             }
+            const opts = pending.options || {};
+            if (opts.videoHeight || pending.preview?.videoHeight) {
+                this.sourceHeight = opts.videoHeight || pending.preview.videoHeight;
+            }
+            if (opts.videoWidth || pending.preview?.videoWidth) {
+                this.sourceWidth = opts.videoWidth || pending.preview.videoWidth;
+            }
+            this.processingMode = opts.processingMode || 'local';
+            this.storageDisk = opts.storageDisk || 'dl';
+            if (this.processOptions) {
+                this.processOptions.storage_disk = this.storageDisk;
+            }
+            this.uploadStatus.video = this.processingMode === 'local' ? 'local-pending' : 'pending';
             if (this.episode?.id) {
                 this.currentStep = this.FORM_STEPS.findIndex((s) => s.id === "media");
-                this.uploadFile(this.episode.id, "video");
-                this.showToast("ویدیو در پس‌زمینه در حال آپلود است؛ می‌توانید سایر فیلدها را تکمیل کنید.");
             }
+        },
+        onProcessingModeSelected(data) {
+            const { mode, storageDisk } = data;
+            this.processingMode = mode || 'local';
+            this.storageDisk = storageDisk || 'dl';
+            if (this.processOptions) {
+                this.processOptions.storage_disk = this.storageDisk;
+            }
+            this.showProcessingModeSheet = false;
+            if (this.video) {
+                this.uploadStatus.video = this.processingMode === 'local' ? 'local-pending' : 'pending';
+            }
+            this.showToast(`شیوه پردازش بر روی ${this.processingMode === 'local' ? 'پردازش محلی (Local Video Processor)' : 'سرور ورکر (Server Worker)'} تنظیم شد.`);
         },
         goToStep(index) {
             const steps = this.FORM_STEPS;
@@ -1096,16 +1347,12 @@ export default {
         startPendingMediaUploads() {
             if (!this.episode?.id || this.currentStepId !== "media") return;
             let started = false;
-            if (this.video && this.uploadStatus.video === "pending") {
-                this.uploadFile(this.episode.id, "video");
-                started = true;
-            }
             if (this.pendingAttachmentCount()) {
                 this.uploadPendingAttachments(this.episode.id);
                 started = true;
             }
             if (started) {
-                this.showToast("آپلود در پس‌زمینه ادامه دارد؛ می‌توانید به مراحل بعدی بروید.");
+                this.showToast("آپلود پیوست‌ها در پس‌زمینه ادامه دارد؛ می‌توانید به مراحل بعدی بروید.");
             }
         },
         async initFromSlug() {
@@ -1320,16 +1567,24 @@ export default {
             }
 
             this.video = file;
-            this.uploadStatus.video = 'pending';
+            this.processingMode = this.processingMode || 'local';
+            this.storageDisk = this.storageDisk || 'dl';
+            this.uploadStatus.video = this.processingMode === 'local' ? 'local-pending' : 'pending';
             this.processingStatus.video = 'idle';
-
-            this.continueToCreateModal = true;
+            this.showProcessingModeSheet = true;
 
             const url = URL.createObjectURL(file);
             const video = document.createElement("video");
             video.src = url;
             video.currentTime = 1;
             video.muted = true;
+
+            video.addEventListener("loadedmetadata", () => {
+                if (video.videoHeight > 0) {
+                    this.sourceHeight = video.videoHeight;
+                    this.sourceWidth = video.videoWidth;
+                }
+            });
 
             video.addEventListener("loadeddata", () => {
                 const canvas = document.createElement("canvas");
@@ -1341,6 +1596,7 @@ export default {
 
                 if (video.videoHeight > 0) {
                     this.sourceHeight = video.videoHeight;
+                    this.sourceWidth = video.videoWidth;
                 }
 
                 this.videoPreview = {
@@ -1422,21 +1678,6 @@ export default {
                 this.currentStep = 0;
                 return;
             }
-
-            const hasPendingVideo = this.video && this.uploadStatus.video === "pending";
-            const hasPendingAttach = this.pendingAttachmentCount() > 0;
-            const videoInProgress = this.video && ["uploading", "queued", "processing", "uploaded"].includes(this.uploadStatus.video);
-            const attachInProgress = this.attachmentUploading;
-
-            if (hasPendingVideo || hasPendingAttach) {
-                this.showSubmitWarningModal = true;
-                return;
-            }
-
-            if (videoInProgress || attachInProgress) {
-                this.showUploadProgressModal = true;
-            }
-
             this.doSubmit();
         },
         doSubmit() {
@@ -1463,25 +1704,31 @@ export default {
                 section_id: this.selectedSection.id,
                 episode_id: this.episode.id,
             }).then((response) => {
-                console.log(response.data)
+                this.formSubmited = true;
 
-                // Start uploads for files that are selected but not yet uploaded
-                if (this.video && !["uploaded", "processed", "uploading", "queued", "processing"].includes(this.uploadStatus.video)) {
-                    this.uploadFile(this.episode.id, "video");
+                // Start uploads/processing for video that is selected but not yet uploaded/processed
+                const hasPendingVideo = this.video && (this.uploadStatus.video === 'pending' || this.uploadStatus.video === 'local-pending');
+
+                if (hasPendingVideo) {
+                    if (this.processingMode === 'local') {
+                        this.startLocalProcessing();
+                    } else {
+                        this.uploadFile(this.episode.id, "video");
+                    }
                 }
+
                 if (this.pendingAttachmentCount()) {
                     this.uploadPendingAttachments(this.episode.id);
                 }
 
-                this.formSubmited = true;
-                const willUploadVideo = this.video && !["uploaded", "processed", "uploading", "queued", "processing"].includes(this.uploadStatus.video);
+                const willUploadVideo = hasPendingVideo;
                 const willUploadAttach = this.pendingAttachmentCount() > 0 || this.attachmentUploading;
-                const transferInProgress = (this.video && ["uploading", "queued", "processing", "uploaded"].includes(this.uploadStatus.video))
+                const transferInProgress = (this.video && ["uploading", "queued", "processing", "uploaded", "local-processing"].includes(this.uploadStatus.video))
                     || this.attachmentUploading;
 
                 if (willUploadVideo || willUploadAttach || transferInProgress) {
                     this.showUploadProgressModal = true;
-                    this.showToast("فایل‌های جلسه در حال آپلود هستند؛ می‌توانید وضعیت را از باتم‌شیت ببینید.");
+                    this.showToast("جلسه با موفقیت ذخیره شد؛ فرآیند آپلود و پردازش آغاز گردید.");
                 } else {
                     this.showToast("ویرایش با موفقیت انجام شد.");
                     if (!this.video && !this.pendingAttachmentCount()) {
@@ -1494,12 +1741,13 @@ export default {
                 this.errors = {
                     ...this.errors,
                     ...error.response?.data?.errors
-                }
+                };
                 console.error('Episode update failed:', this.errors);
+                this.showToast("خطا در ذخیره جلسه", true);
             }).finally(() => {
                 this.updateLoading = false;
                 this.loading = false;
-            })
+            });
         },
         confirmSubmitWithUpload() {
             this.showSubmitWarningModal = false;
@@ -1522,20 +1770,17 @@ export default {
             try {
                 await field.uploadAll(async (item, onProgress) => {
                     const file = item.file;
-                    const initRes = await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, {
-                        episode_id: episodeId,
-                        filename: file.name,
-                        mime: file.type || 'application/octet-stream',
-                        size: file.size,
-                        title: item.title || file.name,
-                    });
-                    const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
                     const formData = new FormData();
-                    formData.append('path', uploadPath);
-                    formData.append('file', file);
-                    await axios.post(workerUploadUrl, formData, {
+                    formData.append("episode_id", episodeId);
+                    formData.append("file", file);
+                    formData.append("title", item.title || file.name);
+                    formData.append("filename", file.name);
+                    formData.append("mime", file.type || "application/octet-stream");
+                    formData.append("size", file.size);
+
+                    await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, formData, {
+                        headers: { "Content-Type": "multipart/form-data" },
                         timeout: 3600 * 1000,
-                        headers: { Authorization: `Bearer ${uploadToken}` },
                         onUploadProgress: (progressEvent) => {
                             const { loaded, total } = progressEvent;
                             onProgress(total ? Math.round((loaded * 100) / total) : 0);
@@ -1600,6 +1845,33 @@ export default {
             this.uploadStatus[fileType] = 'uploading';
 
             try {
+                let workerRes;
+                if (fileType === 'attached_file') {
+                    // Direct upload to main server for attachments
+                    const formData = new FormData();
+                    formData.append('episode_id', episodeId);
+                    formData.append('file', file);
+                    formData.append('title', file.name);
+                    formData.append('filename', file.name);
+                    formData.append('mime', file.type || 'application/octet-stream');
+                    formData.append('size', file.size);
+                    workerRes = await axiosInstance.post(`admin/course/${this.course.slug}/episode/uploadAttachedFile`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        timeout: 3600 * 1000,
+                        signal: controller.signal,
+                        onUploadProgress: (progressEvent) => {
+                            const { loaded, total } = progressEvent;
+                            this.progress[fileType] = {
+                                percent: total ? Math.round((loaded * 100) / total) : 0,
+                                uploaded: loaded,
+                                total: total,
+                                speed: '',
+                                lastTime: Date.now(),
+                                lastUploaded: loaded,
+                            };
+                        },
+                    });
+                } else {
                 // 1) Init-upload on backend
                 let initUrl = '';
                 let initBody = { filename: file.name, mime: file.type, size: file.size };
@@ -1608,9 +1880,6 @@ export default {
                     initBody.course_id = this.course.id;
                     initBody.episode_id = episodeId;
                     initBody.storage_disk = this.processOptions?.storage_disk || 'dl';
-                } else if (fileType === 'attached_file') {
-                    initUrl = `admin/course/${this.course.slug}/episode/uploadAttachedFile`;
-                    initBody.episode_id = episodeId;
                 }
 
                 const initRes = await axiosInstance.post(initUrl, initBody);
@@ -1620,7 +1889,6 @@ export default {
                     try { this.workerOrigin = new URL(workerUploadUrl).origin; } catch (e) { this.workerOrigin = ''; }
                 }
 
-                let workerRes;
                 if (fileType === 'video') {
                     const { uploadVideoInChunks } = await import('@/utils/chunkedVideoUpload.js');
                     const data = await uploadVideoInChunks({
@@ -1673,6 +1941,7 @@ export default {
                             };
                         },
                     });
+                }
                 }
 
                 this.progress[fileType].completed = true;
@@ -1947,7 +2216,9 @@ export default {
         },
 
         reprocessVideo() {
-            if (this.video_id) {
+            if (this.processingMode === 'local') {
+                this.startLocalProcessing();
+            } else if (this.video_id) {
                 this.startProcessing(this.video_id);
             }
         },
@@ -1957,13 +2228,14 @@ export default {
             this.video = null;
             this.uploadStatus.video = 'idle';
             this.processingStatus.video = 'idle';
+            this.localProcessTaskStatus = 'idle';
+            this.localProcessPhase = '';
             this.videoPreview = { name: '', duration: '', size: '', thumbnail: '', url: '' };
             if (this.statusTimer) {
                 clearInterval(this.statusTimer);
                 this.statusTimer = null;
             }
             if (this.$refs.video) this.$refs.video.value = null;
-
         },
 
         async removeFile(fileType) {
@@ -2052,11 +2324,246 @@ export default {
 
             this.errors[type] = null;
             return true;
+        },
+
+        async startLocalProcessing() {
+            if (!this.episode?.id) return;
+            if (!this.video && !this.video_id) {
+                this.showToast('ابتدا فایل ویدیو را انتخاب کنید.', true);
+                return;
+            }
+
+            this.localProcessingLoading = true;
+            try {
+                let res;
+                const rawBody = buildProcessRequestBody(this.processOptions, this.watermarkFile);
+                let payload;
+                let reqConfig = {};
+
+                const filename = this.video?.name || this.oldVideo?.name || this.episode?.video?.title || '';
+                const mime = this.video?.type || 'video/mp4';
+                const size = String(this.video?.size || this.oldVideo?.size || 0);
+                const storageDisk = this.processOptions?.storage_disk || this.storageDisk || 'dl';
+
+                if (rawBody instanceof FormData) {
+                    payload = rawBody;
+                    payload.append('course_id', this.course.id);
+                    payload.append('episode_id', this.episode.id);
+                    payload.append('filename', filename);
+                    payload.append('mime', mime);
+                    payload.append('size', size);
+                    payload.append('storage_disk', storageDisk);
+                    reqConfig = {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    };
+                } else {
+                    payload = {
+                        ...rawBody,
+                        course_id: this.course.id,
+                        episode_id: this.episode.id,
+                        filename,
+                        mime,
+                        size,
+                        storage_disk: storageDisk,
+                    };
+                }
+
+                if (this.video && (!this.video_id || this.uploadStatus.video === 'local-pending' || this.uploadStatus.video === 'pending')) {
+                    res = await axiosInstance.post('admin/video/local-process/init', payload, reqConfig);
+                } else if (this.video_id) {
+                    res = await axiosInstance.post(`admin/video/local-process/${this.video_id}`, payload, reqConfig);
+                }
+
+                if (!res?.data) throw new Error('پاسخی از سرور دریافت نشد.');
+
+                const data = res.data;
+                this.video_id = data.video_id;
+                this.localProcessTaskUuid = data.task_id;
+                this.localProcessDeepLink = data.deep_link;
+                if (data.app_download_url) {
+                    this.localProcessDownloadUrl = data.app_download_url;
+                }
+
+                this.uploadStatus.video = 'local-processing';
+                this.processingStatus.video = 'processing';
+                this.localProcessTaskStatus = data.task_status || 'pending';
+                this.localProcessPhase = data.phase || 'raw_uploading';
+
+                if (this.localProcessDeepLink) {
+                    this.launchLocalApp(this.localProcessDeepLink);
+                    this.showToast('نرم‌افزار پردازش محلی فراخوانی شد؛ در صورت نیاز همان فایل را در پنجره نرم‌افزار تایید کنید.');
+                }
+
+                this.showUploadProgressModal = true;
+                this.startLocalStatusPolling(this.video_id);
+
+            } catch (error) {
+                console.error('Failed to start local processing:', error);
+                this.showToast(error?.response?.data?.message || 'خطا در شروع پردازش محلی', true);
+                this.uploadStatus.video = 'error';
+            } finally {
+                this.localProcessingLoading = false;
+            }
+        },
+
+        launchLocalApp(url) {
+            if (!url) return;
+            this.isLaunchingApp = true;
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = url;
+                document.body.appendChild(iframe);
+                setTimeout(() => {
+                    try {
+                        if (iframe.parentNode) {
+                            iframe.parentNode.removeChild(iframe);
+                        }
+                    } catch (e) {}
+                    this.isLaunchingApp = false;
+                }, 3000);
+            } catch (e) {
+                this.isLaunchingApp = false;
+                window.location.href = url;
+            }
+        },
+
+        reopenLocalApp() {
+            if (this.localProcessDeepLink) {
+                this.launchLocalApp(this.localProcessDeepLink);
+            }
+        },
+
+        async cancelLocalProcessing() {
+            if (!this.video_id) return;
+            this.cancellingProcess = true;
+            try {
+                await axiosInstance.post(`admin/video/local-process/${this.video_id}/cancel`);
+                this.uploadStatus.video = 'local-pending';
+                this.processingStatus.video = 'idle';
+                this.localProcessTaskStatus = 'cancelled';
+                this.processingProgress = null;
+                if (this.statusTimer) {
+                    clearInterval(this.statusTimer);
+                    this.statusTimer = null;
+                }
+                this.showToast('پردازش محلی لغو شد.');
+            } catch (e) {
+                this.showToast(e?.response?.data?.message || 'لغو پردازش ناموفق بود', true);
+            } finally {
+                this.cancellingProcess = false;
+            }
+        },
+
+        startLocalStatusPolling(videoId) {
+            if (!videoId) return;
+            if (this.statusTimer) clearInterval(this.statusTimer);
+
+            const pollOnce = async () => {
+                try {
+                    const res = await axiosInstance.get(`admin/video/local-process/${videoId}/status`, { timeout: 10000 });
+                    const data = res.data;
+                    if (!data) return;
+
+                    if (typeof data.progress === 'number') {
+                        this.processingProgress = data.progress;
+                    }
+                    this.localProcessPhase = data.phase;
+                    this.localProcessTaskStatus = data.task_status;
+
+                    if (data.task_status === 'completed' || data.status === 'processed') {
+                        this.uploadStatus.video = 'processed';
+                        this.processingStatus.video = 'processed';
+                        this.localProcessTaskStatus = 'completed';
+                        clearInterval(this.statusTimer);
+                        this.statusTimer = null;
+                        this.showToast('پردازش و آپلود محلی با موفقیت به پایان رسید!');
+                    } else if (data.task_status === 'failed' || data.task_status === 'expired') {
+                        this.uploadStatus.video = 'processing-error';
+                        this.processingStatus.video = 'failed';
+                        this.localProcessTaskStatus = 'failed';
+                        clearInterval(this.statusTimer);
+                        this.statusTimer = null;
+                        this.showToast(data.error_message || 'پردازش محلی با خطا متوقف شد.', true);
+                    } else if (data.task_status === 'cancelled') {
+                        this.uploadStatus.video = 'local-pending';
+                        this.processingStatus.video = 'idle';
+                        this.localProcessTaskStatus = 'cancelled';
+                        clearInterval(this.statusTimer);
+                        this.statusTimer = null;
+                    } else {
+                        this.uploadStatus.video = 'local-processing';
+                        this.processingStatus.video = 'processing';
+                    }
+                } catch (e) {
+                    // keep trying
+                }
+            };
+
+            pollOnce();
+            this.statusTimer = setInterval(pollOnce, 3000);
+        },
+
+        handleBeforeUnload(e) {
+            if (this.isLaunchingApp) return;
+            const isBusy = (this.video && ['uploading', 'queued', 'processing', 'local-processing'].includes(this.uploadStatus.video)) || this.attachmentUploading;
+            if (isBusy && !this.allowLeave) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        },
+
+        confirmLeavePage() {
+            this.allowLeave = true;
+            this.showLeaveConfirmModal = false;
+            if (typeof this.pendingLeaveNext === 'function') {
+                this.pendingLeaveNext();
+                this.pendingLeaveNext = null;
+            } else if (this.pendingLeaveTarget) {
+                this.$router.push(this.pendingLeaveTarget);
+                this.pendingLeaveTarget = null;
+            } else {
+                this.$router.back();
+            }
+        },
+
+        cancelLeavePage() {
+            this.showLeaveConfirmModal = false;
+            this.pendingLeaveNext = null;
+            this.pendingLeaveTarget = null;
         }
+    },
+    beforeRouteLeave(to, from, next) {
+        if (this.isLaunchingApp) {
+            next(false);
+            return;
+        }
+        if (this.allowLeave) {
+            next();
+            return;
+        }
+        const isBusy = (this.video && ['uploading', 'queued', 'processing', 'local-processing'].includes(this.uploadStatus.video)) || this.attachmentUploading;
+        if (isBusy) {
+            this.pendingLeaveNext = next;
+            this.pendingLeaveTarget = to;
+            this.showLeaveConfirmModal = true;
+            next(false);
+            return;
+        }
+        next();
     },
     mounted() {
         document.title = "ویرایش جلسه";
+        window.addEventListener('beforeunload', this.handleBeforeUnload);
         this.initFromSlug();
+    },
+    beforeUnmount() {
+        window.removeEventListener('beforeunload', this.handleBeforeUnload);
+        if (this.statusTimer) {
+            clearInterval(this.statusTimer);
+            this.statusTimer = null;
+        }
     }
 };
 </script>

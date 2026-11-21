@@ -4,7 +4,6 @@ definePageMeta({
   middleware: ['auth'],
 })
 </script>
-
 <template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
@@ -106,135 +105,176 @@ definePageMeta({
                                     </span>
                                 </label>
 
+                                <!-- Video Upload Dropzone when no video selected -->
                                 <div
-                                    class="relative border-2 flex flex-col items-center justify-center w-full rounded-2xl cursor-pointer transition overflow-hidden"
+                                    v-if="!video"
+                                    class="relative border-2 border-dashed flex flex-col items-center justify-center w-full max-w-3xl mx-auto rounded-2xl cursor-pointer transition overflow-hidden aspect-video group/drop"
                                     :class="[
-                                        errors?.video ? 'border-rose-500' : 'border-gray-200 dark:border-gray-700',
-                                        videoPreview.thumbnail
-                                            ? 'h-56 border-solid'
-                                            : 'h-64 border-dashed bg-gray-50/80 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800',
+                                        errors?.video ? 'border-rose-500 bg-rose-50/20' : 'border-gray-300 dark:border-gray-700 hover:border-yellow-500 dark:hover:border-yellow-400 bg-gray-50/70 dark:bg-gray-800/40 hover:bg-gray-100/70 dark:hover:bg-gray-800/70',
                                     ]"
                                     @dragover.prevent
                                     @drop.prevent="handleVideo"
-                                    @click="!videoPreview.thumbnail && openVideoPicker()"
+                                    @click="openVideoPicker"
                                 >
-                                    <template v-if="!videoPreview.thumbnail">
-                                        <div class="flex flex-col items-center justify-center p-8 pointer-events-none">
-                                            <div class="w-16 h-16 rounded-2xl bg-yellow-400/20 flex items-center justify-center mb-4">
-                                                <svg class="w-8 h-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                            <p class="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                                                کلیک کنید یا ویدیو را اینجا بکشید
-                                            </p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ fileValidationRules.video.extensions.join(', ') }}
-                                                (حداکثر {{ formatFileSize(fileValidationRules.video.maxSize, 0, 'fa') }})
-                                            </p>
-                                            <button
-                                                type="button"
-                                                class="mt-5 rounded-xl px-5 py-2 text-xs font-bold text-gray-900 bg-yellow-400 hover:bg-yellow-500 transition-colors pointer-events-auto"
-                                                @click.stop="openVideoPicker"
-                                            >
-                                                انتخاب ویدیو
-                                            </button>
+                                    <div class="flex flex-col items-center justify-center p-6 text-center pointer-events-none">
+                                        <div class="w-16 h-16 rounded-2xl bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center mb-4 text-yellow-500 group-hover/drop:scale-110 transition-transform">
+                                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
                                         </div>
-                                    </template>
+                                        <p class="mb-1 text-sm font-bold text-gray-800 dark:text-gray-100">
+                                            انتخاب یا کشیدن و رها کردن ویدیوی جلسه
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-sans">
+                                            {{ fileValidationRules.video.extensions.join(' · ') }} (حداکثر {{ formatFileSize(fileValidationRules.video.maxSize, 0, 'fa') }})
+                                        </p>
+                                        <button
+                                            type="button"
+                                            class="mt-4 rounded-xl px-5 py-2 text-xs font-bold text-gray-900 bg-yellow-400 hover:bg-yellow-500 transition shadow-sm pointer-events-auto"
+                                            @click.stop="openVideoPicker"
+                                        >
+                                            انتخاب فایل ویدیو
+                                        </button>
+                                    </div>
+                                </div>
 
-                                    <template v-else>
-                                        <img :src="videoPreview.thumbnail" class="absolute inset-0 w-full h-full object-cover" alt="" />
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                                        <div class="absolute top-3 end-3 flex items-center gap-1.5 z-10">
-                                            <button
-                                                type="button"
-                                                title="تغییر ویدیو"
-                                                class="h-8 px-3 rounded-lg bg-white/90 dark:bg-gray-900/90 text-xs font-semibold text-gray-800 dark:text-gray-100 shadow hover:bg-white"
-                                                @click.stop="openVideoPicker"
-                                            >
-                                                تغییر
-                                            </button>
-                                            <button
-                                                type="button"
-                                                title="لغو انتخاب ویدیو"
-                                                class="h-8 px-3 rounded-lg bg-rose-500 text-white text-xs font-semibold shadow hover:bg-rose-600 flex items-center gap-1"
-                                                @click.stop="removeVideo"
-                                            >
-                                                لغو انتخاب
-                                            </button>
-                                        </div>
-                                        <div class="absolute bottom-3 start-3 end-3 z-10 flex items-center gap-3 text-white text-xs font-medium">
-                                            <span class="bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1">{{ videoPreview.duration }}</span>
-                                            <span class="bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1">{{ formatFileSize(videoPreview.size) }}</span>
-                                            <span class="bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1 line-clamp-1 flex-1">{{ videoPreview.name }}</span>
-                                        </div>
-                                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
-                                            <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-                                                <svg class="w-6 h-6 text-gray-600 ms-0.5" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M8 5v14l11-7z" />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </template>
+                                <!-- Sleek Video Player when video is selected (Never stretched, full playback) -->
+                                <div v-else class="w-full max-w-3xl mx-auto space-y-3">
+                                    <AdminVideoPlayer
+                                        :src="video"
+                                        :poster="videoPreview.thumbnail"
+                                        :title="videoPreview.name"
+                                        :size="videoPreview.size"
+                                        badge-text="آماده ایجاد"
+                                        @change="openVideoPicker"
+                                        @remove="removeVideo"
+                                    />
+
+
                                 </div>
                                 <span v-if="errors?.video" class="mt-1 text-rose-500 text-xs font-medium block">
                                     {{ errors.video[0] }}
                                 </span>
                             </div>
 
-                            <div class="mt-8 pt-6 border-t border-gray-200/80 dark:border-gray-700/80">
-                                <AdminAttachmentsField
-                                    ref="attachmentsField"
-                                    title="فایل پیوست (PDF، ZIP و...)"
-                                    hint="می‌توانید چند فایل انتخاب کنید و برای هر کدام نام نمایشی بگذارید"
-                                    :accept="fileValidationRules.attached_file.extensions.join(',')"
-                                    :allowed-extensions="fileValidationRules.attached_file.extensions"
-                                    :allowed-types="fileValidationRules.attached_file.types"
-                                    :max-size="fileValidationRules.attached_file.maxSize"
-                                    :uploading="attachmentUploading"
-                                    @change="onPendingAttachChange"
-                                />
-                            </div>
+
                         </section>
 
                         <!-- Step 2: Confirm -->
                         <section
                             v-show="currentStepId === 'confirm'"
-                            class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 shadow-sm"
+                            class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 sm:p-6 shadow-sm space-y-6"
                         >
-                            <div class="mb-5">
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">تایید و ایجاد</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    اطلاعات را بررسی کنید؛ پس از ایجاد به صفحه ویرایش هدایت می‌شوید
-                                </p>
-                            </div>
-
-                            <div class="grid gap-3 grid-cols-1 sm:grid-cols-2">
-                                <div
-                                    v-for="item in confirmSummary"
-                                    :key="item.label"
-                                    class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60 p-3"
-                                >
-                                    <p class="text-[10px] font-medium text-gray-400 mb-1">{{ item.label }}</p>
-                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" :style="item.ltr ? 'direction: ltr' : ''">
-                                        {{ item.value || '—' }}
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-gray-100 dark:border-gray-800">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        <h3 class="text-base font-bold text-gray-900 dark:text-white">بررسی و تایید نهایی جلسه</h3>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        اطلاعات و ویدیوی انتخاب‌شده را بررسی کنید؛ می‌توانید ویدیو را مستقیماً پخش و بازبینی نمایید
                                     </p>
                                 </div>
+                                <span class="self-start sm:self-auto text-xs font-semibold px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-700 dark:text-yellow-400 border border-yellow-400/30">
+                                    مرحله ۲ از ۲: بررسی نهایی
+                                </span>
                             </div>
 
-                            <div v-if="videoPreview.thumbnail" class="mt-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                                <div class="relative h-40">
-                                    <img :src="videoPreview.thumbnail" class="w-full h-full object-cover" alt="" />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                    <div class="absolute bottom-3 start-3 text-white text-xs font-semibold">
-                                        {{ videoPreview.name }}
+                            <!-- Playable Video in Confirm Step -->
+                            <div v-if="video" class="space-y-2">
+                                <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300 px-1 font-semibold">
+                                    <span class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        پیش‌نمایش زنده ویدیو
+                                    </span>
+                                    <span class="text-slate-400 font-normal text-[11px]">با کلیک روی ویدیو یا دکمه پخش، از صحت ویدیو اطمینان حاصل کنید</span>
+                                </div>
+                                <AdminVideoPlayer
+                                    :src="video"
+                                    :poster="videoPreview.thumbnail"
+                                    :title="videoPreview.name"
+                                    :size="videoPreview.size"
+                                    :allow-change="false"
+                                    :allow-remove="false"
+                                    badge-text="آماده ایجاد"
+                                />
+                            </div>
+
+                            <!-- Graphical Information Cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Card 1: Episode Details -->
+                                <div class="rounded-2xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 p-4 space-y-3">
+                                    <div class="flex items-center gap-2 pb-2.5 border-b border-gray-200/60 dark:border-gray-700/60">
+                                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                            </svg>
+                                        </div>
+                                        <h4 class="text-xs font-bold text-gray-900 dark:text-white">مشخصات جلسه</h4>
+                                    </div>
+
+                                    <div class="space-y-2 text-xs">
+                                        <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                            <span class="text-gray-500 dark:text-gray-400">عنوان فارسی:</span>
+                                            <span class="font-bold text-gray-900 dark:text-gray-100 text-end">{{ title || '—' }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                            <span class="text-gray-500 dark:text-gray-400">عنوان انگلیسی:</span>
+                                            <span class="font-mono font-medium text-gray-800 dark:text-gray-200 text-end" dir="ltr">{{ english_title || '—' }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                            <span class="text-gray-500 dark:text-gray-400">دوره / فصل:</span>
+                                            <span class="font-semibold text-gray-800 dark:text-gray-200 text-end">{{ course?.title || '—' }} · {{ selectedSection?.title || '—' }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between py-1">
+                                            <span class="text-gray-500 dark:text-gray-400">شماره ترتیب جلسه:</span>
+                                            <span class="px-2 py-0.5 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold font-mono">جلسه {{ selectedOrder }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 2: Video Details -->
+                                <div class="rounded-2xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/80 dark:border-gray-700/80 p-4 space-y-3">
+                                    <div class="flex items-center justify-between pb-2.5 border-b border-gray-200/60 dark:border-gray-700/60">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-7 h-7 rounded-lg bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center shrink-0">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="text-xs font-bold text-gray-900 dark:text-white">مشخصات ویدیو</h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2 text-xs">
+                                        <div class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700/40">
+                                            <span class="text-gray-500 dark:text-gray-400">نام فایل ویدیو:</span>
+                                            <span class="font-mono text-gray-800 dark:text-gray-200 truncate max-w-[180px]" :title="videoPreview.name" dir="ltr">{{ videoPreview.name || '—' }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between py-1">
+                                            <span class="text-gray-500 dark:text-gray-400">حجم و زمان:</span>
+                                            <span class="font-mono text-gray-800 dark:text-gray-200" dir="ltr">
+                                                {{ formatFileSize(videoPreview.size) }} · {{ videoPreview.duration || '—' }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="mt-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 p-3">
+
+
+                            <!-- Notice Box -->
+                            <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 p-3.5 flex items-start gap-3">
+                                <div class="w-5 h-5 rounded-full bg-amber-400/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                                 <p class="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-                                    پس از ایجاد جلسه، به صفحه ویرایش منتقل می‌شوید تا سایر جزئیات را تکمیل کنید و ویدیو آپلود و پردازش شود.
+                                    پس از فشردن دکمه «ایجاد جلسه و ادامه»، جلسه ذخیره شده و مستقیماً به صفحه ویرایش هدایت می‌شوید تا مراحل انتقال و پردازش ویدیو به‌صورت خودکار آغاز شود.
                                 </p>
                             </div>
                         </section>
@@ -274,6 +314,8 @@ definePageMeta({
                 </div>
             </div>
         </BottomSheetDrawer>
+
+
         <component :is="'style'" type="text/css">{{ adminFormStyles }}</component>
     </AdminMasterPage>
 </template>
@@ -289,7 +331,7 @@ import axios from "axios";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { setPendingEpisodeVideo } from "@/utils/episodeUploadBridge.js";
-import AdminAttachmentsField from "@/views/components/admin/AdminAttachmentsField.vue";
+import AdminVideoPlayer from "@/views/components/admin/episode/AdminVideoPlayer.vue";
 
 const FORM_STEPS = [
     { id: "basic", label: "اطلاعات اولیه", hint: "عنوان و ویدیو" },
@@ -305,7 +347,7 @@ export default {
         AdminFormStepperNav,
         LoadingComponent,
         BottomSheetDrawer,
-        AdminAttachmentsField,
+        AdminVideoPlayer,
     },
     data() {
         return {
@@ -329,10 +371,9 @@ export default {
             lock: 0,
             video: null,
             videoPreview: { name: "", size: 0, duration: "", thumbnail: "" },
+            processingMode: "local",
+            storageDisk: "static",
             showErrorModal: false,
-            attachmentUploading: false,
-            pendingAttachCount: 0,
-            pendingAttachTitles: [],
             fileValidationRules: {
                 video: {
                     maxSize: 2 * 1024 * 1024 * 1024,
@@ -342,35 +383,7 @@ export default {
                     errorKey: "video",
                     label: "ویدیو",
                 },
-                attached_file: {
-                    maxSize: 200 * 1024 * 1024,
-                    types: [
-                        "application/pdf",
-                        "text/plain",
-                        "application/zip",
-                        "application/x-zip-compressed",
-                        "text/csv",
-                        "image/png",
-                        "image/jpeg",
-                        "application/msword",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        "application/vnd.ms-word.document.macroEnabled.12",
-                        "application/vnd.ms-excel",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "application/vnd.ms-excel.sheet.macroEnabled.12",
-                        "application/vnd.ms-powerpoint",
-                        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                        "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
-                    ],
-                    extensions: [
-                        ".pdf", ".txt", ".zip", ".csv", ".png", ".jpg", ".jpeg",
-                        ".doc", ".docx", ".docm", ".xls", ".xlsx", ".xlsm",
-                        ".ppt", ".pptx", ".pptm",
-                    ],
-                    required: false,
-                    errorKey: "attached_file",
-                    label: "فایل پیوست",
-                },
+
             },
         };
     },
@@ -382,7 +395,6 @@ export default {
                 { label: "فصل", value: this.selectedSection?.title },
                 { label: "شماره جلسه", value: this.selectedOrder },
                 { label: "ویدیو", value: this.video ? this.videoPreview.name : "—" },
-                { label: "پیوست‌ها", value: this.pendingAttachTitles.length ? this.pendingAttachTitles.join("، ") : "—" },
             ];
         },
     },
@@ -435,45 +447,7 @@ export default {
             this.episode = response.data.episode;
             return this.episode;
         },
-        onPendingAttachChange(files) {
-            const pending = (files || []).filter((item) => item.status !== "uploaded");
-            this.pendingAttachCount = pending.length;
-            this.pendingAttachTitles = pending.map((item) => item.title).filter(Boolean);
-        },
-        async uploadPendingAttachments() {
-            const field = this.$refs.attachmentsField;
-            const episodeId = this.episode?.id;
-            if (!field || !episodeId || !field.pendingForUpload().length) return;
-            this.attachmentUploading = true;
-            try {
-                await field.uploadAll(async (item, onProgress) => {
-                    const file = item.file;
-                    const initRes = await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, {
-                        episode_id: episodeId,
-                        filename: file.name,
-                        mime: file.type || "application/octet-stream",
-                        size: file.size,
-                        title: item.title || file.name,
-                    });
-                    const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
-                    const formData = new FormData();
-                    formData.append("path", uploadPath);
-                    formData.append("file", file);
-                    await axios.post(workerUploadUrl, formData, {
-                        timeout: 3600 * 1000,
-                        headers: { Authorization: `Bearer ${uploadToken}` },
-                        onUploadProgress: (progressEvent) => {
-                            const { loaded, total } = progressEvent;
-                            onProgress(total ? Math.round((loaded * 100) / total) : 0);
-                        },
-                    });
-                });
-            } catch (error) {
-                this.showToast(error?.response?.data?.message || "آپلود برخی فایل‌های پیوست ناموفق بود", true);
-            } finally {
-                this.attachmentUploading = false;
-            }
-        },
+
         prepareOrderOptions() {
             const sections = this.course.sections;
             const currentIndex = sections.findIndex((sec) => sec.id === this.selectedSection.id);
@@ -558,6 +532,7 @@ export default {
                 URL.revokeObjectURL(url);
             });
         },
+
         removeVideo() {
             this.video = null;
             if (this.$refs.video) this.$refs.video.value = null;
@@ -625,8 +600,10 @@ export default {
                     section_id: this.selectedSection.id,
                     episode_id: this.episode.id,
                 });
-                setPendingEpisodeVideo(this.video, this.videoPreview);
-                await this.uploadPendingAttachments();
+                setPendingEpisodeVideo(this.video, this.videoPreview, {
+                    processingMode: this.processingMode || "local",
+                    storageDisk: this.storageDisk || "static",
+                });
                 this.showToast("جلسه ایجاد شد؛ در حال انتقال به صفحه ویرایش...");
                 const savedEpisode = response.data?.episode || this.episode;
                 const episodeSlug = savedEpisode.slug || this.english_title;

@@ -443,8 +443,7 @@ export default {
     },
     watch: {
         "$route.params.articleSlug"(slug, prev) {
-            if (prev === undefined) return;
-            if (slug === prev) return;
+            if (!slug || prev === undefined || slug === prev) return;
             this.loadArticle();
         },
     },
@@ -500,6 +499,7 @@ export default {
             }
         },
         async loadArticle() {
+            if (!this.articleSlug) return;
             this.readingProgress = 0;
             this.loading = true;
             try {

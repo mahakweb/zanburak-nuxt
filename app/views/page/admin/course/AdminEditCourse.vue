@@ -1,16 +1,16 @@
-<template>
+﻿<template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
             <router-link :to="{ name: 'admin-courses-list' }" :class="BTN_SECONDARY">
                 <span class="flex items-center gap-1.5">
-                    لیست دوره‌ها
+                    Ù„ÛŒØ³Øª Ø¯ÙˆØ±Ù‡â€ŒÙ‡Ø§
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                 </span>
             </router-link>
             <router-link v-if="courseSlug" :to="{ name: 'admin-course-details', params: { courseSlug } }" :class="BTN_SECONDARY">
-                <span class="flex items-center gap-1.5">جزئیات دوره</span>
+                <span class="flex items-center gap-1.5">Ø¬Ø²Ø¦ÛŒØ§Øª Ø¯ÙˆØ±Ù‡</span>
             </router-link>
         </template>
 
@@ -25,9 +25,9 @@
                         :footer-label="footerStepLabel"
                         :show-submit="currentStepId === 'confirm'"
                         :submit-loading="updateLoading"
-                        submit-label="تایید و ذخیره تغییرات"
+                        submit-label="ØªØ§ÛŒÛŒØ¯ Ùˆ Ø°Ø®ÛŒØ±Ù‡ ØªØºÛŒÛŒØ±Ø§Øª"
                         :show-reset="currentStepId === 'confirm'"
-                        reset-label="بازنشانی فرم"
+                        reset-label="Ø¨Ø§Ø²Ù†Ø´Ø§Ù†ÛŒ ÙØ±Ù…"
                         @go-to-step="goToStep"
                         @prev="prevStep"
                         @next="nextStep"
@@ -38,14 +38,14 @@
                     <div class="min-w-0 min-h-[420px]">
                         <section v-show="currentStepId === 'basic'" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 shadow-sm">
                             <div class="mb-5">
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">اطلاعات کلی</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">عنوان، نوع، قیمت، انتشار و دسته‌بندی دوره</p>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ú©Ù„ÛŒ</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ø¹Ù†ÙˆØ§Ù†ØŒ Ù†ÙˆØ¹ØŒ Ù‚ÛŒÙ…ØªØŒ Ø§Ù†ØªØ´Ø§Ø± Ùˆ Ø¯Ø³ØªÙ‡â€ŒØ¨Ù†Ø¯ÛŒ Ø¯ÙˆØ±Ù‡</p>
                             </div>
                             <div class="grid gap-x-6 gap-y-3 mb-6 grid-cols-1 md:grid-cols-2">
                             <div>
                                 <label for="title"
-                                    class="field-label">عنوان فارسی
-                                    دوره</label>
+                                    class="field-label">Ø¹Ù†ÙˆØ§Ù† ÙØ§Ø±Ø³ÛŒ
+                                    Ø¯ÙˆØ±Ù‡</label>
                                 <input type="text" id="title" v-model="title"
                                     class="form-input"
                                     :class="{ 'text-rose-500 dark:text-rose-500 ring-2 ring-rose-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900': errors && errors.title }"
@@ -57,8 +57,8 @@
 
                             <div>
                                 <label for="english_title"
-                                    class="field-label">عنوان
-                                    انگلیسی دوره</label>
+                                    class="field-label">Ø¹Ù†ÙˆØ§Ù†
+                                    Ø§Ù†Ú¯Ù„ÛŒØ³ÛŒ Ø¯ÙˆØ±Ù‡</label>
                                 <input type="text" id="english_title" v-model="english_title"
                                     @input="filterInputEnglishTitle"
                                     class="form-input"
@@ -68,14 +68,14 @@
                                     class="mt-1 text-rose-500 text-xs font-medium">
                                     {{ errors.english_title[0] }}
                                 </span>
-                                <p class="text-xs text-gray-400 mt-1">این فیلد برای ساخت آدرس (slug) دوره استفاده
-                                    می‌شود.</p>
+                                <p class="text-xs text-gray-400 mt-1">Ø§ÛŒÙ† ÙÛŒÙ„Ø¯ Ø¨Ø±Ø§ÛŒ Ø³Ø§Ø®Øª Ø¢Ø¯Ø±Ø³ (slug) Ø¯ÙˆØ±Ù‡ Ø§Ø³ØªÙØ§Ø¯Ù‡
+                                    Ù…ÛŒâ€ŒØ´ÙˆØ¯.</p>
                             </div>
 
                             <div>
                                 <label for="type"
-                                    class="field-label">نوع
-                                    دوره</label>
+                                    class="field-label">Ù†ÙˆØ¹
+                                    Ø¯ÙˆØ±Ù‡</label>
                                 <div>
                                     <ul
                                         class="h-10 grid w-full grid-cols-4 p-1 rounded-lg bg-gray-100 dark:bg-gray-700">
@@ -85,7 +85,7 @@
                                             <label for="type-free"
                                                 class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
                                                 <div class="block text-xs font-semibold text-center w-full">
-                                                    رایگان
+                                                    Ø±Ø§ÛŒÚ¯Ø§Ù†
                                                 </div>
                                             </label>
                                         </li>
@@ -95,7 +95,7 @@
                                             <label for="type-cash"
                                                 class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
                                                 <div class="block text-xs font-semibold text-center w-full">
-                                                    نقدی
+                                                    Ù†Ù‚Ø¯ÛŒ
                                                 </div>
                                             </label>
                                         </li>
@@ -105,7 +105,7 @@
                                             <label for="type-cash-vip"
                                                 class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
                                                 <div class="block text-xs font-semibold text-center w-full">
-                                                    نقدی و اعضای ویژه
+                                                    Ù†Ù‚Ø¯ÛŒ Ùˆ Ø§Ø¹Ø¶Ø§ÛŒ ÙˆÛŒÚ˜Ù‡
                                                 </div>
                                             </label>
                                         </li>
@@ -118,8 +118,8 @@
 
                             <div>
                                 <label for="price"
-                                    class="field-label">قیمت
-                                    (تومان)</label>
+                                    class="field-label">Ù‚ÛŒÙ…Øª
+                                    (ØªÙˆÙ…Ø§Ù†)</label>
                                 <input type="text" id="price" v-model="formattedPrice" @input="onInputPrice"
                                     :disabled="type === 'free'"
                                     class="bg-gray-100 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-offset-1 ring-offset-white dark:ring-offset-gray-900 focus:ring-yellow-500 block w-full p-2.5 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
@@ -129,13 +129,13 @@
                                     {{ errors.price[0] }}
                                 </span>
                                 <p class="text-xs text-gray-400">&nbsp;{{ priceInWords }}&nbsp;<span v-if="priceInWords"
-                                        class="">تومان</span></p>
+                                        class="">ØªÙˆÙ…Ø§Ù†</span></p>
                             </div>
 
                             <div>
                                 <label for="publish"
-                                    class="field-label">وضعیت
-                                    انتشار</label>
+                                    class="field-label">ÙˆØ¶Ø¹ÛŒØª
+                                    Ø§Ù†ØªØ´Ø§Ø±</label>
                                 <ul
                                     class="h-10 grid w-full gap-3 grid-cols-2 p-1 rounded-lg bg-gray-100 dark:bg-gray-700">
                                     <li>
@@ -144,7 +144,7 @@
                                         <label for="publish-false"
                                             class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
                                             <div class="block text-xs font-semibold text-center w-full">
-                                                پیش‌نویس
+                                                Ù¾ÛŒØ´â€ŒÙ†ÙˆÛŒØ³
                                             </div>
                                         </label>
                                     </li>
@@ -154,13 +154,13 @@
                                         <label for="publish-true"
                                             class="h-full inline-flex items-center justify-between w-full p-1.5 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer peer-checked:text-black peer-checked:bg-yellow-400">
                                             <div class="block text-xs font-semibold text-center w-full">
-                                                منتشر شده
+                                                Ù…Ù†ØªØ´Ø± Ø´Ø¯Ù‡
                                             </div>
                                         </label>
                                     </li>
                                 </ul>
-                                <p class="text-xs text-gray-400 mt-1">اگر در حالت "منتشر شده" باشد، دوره برای عموم قابل
-                                    مشاهده خواهد بود.</p>
+                                <p class="text-xs text-gray-400 mt-1">Ø§Ú¯Ø± Ø¯Ø± Ø­Ø§Ù„Øª "Ù…Ù†ØªØ´Ø± Ø´Ø¯Ù‡" Ø¨Ø§Ø´Ø¯ØŒ Ø¯ÙˆØ±Ù‡ Ø¨Ø±Ø§ÛŒ Ø¹Ù…ÙˆÙ… Ù‚Ø§Ø¨Ù„
+                                    Ù…Ø´Ø§Ù‡Ø¯Ù‡ Ø®ÙˆØ§Ù‡Ø¯ Ø¨ÙˆØ¯.</p>
                             </div>
 
                             <div v-if="type !== 'free'" class="md:col-span-2">
@@ -181,39 +181,39 @@
 
                             <div>
                                 <label for="tags"
-                                    class="field-label">برچسب های
-                                    دوره</label>
+                                    class="field-label">Ø¨Ø±Ú†Ø³Ø¨ Ù‡Ø§ÛŒ
+                                    Ø¯ÙˆØ±Ù‡</label>
                                 <vue3-tags-input
                                     class="bg-gray-100 border border-gray-300 text-gray-900 text-sm border-none rounded-lg focus:outline-none focus:border-none dark:focus:outline-none dark:focus:border-none focus-within:border-transparent dark:focus-within:border-transparent focus-within:ring-yellow-500 block w-full p-1 dark:bg-gray-700 dark:placeholder-gray-400 focus-within:ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 dark:text-white dark:focus-within:ring-yellow-500"
                                     :class="{ 'text-rose-500 dark:text-rose-500 ring-2 ring-rose-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900': errors && errors.tags }"
                                     placeholder="" :limit="3" :loading="true" :tags="tags" :duplicate-select-item="true"
                                     @on-tags-changed="handleChangeTag" />
-                                <p class="text-xs text-gray-400 mt-1">تگ ها را وارد کنید و با زدن کلید اینتر یا فاصله آن
-                                    هارا از هم جدا کنید</p>
+                                <p class="text-xs text-gray-400 mt-1">ØªÚ¯ Ù‡Ø§ Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯ Ùˆ Ø¨Ø§ Ø²Ø¯Ù† Ú©Ù„ÛŒØ¯ Ø§ÛŒÙ†ØªØ± ÛŒØ§ ÙØ§ØµÙ„Ù‡ Ø¢Ù†
+                                    Ù‡Ø§Ø±Ø§ Ø§Ø² Ù‡Ù… Ø¬Ø¯Ø§ Ú©Ù†ÛŒØ¯</p>
                             </div>
 
                             <div>
                                 <label for="categories"
-                                    class="field-label">دسته
-                                    بندی‌های دوره</label>
+                                    class="field-label">Ø¯Ø³ØªÙ‡
+                                    Ø¨Ù†Ø¯ÛŒâ€ŒÙ‡Ø§ÛŒ Ø¯ÙˆØ±Ù‡</label>
                                 <AdvancedMultiSelect v-model="selectedCategories" :options="categories"
                                     :closeOnSelect="true" optionLabel="title" optionValue="id"
-                                    :placeholder="'انتخاب کنید'" :enableSearch="true" :enableSelectAll="true"
+                                    :placeholder="'Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒØ¯'" :enableSearch="true" :enableSelectAll="true"
                                     :enableClearAll="true"
                                     :class="{ 'text-rose-500 dark:text-rose-500 ring-2 ring-rose-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 rounded-lg': errors && errors.categories }" />
                                 <span v-if="errors && errors.categories" class="mt-1 text-rose-500 text-xs font-medium">
                                     {{ errors.categories[0] }}
                                 </span>
 
-                                <p class="text-xs text-gray-400 mt-1">برای دسته بندی میتوانید چندین مورد را انتخاب کنید.
+                                <p class="text-xs text-gray-400 mt-1">Ø¨Ø±Ø§ÛŒ Ø¯Ø³ØªÙ‡ Ø¨Ù†Ø¯ÛŒ Ù…ÛŒØªÙˆØ§Ù†ÛŒØ¯ Ú†Ù†Ø¯ÛŒÙ† Ù…ÙˆØ±Ø¯ Ø±Ø§ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒØ¯.
                                 </p>
                             </div>
                             
                             <div>
                                 <label for="paths"
-                                    class="field-label">مسیرهای یادگیری</label>
-                                <AsyncSearchSelect v-model="selectedPaths" class="h-11" searchApi="/admin/path/search/paths" :placeholder="'جستجو مسیر...'"></AsyncSearchSelect>
-                                <!-- <p class="text-xs text-gray-400 mt-1">مسیرهایی که این دوره جز آن‌هاست را انتخاب کنید.
+                                    class="field-label">Ù…Ø³ÛŒØ±Ù‡Ø§ÛŒ ÛŒØ§Ø¯Ú¯ÛŒØ±ÛŒ</label>
+                                <AsyncSearchSelect v-model="selectedPaths" class="h-11" searchApi="/admin/path/search/paths" :placeholder="'Ø¬Ø³ØªØ¬Ùˆ Ù…Ø³ÛŒØ±...'"></AsyncSearchSelect>
+                                <!-- <p class="text-xs text-gray-400 mt-1">Ù…Ø³ÛŒØ±Ù‡Ø§ÛŒÛŒ Ú©Ù‡ Ø§ÛŒÙ† Ø¯ÙˆØ±Ù‡ Ø¬Ø² Ø¢Ù†â€ŒÙ‡Ø§Ø³Øª Ø±Ø§ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒØ¯.
                                 </p> -->
                             </div>
                         </div>
@@ -221,14 +221,14 @@
 
                         <section v-show="currentStepId === 'details'" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 shadow-sm">
                             <div class="mb-5">
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">جزئیات آموزشی</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">توضیحات، سطح، وضعیت و تاریخ‌های دوره</p>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Ø¬Ø²Ø¦ÛŒØ§Øª Ø¢Ù…ÙˆØ²Ø´ÛŒ</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">ØªÙˆØ¶ÛŒØ­Ø§ØªØŒ Ø³Ø·Ø­ØŒ ÙˆØ¶Ø¹ÛŒØª Ùˆ ØªØ§Ø±ÛŒØ®â€ŒÙ‡Ø§ÛŒ Ø¯ÙˆØ±Ù‡</p>
                             </div>
                             <div class="grid gap-6 mb-6 grid-cols-1 md:grid-cols-2">
                             <div class="md:col-span-2">
                                 <label for="short_description"
-                                    class="field-label">توضیح
-                                    کوتاه</label>
+                                    class="field-label">ØªÙˆØ¶ÛŒØ­
+                                    Ú©ÙˆØªØ§Ù‡</label>
                                 <textarea id="short_description" rows="5" v-model="short_description"
                                     class="form-input"
                                     :class="{ 'text-rose-500 dark:text-rose-500 ring-2 ring-rose-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900': errors && errors.short_description }"
@@ -237,15 +237,15 @@
                                     class="mt-1 text-rose-500 text-xs font-medium">
                                     {{ errors.short_description[0] }}
                                 </span>
-                                <p class="text-xs text-gray-400 mt-1">توضیح مختصر در ۲-۳ جمله که دوره را معرفی می‌کند.
+                                <p class="text-xs text-gray-400 mt-1">ØªÙˆØ¶ÛŒØ­ Ù…Ø®ØªØµØ± Ø¯Ø± Û²-Û³ Ø¬Ù…Ù„Ù‡ Ú©Ù‡ Ø¯ÙˆØ±Ù‡ Ø±Ø§ Ù…Ø¹Ø±ÙÛŒ Ù…ÛŒâ€ŒÚ©Ù†Ø¯.
                                 </p>
                             </div>
 
                             <div class="md:col-span-2">
                                 <label for="description"
-                                    class="flex items-center mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">توضیح
-                                    کامل
-                                    دوره
+                                    class="flex items-center mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">ØªÙˆØ¶ÛŒØ­
+                                    Ú©Ø§Ù…Ù„
+                                    Ø¯ÙˆØ±Ù‡
                                     <svg class="w-5 h-5 -rotate-90 ltr:hidden mt-1.5 ms-0.5" viewBox="0 0 24 24"
                                         fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M16 17L16 15C16 12.7909 14.2091 11 12 11L7 11" stroke="currentColor"
@@ -258,14 +258,14 @@
                                     :focusedBorder="'2px #eab308 solid'"
                                     :bodyClass="['bg-gray-100', 'text-gray-900', 'dark:bg-gray-700', 'dark:text-white']"
                                     :errors="errors && errors.description ? errors.description[0] : ''"
-                                    :placeholder="'تمامی نکات، موضوعات تحت پوشش، اهداف آموزشی و نیازمندی‌های این دوره را بنویسید...'"
+                                    :placeholder="'ØªÙ…Ø§Ù…ÛŒ Ù†Ú©Ø§ØªØŒ Ù…ÙˆØ¶ÙˆØ¹Ø§Øª ØªØ­Øª Ù¾ÙˆØ´Ø´ØŒ Ø§Ù‡Ø¯Ø§Ù Ø¢Ù…ÙˆØ²Ø´ÛŒ Ùˆ Ù†ÛŒØ§Ø²Ù…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§ÛŒ Ø§ÛŒÙ† Ø¯ÙˆØ±Ù‡ Ø±Ø§ Ø¨Ù†ÙˆÛŒØ³ÛŒØ¯...'"
                                     v-model="description"> </EditorComponent>
                             </div>
 
                             <div class="md:col-span-2">
                                 <label for="meta_keywords"
-                                    class="field-label">کلمات کلیدی
-                                    <span class="text-gray-400">(حداقل 3 و حداکثر 10 کلمه)</span>
+                                    class="field-label">Ú©Ù„Ù…Ø§Øª Ú©Ù„ÛŒØ¯ÛŒ
+                                    <span class="text-gray-400">(Ø­Ø¯Ø§Ù‚Ù„ 3 Ùˆ Ø­Ø¯Ø§Ú©Ø«Ø± 10 Ú©Ù„Ù…Ù‡)</span>
                                 </label>
                                 <textarea id="meta_keywords" rows="3" v-model="meta_keywords"
                                     class="form-input"
@@ -276,22 +276,22 @@
                                     {{ errors.meta_keywords[0] }}
                                 </span>
                                 <p class="text-xs text-gray-400 mt-1">
-                                    کلمات کلیدی را با کاما (,) جدا کنید. این کلمات برای SEO استفاده می‌شوند.
+                                    Ú©Ù„Ù…Ø§Øª Ú©Ù„ÛŒØ¯ÛŒ Ø±Ø§ Ø¨Ø§ Ú©Ø§Ù…Ø§ (,) Ø¬Ø¯Ø§ Ú©Ù†ÛŒØ¯. Ø§ÛŒÙ† Ú©Ù„Ù…Ø§Øª Ø¨Ø±Ø§ÛŒ SEO Ø§Ø³ØªÙØ§Ø¯Ù‡ Ù…ÛŒâ€ŒØ´ÙˆÙ†Ø¯.
                                     <span class="block mt-1" :class="metaKeywordsCount < 3 || metaKeywordsCount > 10 ? 'text-rose-500' : 'text-green-500'">
-                                        تعداد کلمات: {{ metaKeywordsCount }} / 3-10
+                                        ØªØ¹Ø¯Ø§Ø¯ Ú©Ù„Ù…Ø§Øª: {{ metaKeywordsCount }} / 3-10
                                     </span>
                                 </p>
                             </div>
 
                             <div>
                                 <label for="level"
-                                    class="field-label">سطح
-                                    دوره</label>
+                                    class="field-label">Ø³Ø·Ø­
+                                    Ø¯ÙˆØ±Ù‡</label>
                                 <select id="level" v-model="level_id"
                                     class="bg-gray-100 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-offset-1 ring-offset-white dark:ring-offset-gray-900 focus:ring-yellow-500 block w-full p-2 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white"
                                     :class="{ 'text-rose-500 dark:text-rose-500 ring-2 ring-rose-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900': errors && errors.level_id }">
 
-                                    <option value="" disabled selected>انتخاب کنید</option>
+                                    <option value="" disabled selected>Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒØ¯</option>
                                     <option v-for="(level, index) in levels" :key="index" :value="level.id">{{
                                         level.title }}</option>
                                 </select>
@@ -302,12 +302,12 @@
 
                             <div>
                                 <label for="status"
-                                    class="field-label">وضعیت
-                                    دوره</label>
+                                    class="field-label">ÙˆØ¶Ø¹ÛŒØª
+                                    Ø¯ÙˆØ±Ù‡</label>
                                 <select id="status" v-model="status_id"
                                     class="bg-gray-100 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-offset-1 ring-offset-white dark:ring-offset-gray-900 focus:ring-yellow-500 block w-full p-2 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white"
                                     :class="{ 'text-rose-500 dark:text-rose-500 ring-2 ring-rose-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900': errors && errors.status_id }">
-                                    <option value="" disabled selected>انتخاب کنید</option>
+                                    <option value="" disabled selected>Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒØ¯</option>
                                     <option v-for="(status, index) in statuses" :key="index" :value="status.id">{{
                                         status.title }}</option>
                                 </select>
@@ -318,30 +318,30 @@
 
                             <div>
                                 <label for="start_date"
-                                    class="field-label">تاریخ
-                                    شروع</label>
+                                    class="field-label">ØªØ§Ø±ÛŒØ®
+                                    Ø´Ø±ÙˆØ¹</label>
                                 <input type="datetime-local" id="start_date" v-model="start_date"
                                     class="form-input text-center"
                                     :class="{ 'text-rose-500 dark:text-rose-500 ring-2 ring-rose-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900': errors && errors.start_date }" />
                                 <span v-if="errors && errors.start_date" class="mt-1 text-rose-500 text-xs font-medium">
                                     {{ errors.start_date[0] }}
                                 </span>
-                                <p class="text-xs text-gray-400">در صورت لایو بودن، تاریخ آغاز کلاس‌ها را وارد
-                                    کنید.</p>
+                                <p class="text-xs text-gray-400">Ø¯Ø± ØµÙˆØ±Øª Ù„Ø§ÛŒÙˆ Ø¨ÙˆØ¯Ù†ØŒ ØªØ§Ø±ÛŒØ® Ø¢ØºØ§Ø² Ú©Ù„Ø§Ø³â€ŒÙ‡Ø§ Ø±Ø§ ÙˆØ§Ø±Ø¯
+                                    Ú©Ù†ÛŒØ¯.</p>
                             </div>
 
                             <div>
                                 <label for="end_date"
-                                    class="field-label">تاریخ
-                                    پایان</label>
+                                    class="field-label">ØªØ§Ø±ÛŒØ®
+                                    Ù¾Ø§ÛŒØ§Ù†</label>
                                 <input type="datetime-local" id="end_date" v-model="end_date"
                                     class="form-input text-center"
                                     :class="{ 'text-rose-500 dark:text-rose-500 ring-2 ring-rose-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900': errors && errors.end_date }" />
                                 <span v-if="errors && errors.end_date" class="mt-1 text-rose-500 text-xs font-medium">
                                     {{ errors.end_date[0] }}
                                 </span>
-                                <p class="text-xs text-gray-400 mt-1">برای مدیریت طول دوره، تاریخ پایان را نیز مشخص
-                                    کنید.</p>
+                                <p class="text-xs text-gray-400 mt-1">Ø¨Ø±Ø§ÛŒ Ù…Ø¯ÛŒØ±ÛŒØª Ø·ÙˆÙ„ Ø¯ÙˆØ±Ù‡ØŒ ØªØ§Ø±ÛŒØ® Ù¾Ø§ÛŒØ§Ù† Ø±Ø§ Ù†ÛŒØ² Ù…Ø´Ø®Øµ
+                                    Ú©Ù†ÛŒØ¯.</p>
                             </div>
                         </div>
                         </section>
@@ -361,14 +361,14 @@
 
                         <section v-show="currentStepId === 'media'" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 shadow-sm">
                             <div class="mb-5">
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">فایل‌ها و رسانه</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">پوستر، تریلر و فایل‌های پیوست</p>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">ÙØ§ÛŒÙ„â€ŒÙ‡Ø§ Ùˆ Ø±Ø³Ø§Ù†Ù‡</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ù¾ÙˆØ³ØªØ±ØŒ ØªØ±ÛŒÙ„Ø± Ùˆ ÙØ§ÛŒÙ„â€ŒÙ‡Ø§ÛŒ Ù¾ÛŒÙˆØ³Øª</p>
                             </div>
                             <div class="grid gap-3 mb-6 grid-cols-1 md:grid-cols-2">
                             <div>
                                 <label for="poster"
                                     class="flex items-center justify-between mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">
-                                    پوستر دوره
+                                    Ù¾ÙˆØ³ØªØ± Ø¯ÙˆØ±Ù‡
                                     <MediaStatusBadge
                                         v-if="poster || oldPoster"
                                         :status="poster ? uploadStatus.poster : 'uploaded'"
@@ -383,7 +383,7 @@
                                         </div>
                                         <div
                                             class="absolute top-2 start-2 z-10 flex items-center space-x-2 rtl:space-x-reverse">
-                                            <button type="button" title="تغییر پوستر دوره"
+                                            <button type="button" title="ØªØºÛŒÛŒØ± Ù¾ÙˆØ³ØªØ± Ø¯ÙˆØ±Ù‡"
                                                 class="h-6 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 text-xs font-semibold px-2 py-[3px] rounded shadow hover:bg-opacity-90 dark:hover:bg-opacity-90 flex items-center"
                                                 @click.stop="$refs.poster.click()">
                                                 <svg class="w-5 h-5 me-1.5" viewBox="0 0 512 512" version="1.1"
@@ -403,7 +403,7 @@
                                                     </path>
 
                                                 </svg>
-                                                تغییر پوستر دوره
+                                                ØªØºÛŒÛŒØ± Ù¾ÙˆØ³ØªØ± Ø¯ÙˆØ±Ù‡
                                             </button>
                                         </div>
                                     </div>
@@ -430,10 +430,10 @@
 
                                             </svg>
                                             <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                                                <span class="font-semibold">کلیک برای انتخاب</span> یا کشیدن و رها کردن
+                                                <span class="font-semibold">Ú©Ù„ÛŒÚ© Ø¨Ø±Ø§ÛŒ Ø§Ù†ØªØ®Ø§Ø¨</span> ÛŒØ§ Ú©Ø´ÛŒØ¯Ù† Ùˆ Ø±Ù‡Ø§ Ú©Ø±Ø¯Ù†
                                             </p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ fileValidationRules.poster.extensions }} (حداکثر {{
+                                                {{ fileValidationRules.poster.extensions }} (Ø­Ø¯Ø§Ú©Ø«Ø± {{
                                                     formatFileSize(fileValidationRules.poster.maxSize, 0, 'fa') }} )
                                             </p>
                                         </div>
@@ -441,7 +441,7 @@
                                             <img onerror="this.style.display='none'" :src="posterPreview.url" class="w-full h-full object-cover " />
                                             <button
                                                 v-if="poster && (uploadStatus.poster === 'pending' || uploadStatus.poster === 'error')"
-                                                type="button" title="تغییر پوستر"
+                                                type="button" title="ØªØºÛŒÛŒØ± Ù¾ÙˆØ³ØªØ±"
                                                 class="z-10 absolute top-2 start-2 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 bg-opacity-70 dark:bg-opacity-70 text-xs font-semibold px-2 py-[3px] rounded-lg shadow hover:bg-opacity-100 dark:hover:bg-opacity-100 flex items-center"
                                                 @click.stop="$refs.poster.click()">
                                                 <svg class="w-5 h-5 me-1.5" viewBox="0 0 512 512" version="1.1"
@@ -461,12 +461,12 @@
                                                     </path>
 
                                                 </svg>
-                                                تغییر
+                                                ØªØºÛŒÛŒØ±
                                             </button>
                                             <div
                                                 class="z-10 absolute top-2 end-2 flex items-center space-x-1 rtl:space-x-reverse">
                                                 <button v-if="poster && uploadStatus.poster === 'uploading'"
-                                                    @click.prevent="cancelUpload('poster')" title="لغو آپلود"
+                                                    @click.prevent="cancelUpload('poster')" title="Ù„ØºÙˆ Ø§Ù“Ù¾Ù„ÙˆØ¯"
                                                     class="w-6 h-6 shadow rounded-lg bg-rose-500 text-white flex items-center justify-center">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 32 32" version="1.1"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -477,7 +477,7 @@
                                                 </button>
                                                 <button
                                                     v-if="poster && (uploadStatus.poster === 'pending' || uploadStatus.poster === 'error')"
-                                                    @click.prevent="removePoster" title="حذف"
+                                                    @click.prevent="removePoster" title="Ø­Ø°Ù"
                                                     class="w-6 h-6 shadow rounded-lg bg-rose-500 text-white flex items-center justify-center">
                                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -491,7 +491,7 @@
                                                 </button>
                                                 <button
                                                     v-if="poster && course_id && (uploadStatus.poster === 'pending' || uploadStatus.poster === 'error')"
-                                                    @click.prevent="uploadFile(course_id, 'poster')" title="آپلود "
+                                                    @click.prevent="uploadFile(course_id, 'poster')" title="Ø§Ù“Ù¾Ù„ÙˆØ¯ "
                                                     class="px-2 h-6 text-xs font-semibold shadow rounded-lg bg-gray-700 text-white flex items-center justify-center">
                                                     <svg class="w-4 h-4 me-1.5" viewBox="0 0 24 24" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -502,7 +502,7 @@
                                                             d="M3.75 15C3.75 14.5858 3.41422 14.25 3 14.25C2.58579 14.25 2.25 14.5858 2.25 15V15.0549C2.24998 16.4225 2.24996 17.5248 2.36652 18.3918C2.48754 19.2919 2.74643 20.0497 3.34835 20.6516C3.95027 21.2536 4.70814 21.5125 5.60825 21.6335C6.47522 21.75 7.57754 21.75 8.94513 21.75H15.0549C16.4225 21.75 17.5248 21.75 18.3918 21.6335C19.2919 21.5125 20.0497 21.2536 20.6517 20.6516C21.2536 20.0497 21.5125 19.2919 21.6335 18.3918C21.75 17.5248 21.75 16.4225 21.75 15.0549V15C21.75 14.5858 21.4142 14.25 21 14.25C20.5858 14.25 20.25 14.5858 20.25 15C20.25 16.4354 20.2484 17.4365 20.1469 18.1919C20.0482 18.9257 19.8678 19.3142 19.591 19.591C19.3142 19.8678 18.9257 20.0482 18.1919 20.1469C17.4365 20.2484 16.4354 20.25 15 20.25H9C7.56459 20.25 6.56347 20.2484 5.80812 20.1469C5.07435 20.0482 4.68577 19.8678 4.40901 19.591C4.13225 19.3142 3.9518 18.9257 3.85315 18.1919C3.75159 17.4365 3.75 16.4354 3.75 15Z"
                                                             fill="currentColor"></path>
                                                     </svg>
-                                                    آپلود
+                                                    Ø¢Ù¾Ù„ÙˆØ¯
                                                 </button>
                                             </div>
                                             <div
@@ -544,13 +544,13 @@
                                 <span v-if="errors && errors.poster" class="mt-1 text-rose-500 text-xs font-medium">
                                     {{ errors.poster[0] }}
                                 </span>
-                                <p class="text-xs text-gray-400 mt-1">تصویر اصلی که در صفحه معرفی دوره نمایش داده
-                                    می‌شود.</p>
+                                <p class="text-xs text-gray-400 mt-1">ØªØµÙˆÛŒØ± Ø§ØµÙ„ÛŒ Ú©Ù‡ Ø¯Ø± ØµÙØ­Ù‡ Ù…Ø¹Ø±ÙÛŒ Ø¯ÙˆØ±Ù‡ Ù†Ù…Ø§ÛŒØ´ Ø¯Ø§Ø¯Ù‡
+                                    Ù…ÛŒâ€ŒØ´ÙˆØ¯.</p>
                             </div>
                             <div>
                                 <label for="trailer"
                                     class="flex items-center justify-between mb-1 text-xs font-medium text-gray-900 dark:text-gray-300 gap-2">
-                                    ویدیوی معرفی دوره
+                                    ÙˆÛŒØ¯ÛŒÙˆÛŒ Ù…Ø¹Ø±ÙÛŒ Ø¯ÙˆØ±Ù‡
                                     <span v-if="trailer || oldTrailer" class="flex items-center gap-1 flex-wrap justify-end">
                                         <MediaStatusBadge
                                             v-if="trailer && uploadStatus.trailer && uploadStatus.trailer !== 'idle'"
@@ -573,7 +573,7 @@
                                         </video>
                                         <div
                                             class="absolute top-2 start-2 z-10 flex items-center space-x-2 rtl:space-x-reverse">
-                                            <button type="button" title="تغییر تریلر دوره"
+                                            <button type="button" title="ØªØºÛŒÛŒØ± ØªØ±ÛŒÙ„Ø± Ø¯ÙˆØ±Ù‡"
                                                 class="h-6 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 text-xs font-semibold px-2 py-[3px] rounded shadow hover:bg-opacity-90 dark:hover:bg-opacity-90 flex items-center"
                                                 @click.stop="$refs.trailer.click()">
                                                 <svg class="w-5 h-5 me-1.5" viewBox="0 0 512 512" version="1.1"
@@ -593,9 +593,9 @@
                                                     </path>
 
                                                 </svg>
-                                                تغییر تریلر دوره
+                                                ØªØºÛŒÛŒØ± ØªØ±ÛŒÙ„Ø± Ø¯ÙˆØ±Ù‡
                                             </button>
-                                            <button @click.prevent="removeFile('trailer')" title="حذف تریلر دوره"
+                                            <button @click.prevent="removeFile('trailer')" title="Ø­Ø°Ù ØªØ±ÛŒÙ„Ø± Ø¯ÙˆØ±Ù‡"
                                                 class="h-6 text-white bg-rose-600 text-xs font-semibold px-2 py-[3px] rounded shadow hover:bg-opacity-90 dark:hover:bg-opacity-90 flex items-center">
                                                 <svg class="w-4 h-4 me-1.5" viewBox="0 0 24 24" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -606,7 +606,7 @@
                                                         d="M11.5956 22.0001H12.4044C15.1871 22.0001 16.5785 22.0001 17.4831 21.1142C18.3878 20.2283 18.4803 18.7751 18.6654 15.8686L18.9321 11.6807C19.0326 10.1037 19.0828 9.31524 18.6289 8.81558C18.1751 8.31592 17.4087 8.31592 15.876 8.31592H8.12404C6.59127 8.31592 5.82488 8.31592 5.37105 8.81558C4.91722 9.31524 4.96744 10.1037 5.06788 11.6807L5.33459 15.8686C5.5197 18.7751 5.61225 20.2283 6.51689 21.1142C7.42153 22.0001 8.81289 22.0001 11.5956 22.0001ZM10.2463 12.1886C10.2051 11.7548 9.83753 11.4382 9.42537 11.4816C9.01321 11.525 8.71251 11.9119 8.75372 12.3457L9.25372 17.6089C9.29494 18.0427 9.66247 18.3593 10.0746 18.3159C10.4868 18.2725 10.7875 17.8856 10.7463 17.4518L10.2463 12.1886ZM14.5746 11.4816C14.9868 11.525 15.2875 11.9119 15.2463 12.3457L14.7463 17.6089C14.7051 18.0427 14.3375 18.3593 13.9254 18.3159C13.5132 18.2725 13.2125 17.8856 13.2537 17.4518L13.7537 12.1886C13.7949 11.7548 14.1625 11.4382 14.5746 11.4816Z"
                                                         fill="currentColor"></path>
                                                 </svg>
-                                                حذف تریلر دوره
+                                                Ø­Ø°Ù ØªØ±ÛŒÙ„Ø± Ø¯ÙˆØ±Ù‡
                                             </button>
                                         </div>
                                     </div>
@@ -632,10 +632,10 @@
 
                                             </svg>
                                             <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                                <span class="font-semibold">کلیک برای انتخاب</span> یا کشیدن و رها کردن
+                                                <span class="font-semibold">Ú©Ù„ÛŒÚ© Ø¨Ø±Ø§ÛŒ Ø§Ù†ØªØ®Ø§Ø¨</span> ÛŒØ§ Ú©Ø´ÛŒØ¯Ù† Ùˆ Ø±Ù‡Ø§ Ú©Ø±Ø¯Ù†
                                             </p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ fileValidationRules.trailer.extensions }} (حداکثر {{
+                                                {{ fileValidationRules.trailer.extensions }} (Ø­Ø¯Ø§Ú©Ø«Ø± {{
                                                     formatFileSize(fileValidationRules.trailer.maxSize, 0, 'fa') }} )
                                             </p>
                                         </div>
@@ -646,10 +646,10 @@
                                             <!-- Processing Status for New Uploaded Video -->
                                             <div v-if="processingStatus.trailer !== 'idle'" class="absolute bottom-2 left-2 right-2 bg-black/80 text-white text-xs p-2 rounded">
                                                 <div v-if="processingStatus.trailer === 'queued'" class="text-blue-400">
-                                                    در صف پردازش
+                                                    Ø¯Ø± ØµÙ Ù¾Ø±Ø¯Ø§Ø²Ø´
                                                 </div>
                                                 <div v-else-if="processingStatus.trailer === 'processing'" class="flex items-center text-blue-400">
-                                                    درحال پردازش ویدیو
+                                                    Ø¯Ø±Ø­Ø§Ù„ Ù¾Ø±Ø¯Ø§Ø²Ø´ ÙˆÛŒØ¯ÛŒÙˆ
                                                     <svg class="animate-spin w-4 h-4 ms-1" xmlns="http://www.w3.org/2000/svg" viewBox="-58 -58 116 116">
                                                         <g stroke-linecap="round" stroke-width="15">
                                                             <path id="a" d="m0 35 0,14" />
@@ -669,15 +669,15 @@
                                                     </svg>
                                                 </div>
                                                 <div v-else-if="processingStatus.trailer === 'processed'" class="text-green-400">
-                                                    ویدیو پردازش شده است
+                                                    ÙˆÛŒØ¯ÛŒÙˆ Ù¾Ø±Ø¯Ø§Ø²Ø´ Ø´Ø¯Ù‡ Ø§Ø³Øª
                                                 </div>
                                                 <div v-else-if="processingStatus.trailer === 'failed'" class="text-red-400">
-                                                    خطا در پردازش ویدیو
+                                                    Ø®Ø·Ø§ Ø¯Ø± Ù¾Ø±Ø¯Ø§Ø²Ø´ ÙˆÛŒØ¯ÛŒÙˆ
                                                 </div>
                                             </div>
                                             <button
                                                 v-if="trailer && (uploadStatus.trailer === 'pending' || uploadStatus.trailer === 'upload-error')"
-                                                type="button" title="تغییر تریلر"
+                                                type="button" title="ØªØºÛŒÛŒØ± ØªØ±ÛŒÙ„Ø±"
                                                 class="z-10 absolute top-2 start-2 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 text-xs font-semibold px-2 py-[3px] rounded-lg shadow hover:bg-opacity-90 dark:hover:bg-opacity-90 flex items-center"
                                                 @click.stop="$refs.trailer.click()">
                                                 <svg class="w-5 h-5 me-1.5" viewBox="0 0 512 512" version="1.1"
@@ -697,12 +697,12 @@
                                                     </path>
 
                                                 </svg>
-                                                تغییر
+                                                ØªØºÛŒÛŒØ±
                                             </button>
                                             <div
                                                 class="z-10 absolute top-2 end-2 flex items-center space-x-1 rtl:space-x-reverse">
                                                 <button v-if="trailer && uploadStatus.trailer === 'uploading'"
-                                                    @click.prevent="cancelUpload('trailer')" title="لغو آپلود"
+                                                    @click.prevent="cancelUpload('trailer')" title="Ù„ØºÙˆ Ø§Ù“Ù¾Ù„ÙˆØ¯"
                                                     class="w-6 h-6 shadow rounded-lg bg-rose-500 text-white flex items-center justify-center">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 32 32" version="1.1"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -713,7 +713,7 @@
                                                 </button>
                                                 <button
                                                     v-if="trailer && (uploadStatus.trailer === 'pending' || uploadStatus.trailer === 'upload-error')"
-                                                    @click.prevent="removeTrailer" title="حذف"
+                                                    @click.prevent="removeTrailer" title="Ø­Ø°Ù"
                                                     class="w-6 h-6 shadow rounded-lg bg-rose-500 text-white flex items-center justify-center">
                                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -728,7 +728,7 @@
                                                 <button
                                                     v-if="trailer && course_id && (uploadStatus.trailer === 'pending' || uploadStatus.trailer === 'upload-error')"
                                                     @click.prevent="uploadFile(course_id, 'trailer')"
-                                                    title="آپلود تریلر"
+                                                    title="Ø§Ù“Ù¾Ù„ÙˆØ¯ ØªØ±ÛŒÙ„Ø±"
                                                     class="px-2 h-6 text-xs font-semibold shadow rounded-lg bg-gray-700 text-white flex items-center justify-center">
                                                     <svg class="w-4 h-4 me-1.5" viewBox="0 0 24 24" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -739,11 +739,11 @@
                                                             d="M3.75 15C3.75 14.5858 3.41422 14.25 3 14.25C2.58579 14.25 2.25 14.5858 2.25 15V15.0549C2.24998 16.4225 2.24996 17.5248 2.36652 18.3918C2.48754 19.2919 2.74643 20.0497 3.34835 20.6516C3.95027 21.2536 4.70814 21.5125 5.60825 21.6335C6.47522 21.75 7.57754 21.75 8.94513 21.75H15.0549C16.4225 21.75 17.5248 21.75 18.3918 21.6335C19.2919 21.5125 20.0497 21.2536 20.6517 20.6516C21.2536 20.0497 21.5125 19.2919 21.6335 18.3918C21.75 17.5248 21.75 16.4225 21.75 15.0549V15C21.75 14.5858 21.4142 14.25 21 14.25C20.5858 14.25 20.25 14.5858 20.25 15C20.25 16.4354 20.2484 17.4365 20.1469 18.1919C20.0482 18.9257 19.8678 19.3142 19.591 19.591C19.3142 19.8678 18.9257 20.0482 18.1919 20.1469C17.4365 20.2484 16.4354 20.25 15 20.25H9C7.56459 20.25 6.56347 20.2484 5.80812 20.1469C5.07435 20.0482 4.68577 19.8678 4.40901 19.591C4.13225 19.3142 3.9518 18.9257 3.85315 18.1919C3.75159 17.4365 3.75 16.4354 3.75 15Z"
                                                             fill="currentColor"></path>
                                                     </svg>
-                                                    آپلود
+                                                    Ø§Ù“Ù¾Ù„ÙˆØ¯
                                                 </button>
                                                 <button
                                                     v-if="course_id && processingStatus.trailer === 'failed'"
-                                                    @click.prevent="startProcessing(video_id)" title="پردازش مجدد"
+                                                    @click.prevent="startProcessing(video_id)" title="Ù¾Ø±Ø¯Ø§Ø²Ø´ Ù…Ø¬Ø¯Ø¯"
                                                     class="w-6 h-6 shadow rounded-lg bg-gray-700 text-white flex items-center justify-center">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14" role="img"
                                                         focusable="false" aria-hidden="true"
@@ -832,8 +832,8 @@
                             <div class="md:col-span-2 md:mt-8">
                                 <AdminAttachmentsField
                                     ref="attachmentsField"
-                                    title="فایل پیوست (PDF، ZIP و...)"
-                                    :hint="`فایل‌های اضافی مثل منابع PDF و تمرین. فرمت‌های مجاز: ${fileValidationRules.attached_file.extensions.join(', ')}`"
+                                    title="ÙØ§ÛŒÙ„ Ù¾ÛŒÙˆØ³Øª (PDFØŒ ZIP Ùˆ...)"
+                                    :hint="`ÙØ§ÛŒÙ„â€ŒÙ‡Ø§ÛŒ Ø§Ø¶Ø§ÙÛŒ Ù…Ø«Ù„ Ù…Ù†Ø§Ø¨Ø¹ PDF Ùˆ ØªÙ…Ø±ÛŒÙ†. ÙØ±Ù…Øªâ€ŒÙ‡Ø§ÛŒ Ù…Ø¬Ø§Ø²: ${fileValidationRules.attached_file.extensions.join(', ')}`"
                                     :accept="fileValidationRules.attached_file.extensions.join(',')"
                                     :allowed-extensions="fileValidationRules.attached_file.extensions"
                                     :allowed-types="fileValidationRules.attached_file.types"
@@ -851,13 +851,13 @@
 
                         <section v-show="currentStepId === 'confirm'" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 shadow-sm space-y-5">
                             <div>
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">بررسی و تایید نهایی</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">اطلاعات وارد شده را بررسی کنید</p>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Ø¨Ø±Ø±Ø³ÛŒ Ùˆ ØªØ§ÛŒÛŒØ¯ Ù†Ù‡Ø§ÛŒÛŒ</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ø§Ø·Ù„Ø§Ø¹Ø§Øª ÙˆØ§Ø±Ø¯ Ø´Ø¯Ù‡ Ø±Ø§ Ø¨Ø±Ø±Ø³ÛŒ Ú©Ù†ÛŒØ¯</p>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div v-for="item in confirmSummary" :key="item.label" class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 px-4 py-3">
                                     <p class="text-[10px] font-medium text-gray-400 mb-0.5">{{ item.label }}</p>
-                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" :style="item.ltr ? 'direction: ltr' : ''">{{ item.value || '—' }}</p>
+                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" :style="item.ltr ? 'direction: ltr' : ''">{{ item.value || 'â€”' }}</p>
                                 </div>
                             </div>
                         </section>
@@ -893,11 +893,11 @@ import { defaultProcessOptions, buildProcessRequestBody, probeVideoHeightFromFil
 
 
 const FORM_STEPS = [
-    { id: "basic", label: "اطلاعات کلی", hint: "عنوان و قیمت" },
-    { id: "details", label: "جزئیات آموزشی", hint: "توضیحات دوره" },
-    { id: "certificate", label: "گواهینامه", hint: "تنظیمات مدرک" },
-    { id: "media", label: "فایل و رسانه", hint: "پوستر و تریلر" },
-    { id: "confirm", label: "تایید و ذخیره", hint: "بررسی نهایی" },
+    { id: "basic", label: "Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ú©Ù„ÛŒ", hint: "Ø¹Ù†ÙˆØ§Ù† Ùˆ Ù‚ÛŒÙ…Øª" },
+    { id: "details", label: "Ø¬Ø²Ø¦ÛŒØ§Øª Ø¢Ù…ÙˆØ²Ø´ÛŒ", hint: "ØªÙˆØ¶ÛŒØ­Ø§Øª Ø¯ÙˆØ±Ù‡" },
+    { id: "certificate", label: "Ú¯ÙˆØ§Ù‡ÛŒÙ†Ø§Ù…Ù‡", hint: "ØªÙ†Ø¸ÛŒÙ…Ø§Øª Ù…Ø¯Ø±Ú©" },
+    { id: "media", label: "ÙØ§ÛŒÙ„ Ùˆ Ø±Ø³Ø§Ù†Ù‡", hint: "Ù¾ÙˆØ³ØªØ± Ùˆ ØªØ±ÛŒÙ„Ø±" },
+    { id: "confirm", label: "ØªØ§ÛŒÛŒØ¯ Ùˆ Ø°Ø®ÛŒØ±Ù‡", hint: "Ø¨Ø±Ø±Ø³ÛŒ Ù†Ù‡Ø§ÛŒÛŒ" },
 ];
 
 const stepperMixin = createStepperMixin();
@@ -1021,7 +1021,7 @@ export default {
                     extensions: ['.jpg', '.jpeg', '.png', '.webp'],
                     required: true,
                     errorKey: 'poster',
-                    label: 'پوستر',
+                    label: 'Ù¾ÙˆØ³ØªØ±',
                 },
                 trailer: {
                     maxSize: 100 * 1024 * 1024,
@@ -1029,7 +1029,7 @@ export default {
                     extensions: ['.mp4', '.mkv'],
                     required: false,
                     errorKey: 'trailer',
-                    label: 'تریلر',
+                    label: 'ØªØ±ÛŒÙ„Ø±',
                 },
                 attached_file: {
                     maxSize: 200 * 1024 * 1024,
@@ -1059,7 +1059,7 @@ export default {
                     ],
                     required: false,
                     errorKey: 'attached_file',
-                    label: 'فایل پیوست',
+                    label: 'ÙØ§ÛŒÙ„ Ù¾ÛŒÙˆØ³Øª',
                 },
             },
             processEnabled: false,
@@ -1076,15 +1076,15 @@ export default {
     },
     computed: {
         confirmSummary() {
-            const typeLabels = { free: "رایگان", cash: "نقدی", "cash-vip": "نقدی/VIP" };
+            const typeLabels = { free: "Ø±Ø§ÛŒÚ¯Ø§Ù†", cash: "Ù†Ù‚Ø¯ÛŒ", "cash-vip": "Ù†Ù‚Ø¯ÛŒ/VIP" };
             return [
-                { label: "عنوان فارسی", value: this.title },
-                { label: "عنوان انگلیسی", value: this.english_title, ltr: true },
-                { label: "نوع دوره", value: typeLabels[this.type] || this.type },
-                { label: "قیمت", value: this.type === "free" ? "رایگان" : (this.formattedPrice ? this.formattedPrice + " تومان" : "") },
-                { label: "انتشار", value: String(this.publish) === "1" ? "منتشر شده" : "پیش‌نویس" },
-                { label: "گواهینامه", value: this.certificate_enabled ? "فعال" : "غیرفعال" },
-                { label: "گارانتی بازگشت وجه", value: this.has_money_back_guarantee ? "فعال" : "غیرفعال" },
+                { label: "Ø¹Ù†ÙˆØ§Ù† ÙØ§Ø±Ø³ÛŒ", value: this.title },
+                { label: "Ø¹Ù†ÙˆØ§Ù† Ø§Ù†Ú¯Ù„ÛŒØ³ÛŒ", value: this.english_title, ltr: true },
+                { label: "Ù†ÙˆØ¹ Ø¯ÙˆØ±Ù‡", value: typeLabels[this.type] || this.type },
+                { label: "Ù‚ÛŒÙ…Øª", value: this.type === "free" ? "Ø±Ø§ÛŒÚ¯Ø§Ù†" : (this.formattedPrice ? this.formattedPrice + " ØªÙˆÙ…Ø§Ù†" : "") },
+                { label: "Ø§Ù†ØªØ´Ø§Ø±", value: String(this.publish) === "1" ? "Ù…Ù†ØªØ´Ø± Ø´Ø¯Ù‡" : "Ù¾ÛŒØ´â€ŒÙ†ÙˆÛŒØ³" },
+                { label: "Ú¯ÙˆØ§Ù‡ÛŒÙ†Ø§Ù…Ù‡", value: this.certificate_enabled ? "ÙØ¹Ø§Ù„" : "ØºÛŒØ±ÙØ¹Ø§Ù„" },
+                { label: "Ú¯Ø§Ø±Ø§Ù†ØªÛŒ Ø¨Ø§Ø²Ú¯Ø´Øª ÙˆØ¬Ù‡", value: this.has_money_back_guarantee ? "ÙØ¹Ø§Ù„" : "ØºÛŒØ±ÙØ¹Ø§Ù„" },
             ];
         },
 
@@ -1229,7 +1229,7 @@ export default {
         },
         formatFileSize(bytes, decimal = 1, lang = 'en') {
             const units = {
-                fa: ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت'],
+                fa: ['Ø¨Ø§ÛŒØª', 'Ú©ÛŒÙ„ÙˆØ¨Ø§ÛŒØª', 'Ù…Ú¯Ø§Ø¨Ø§ÛŒØª', 'Ú¯ÛŒÚ¯Ø§Ø¨Ø§ÛŒØª'],
                 en: ['B', 'KB', 'MB', 'GB']
             };
 
@@ -1282,7 +1282,7 @@ export default {
             if (!this.processEnabled && name.endsWith('.mkv')) {
                 this.trailer = null;
                 if (this.$refs.trailer) this.$refs.trailer.value = null;
-                this.showToast('بدون پردازش فقط MP4 در پلیر پخش می‌شود. برای MKV پردازش را فعال کنید.', true);
+                this.showToast('Ø¨Ø¯ÙˆÙ† Ù¾Ø±Ø¯Ø§Ø²Ø´ ÙÙ‚Ø· MP4 Ø¯Ø± Ù¾Ù„ÛŒØ± Ù¾Ø®Ø´ Ù…ÛŒâ€ŒØ´ÙˆØ¯. Ø¨Ø±Ø§ÛŒ MKV Ù¾Ø±Ø¯Ø§Ø²Ø´ Ø±Ø§ ÙØ¹Ø§Ù„ Ú©Ù†ÛŒØ¯.', true);
                 return;
             }
 
@@ -1378,7 +1378,7 @@ export default {
                     file_type: fileType
                 }
             ).then(() => {
-                toast.success("عملیات با موفقیت انجام شد و فایل حذف شد.", {
+                toast.success("Ø¹Ù…Ù„ÛŒØ§Øª Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø§Ù†Ø¬Ø§Ù… Ø´Ø¯ Ùˆ ÙØ§ÛŒÙ„ Ø­Ø°Ù Ø´Ø¯.", {
                     theme: "colored",
                     hideProgressBar: false,
                     rtl: localStorage.getItem("direction") == "rtl" ? true : false,
@@ -1423,10 +1423,10 @@ export default {
             const stepId = this.FORM_STEPS[stepIndex]?.id;
             if (stepId === "basic") {
                 const missing = [];
-                if (!this.title?.trim()) missing.push("عنوان فارسی");
-                if (!this.english_title?.trim()) missing.push("عنوان انگلیسی");
+                if (!this.title?.trim()) missing.push("Ø¹Ù†ÙˆØ§Ù† ÙØ§Ø±Ø³ÛŒ");
+                if (!this.english_title?.trim()) missing.push("Ø¹Ù†ÙˆØ§Ù† Ø§Ù†Ú¯Ù„ÛŒØ³ÛŒ");
                 if (missing.length) {
-                    this.showToast(`لطفاً فیلدهای الزامی را تکمیل کنید: ${missing.join("، ")}`, true);
+                    this.showToast(`Ù„Ø·ÙØ§Ù‹ ÙÛŒÙ„Ø¯Ù‡Ø§ÛŒ Ø§Ù„Ø²Ø§Ù…ÛŒ Ø±Ø§ ØªÚ©Ù…ÛŒÙ„ Ú©Ù†ÛŒØ¯: ${missing.join("ØŒ ")}`, true);
                     return false;
                 }
             }
@@ -1469,7 +1469,7 @@ export default {
             }
             if (this.trailer && this.processEnabled && !this.canStartTrailerProcessing) {
                 this.updateLoading = false;
-                this.showToast('کیفیت‌ها و تنظیمات پردازش تریلر را کامل کنید.', true);
+                this.showToast('Ú©ÛŒÙÛŒØªâ€ŒÙ‡Ø§ Ùˆ ØªÙ†Ø¸ÛŒÙ…Ø§Øª Ù¾Ø±Ø¯Ø§Ø²Ø´ ØªØ±ÛŒÙ„Ø± Ø±Ø§ Ú©Ø§Ù…Ù„ Ú©Ù†ÛŒØ¯.', true);
                 return;
             }
             try {
@@ -1502,7 +1502,7 @@ export default {
                 this.courseSlug = response.data.course.slug;
                 // console.log(response.data);
 
-                toast.success(`عملیات با موفقیت انجام شد و دوره با موفقیت ویرایش شد. ${(this.poster || this.trailer || this.$refs.attachmentsField?.pendingForUpload?.().length) ? ' منتظر آپلود فایل(های) دوره باشید.' : ''}`, {
+                toast.success(`Ø¹Ù…Ù„ÛŒØ§Øª Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø§Ù†Ø¬Ø§Ù… Ø´Ø¯ Ùˆ Ø¯ÙˆØ±Ù‡ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª ÙˆÛŒØ±Ø§ÛŒØ´ Ø´Ø¯. ${(this.poster || this.trailer || this.$refs.attachmentsField?.pendingForUpload?.().length) ? ' Ù…Ù†ØªØ¸Ø± Ø¢Ù¾Ù„ÙˆØ¯ ÙØ§ÛŒÙ„(Ù‡Ø§ÛŒ) Ø¯ÙˆØ±Ù‡ Ø¨Ø§Ø´ÛŒØ¯.' : ''}`, {
                     theme: "colored",
                     hideProgressBar: false,
                     rtl: localStorage.getItem("direction") == "rtl" ? true : false,
@@ -1536,20 +1536,16 @@ export default {
             try {
                 await field.uploadAll(async (item, onProgress) => {
                     const file = item.file;
-                    const initRes = await axiosInstance.post('admin/course/uploadAttachedFile', {
-                        course_id: courseId,
-                        filename: file.name,
-                        mime: file.type || 'application/octet-stream',
-                        size: file.size,
-                        title: item.title || file.name,
-                    });
-                    const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
                     const formData = new FormData();
-                    formData.append('path', uploadPath);
+                    formData.append('course_id', courseId);
                     formData.append('file', file);
-                    await axios.post(workerUploadUrl, formData, {
+                    formData.append('title', item.title || file.name);
+                    formData.append('filename', file.name);
+                    formData.append('mime', file.type || 'application/octet-stream');
+                    formData.append('size', file.size);
+                    await axiosInstance.post('admin/course/uploadAttachedFile', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
                         timeout: 3600 * 1000,
-                        headers: { Authorization: `Bearer ${uploadToken}` },
                         onUploadProgress: (progressEvent) => {
                             const { loaded, total } = progressEvent;
                             onProgress(total ? Math.round((loaded * 100) / total) : 0);
@@ -1572,9 +1568,9 @@ export default {
                     attach_id: item.id,
                 });
                 this.existingAttachs = this.existingAttachs.filter((row) => row.id !== item.id);
-                this.showToast('فایل پیوست حذف شد.');
+                this.showToast('ÙØ§ÛŒÙ„ Ù¾ÛŒÙˆØ³Øª Ø­Ø°Ù Ø´Ø¯.');
             } catch (error) {
-                this.showToast(error?.response?.data?.message || 'خطا در حذف فایل پیوست', true);
+                this.showToast(error?.response?.data?.message || 'Ø®Ø·Ø§ Ø¯Ø± Ø­Ø°Ù ÙØ§ÛŒÙ„ Ù¾ÛŒÙˆØ³Øª', true);
             } finally {
                 this.removingAttachId = null;
             }
@@ -1589,9 +1585,9 @@ export default {
                     title,
                 });
                 this.existingAttachs = this.existingAttachs.map((row) => row.id === item.id ? { ...row, ...res.data.attach, _editTitle: undefined } : row);
-                this.showToast('نام فایل ذخیره شد.');
+                this.showToast('Ù†Ø§Ù… ÙØ§ÛŒÙ„ Ø°Ø®ÛŒØ±Ù‡ Ø´Ø¯.');
             } catch (error) {
-                this.showToast(error?.response?.data?.message || 'خطا در ذخیره نام فایل', true);
+                this.showToast(error?.response?.data?.message || 'Ø®Ø·Ø§ Ø¯Ø± Ø°Ø®ÛŒØ±Ù‡ Ù†Ø§Ù… ÙØ§ÛŒÙ„', true);
             } finally {
                 this.savingAttachTitleId = null;
             }
@@ -1640,7 +1636,7 @@ export default {
                     });
                     this.progress[fileType].completed = true;
                     this.uploadStatus[fileType] = 'uploaded';
-                    toast.success('پوستر با موفقیت آپلود شد.', {
+                    toast.success('Ù¾ÙˆØ³ØªØ± Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø¢Ù¾Ù„ÙˆØ¯ Ø´Ø¯.', {
                         theme: 'colored',
                         hideProgressBar: false,
                         rtl: localStorage.getItem('direction') == 'rtl' ? true : false,
@@ -1652,45 +1648,55 @@ export default {
                     return;
                 }
 
-                // Trailer / attachment: init token then upload to worker
-                let initUrl = '';
-                let initBody = { filename: file.name, mime: file.type, size: file.size };
-                if (fileType === 'trailer') {
-                    initUrl = 'admin/video/upload';
-                    initBody.course_id = courseId;
-                    initBody.episode_id = null;
-                    initBody.storage_disk = this.processOptions?.storage_disk || 'dl';
-                } else if (fileType === 'attached_file') {
-                    initUrl = 'admin/course/uploadAttachedFile';
-                    initBody.course_id = courseId;
-                }
+                // Trailer: upload to worker; Attachment: direct upload to main server
+                let workerRes;
+                if (fileType === 'attached_file') {
+                    // Direct upload to main server
+                    const attachFormData = new FormData();
+                    attachFormData.append('course_id', courseId);
+                    attachFormData.append('file', file);
+                    attachFormData.append('title', file.name);
+                    attachFormData.append('filename', file.name);
+                    attachFormData.append('mime', file.type || 'application/octet-stream');
+                    attachFormData.append('size', file.size);
+                    workerRes = await axiosInstance.post('admin/course/uploadAttachedFile', attachFormData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        timeout: 3600 * 1000,
+                        signal: controller.signal,
+                        onUploadProgress: trackProgress,
+                    });
+                } else {
+                // Trailer: init token then upload to worker
+                const initBody = { filename: file.name, mime: file.type, size: file.size };
+                initBody.course_id = courseId;
+                initBody.episode_id = null;
+                initBody.storage_disk = this.processOptions?.storage_disk || 'dl';
 
-                const initRes = await axiosInstance.post(initUrl, initBody);
+                const initRes = await axiosInstance.post('admin/video/upload', initBody);
                 const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
-                if (fileType === 'trailer') {
-                    this._workerToken = uploadToken;
-                    try { this._workerOrigin = new URL(workerUploadUrl).origin; } catch (e) { this._workerOrigin = ''; }
-                }
+                this._workerToken = uploadToken;
+                try { this._workerOrigin = new URL(workerUploadUrl).origin; } catch (e) { this._workerOrigin = ''; }
 
                 const formData = new FormData();
                 formData.append('path', uploadPath);
                 formData.append('file', file);
 
-                const workerRes = await axios.post(workerUploadUrl, formData, {
+                workerRes = await axios.post(workerUploadUrl, formData, {
                     timeout: 3600 * 1000,
                     headers: { 'Authorization': `Bearer ${uploadToken}` },
                     signal: controller.signal,
                     onUploadProgress: trackProgress,
                 });
+                }
 
                 this.progress[fileType].completed = true;
                 this.uploadStatus[fileType] = 'uploaded';
 
                 let type = '';
-                if (fileType === 'trailer') type = 'تریلر';
-                else if (fileType === 'attached_file') type = 'فایل پیوست';
+                if (fileType === 'trailer') type = 'ØªØ±ÛŒÙ„Ø±';
+                else if (fileType === 'attached_file') type = 'ÙØ§ÛŒÙ„ Ù¾ÛŒÙˆØ³Øª';
 
-                toast.success(`${type} با موفقیت آپلود شد.`, {
+                toast.success(`${type} Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø¢Ù¾Ù„ÙˆØ¯ Ø´Ø¯.`, {
                     theme: 'colored',
                     hideProgressBar: false,
                     rtl: localStorage.getItem('direction') == 'rtl' ? true : false,
@@ -1758,12 +1764,12 @@ export default {
             const name = (this.trailer?.name || '').toLowerCase();
             if (!name.endsWith('.mkv')) return;
             this.removeTrailer();
-            this.showToast('بدون پردازش فقط MP4 در پلیر پخش می‌شود. برای MKV پردازش را فعال کنید.', true);
+            this.showToast('Ø¨Ø¯ÙˆÙ† Ù¾Ø±Ø¯Ø§Ø²Ø´ ÙÙ‚Ø· MP4 Ø¯Ø± Ù¾Ù„ÛŒØ± Ù¾Ø®Ø´ Ù…ÛŒâ€ŒØ´ÙˆØ¯. Ø¨Ø±Ø§ÛŒ MKV Ù¾Ø±Ø¯Ø§Ø²Ø´ Ø±Ø§ ÙØ¹Ø§Ù„ Ú©Ù†ÛŒØ¯.', true);
         },
         async startProcessing(videoId) {
             if (!videoId) return;
             if (!this.processEnabled || !this.canStartTrailerProcessing) {
-                this.showToast('کیفیت‌ها و تنظیمات پردازش تریلر را کامل کنید.', true);
+                this.showToast('Ú©ÛŒÙÛŒØªâ€ŒÙ‡Ø§ Ùˆ ØªÙ†Ø¸ÛŒÙ…Ø§Øª Ù¾Ø±Ø¯Ø§Ø²Ø´ ØªØ±ÛŒÙ„Ø± Ø±Ø§ Ú©Ø§Ù…Ù„ Ú©Ù†ÛŒØ¯.', true);
                 return;
             }
             this.processingStatus.trailer = 'queued';
@@ -1777,7 +1783,7 @@ export default {
                 this.startStatusPolling(videoId);
             } catch (error) {
                 this.processingStatus.trailer = 'failed';
-                this.showToast(error?.response?.data?.message || 'شروع پردازش ناموفق بود', true);
+                this.showToast(error?.response?.data?.message || 'Ø´Ø±ÙˆØ¹ Ù¾Ø±Ø¯Ø§Ø²Ø´ Ù†Ø§Ù…ÙˆÙÙ‚ Ø¨ÙˆØ¯', true);
             }
         },
         startStatusPolling(videoId) {
@@ -1825,7 +1831,7 @@ export default {
                 const hasOldFile = this.getOldFileValue(type) && this.getOldFileValue(type) !== "";
                 
                 if (!hasNewFile && !hasOldFile) {
-                    this.errors[type] = [`فیلد ${rules.label} الزامی است.`];
+                    this.errors[type] = [`ÙÛŒÙ„Ø¯ ${rules.label} Ø§Ù„Ø²Ø§Ù…ÛŒ Ø§Ø³Øª.`];
                     return false;
                 }
             }
@@ -1841,13 +1847,13 @@ export default {
             const isValidType = file.type && rules.types.includes(file.type);
 
             if (!isValidExt && !isValidType) {
-                this.errors[type] = ['فرمت فایل مجاز نیست'];
+                this.errors[type] = ['ÙØ±Ù…Øª ÙØ§ÛŒÙ„ Ù…Ø¬Ø§Ø² Ù†ÛŒØ³Øª'];
                 return false;
             }
 
             if (file.size > rules.maxSize) {
                 this.errors[type] = [
-                    `حجم ${rules.label} نباید بیشتر از ${this.formatFileSize(rules.maxSize, 0, 'fa')} باشد`
+                    `Ø­Ø¬Ù… ${rules.label} Ù†Ø¨Ø§ÛŒØ¯ Ø¨ÛŒØ´ØªØ± Ø§Ø² ${this.formatFileSize(rules.maxSize, 0, 'fa')} Ø¨Ø§Ø´Ø¯`
                 ];
                 return false;
             }
@@ -1862,7 +1868,7 @@ export default {
 
     },
     mounted() {
-        document.title = "فرم ویرایش دوره آموزشی";
+        document.title = "ÙØ±Ù… ÙˆÛŒØ±Ø§ÛŒØ´ Ø¯ÙˆØ±Ù‡ Ø¢Ù…ÙˆØ²Ø´ÛŒ";
         this.getInitData();
         this.getCourse();
     }

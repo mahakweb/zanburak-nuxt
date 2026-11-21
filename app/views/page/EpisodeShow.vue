@@ -97,8 +97,8 @@
                                     <div
                                         class="relative flex flex-col items-center justify-center h-72 sm:h-80 lg:h-[29rem] text-white bg-gray-950">
                                         <SeoImage
-                                            src="/assets/image/other/video_processing_1.gif"
-                                            alt="در حال پردازش ویدیو"
+                                            :src="videoProcessingGif"
+                                            :alt="$t('course.episode.videoProcessing')"
                                             :lazy="false"
                                             img-class="w-auto max-w-[85%] h-auto max-h-[70%] lg:max-h-[58%] object-contain"
                                         />
@@ -236,7 +236,7 @@
                             <hr class="my-2 border-gray-100 border-dashed dark:border-opacity-10 mx-4" />
                             <div class="flex items-center sm:flex-row flex-col justify-between px-2 md:pe-0 py-3">
                                 <div class="md:me-2 mb-2 md:mb-0">
-                                    <div v-if="canDownload && canPlayVideo">
+                                    <div v-if="canDownload && canPlayVideo && hasDownload">
                                         <div class="relative inline-block" ref="downloadMenuRef">
 
                                             <div>
@@ -715,6 +715,7 @@ import { convertToOrdinal } from "@/store/convertToOrdinal";
 import VideoPlayer from "@/views/components/player/VideoPlayer.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 import noVideoPlaceholder from "@/assets/image/other/video-recording-2.png";
+import videoProcessingGif from "@/assets/image/other/video_processing_1.gif";
 import { useSEO, generateEpisodeSchema, generateBreadcrumbSchema } from "@/composables/useSEO";
 import { useI18n } from "vue-i18n";
 import { emptyCourseRatings, sortCourseSections, flattenCourseEpisodes } from "@/utils/courseDisplay";
@@ -736,6 +737,7 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
     const certificateUuid = ref(false);
     const userCanSeeCourse = ref(false);
     const canDownload = ref(false);
+    const hasDownload = ref(false);
     const commentsCount = ref(0);
     const likesCount = ref(0);
     const userHasLiked = ref(false);
@@ -845,6 +847,7 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
     });
 
     async function getEpisode() {
+        if (!courseSlug.value || !episodeOrder.value) return;
         contentBlocked.value = null;
         try {
             const response = await axiosInstance.get("/course/" + courseSlug.value + "/episode/" + episodeOrder.value);
@@ -926,16 +929,18 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
 
             // VideoPlayer loads the source itself when conditions are met
             // Determine canDownload: prefer backend flag, fallback to free or purchased cash
+            hasDownload.value = Boolean(response.data?.has_download);
             if (Object.prototype.hasOwnProperty.call(response.data, 'can_download')) {
-                canDownload.value = Boolean(response.data.can_download);
+                canDownload.value = Boolean(response.data.can_download) && hasDownload.value;
             } else {
                 // Fallback: login is required for any download
                 if (!isLoggedin.value) {
                     canDownload.value = false;
+            hasDownload.value = false;
                 } else {
                     const isFreeCourse = course.value && course.value.type === 'free';
                     const hasPurchasedCashCourse = userCanSeeCourse.value === true && course.value && course.value.type === 'cash';
-                    canDownload.value = Boolean(isFreeCourse || hasPurchasedCashCourse);
+                    canDownload.value = Boolean(isFreeCourse || hasPurchasedCashCourse) && hasDownload.value;
                 }
             }
 
@@ -975,7 +980,9 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
                 return;
             }
             if (error?.response?.status === 404) {
-                router.push({ name: "NotFound" });
+                if (route.name === 'episode.show' && route.params.courseSlug === courseSlug.value && String(route.params.episodeOrder) === String(episodeOrder.value)) {
+                    router.push({ name: "NotFound" });
+                }
             }
             if (error?.response?.statusText) {
                 console.error(error.response.statusText);
@@ -1294,7 +1301,9 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
     }
 
     onMounted(async () => {
-        await getEpisode();
+        if (courseSlug.value && episodeOrder.value) {
+            await getEpisode();
+        }
         document.addEventListener('click', onClickOutside);
     });
     onBeforeUnmount(() => {
@@ -1303,7 +1312,9 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
     });
     watch(
         () => [route.params.courseSlug, route.params.episodeOrder],
-        async ([newCourseSlug, newEpisodeOrder]) => {
+        async ([newCourseSlug, newEpisodeOrder], [oldCourseSlug, oldEpisodeOrder] = []) => {
+            if (!newCourseSlug || !newEpisodeOrder) return;
+            if (newCourseSlug === oldCourseSlug && String(newEpisodeOrder) === String(oldEpisodeOrder)) return;
             stopVideoStatusPolling();
             courseSlug.value = newCourseSlug;
             episodeOrder.value = newEpisodeOrder;
@@ -1312,6 +1323,7 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
             contentBlocked.value = null;
             userCanSeeCourse.value = false;
             canDownload.value = false;
+            hasDownload.value = false;
             videoProcessingStatus.value = null;
             videoId.value = null;
             isVideoProcessing.value = false;

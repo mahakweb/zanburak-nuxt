@@ -139,34 +139,50 @@ export function watermarkFontMeta(fontId) {
     return WATERMARK_FONTS.find((f) => f.id === fontId) || WATERMARK_FONTS[0];
 }
 
-export function defaultProcessOptions(sourceHeight = 720) {
+export function defaultProcessOptions(sourceHeight = null) {
     const qs = defaultSelectedQualities(sourceHeight);
     return {
         outputs: ['stream'],
         stream_qualities: [...qs],
-        download_qualities: [...qs],
+        download_qualities: [],
         qualities: [...qs],
         storage_disk: 'dl',
         watermark: defaultWatermarkOptions(),
+        thumbnails_enabled: false,
     };
 }
 
+export function getEffectiveHeight(sourceHeight, sourceWidth = 0) {
+    const h = Number(sourceHeight) || 0;
+    const w = Number(sourceWidth) || 0;
+    if (h <= 0 && w <= 0) return null;
+    if (w >= 1900 || h >= 1000) return 1080;
+    if (w >= 1200 || h >= 700) return Math.max(h, 720);
+    if (w >= 800 || h >= 460) return Math.max(h, 480);
+    if (w > 0 && h > 0) {
+        const aspectH = Math.round((w * 9) / 16);
+        return Math.max(h, aspectH);
+    }
+    return h > 0 ? h : null;
+}
+
 /**
- * Qualities available for a source height (never above source).
+ * Qualities available for a source height and optional width (never above source).
  */
-export function availableQualitiesForHeight(sourceHeight) {
-    const h = Number(sourceHeight) || 720;
-    const list = VIDEO_QUALITY_LADDER.filter((q) => q <= h);
+export function availableQualitiesForHeight(sourceHeight, sourceWidth = 0) {
+    const effectiveH = getEffectiveHeight(sourceHeight, sourceWidth);
+    if (!effectiveH) return [...VIDEO_QUALITY_LADDER];
+    const list = VIDEO_QUALITY_LADDER.filter((q) => q <= effectiveH);
     if (list.length) return list;
-    const nearest = VIDEO_QUALITY_LADDER.find((q) => q <= h) || Math.min(h, 720);
+    const nearest = VIDEO_QUALITY_LADDER.find((q) => q <= effectiveH) || Math.min(effectiveH, 720);
     return [nearest];
 }
 
 /**
  * Default selection: source rung + up to two lower rungs.
  */
-export function defaultSelectedQualities(sourceHeight) {
-    const available = availableQualitiesForHeight(sourceHeight);
+export function defaultSelectedQualities(sourceHeight, sourceWidth = 0) {
+    const available = availableQualitiesForHeight(sourceHeight, sourceWidth);
     return available.slice(0, Math.min(3, available.length));
 }
 
@@ -226,12 +242,28 @@ function normalizeWatermarkPayload(watermark) {
 export function buildProcessRequestBody(processOptions, watermarkFile = null) {
     const opts = processOptions || {};
     const watermark = normalizeWatermarkPayload(opts.watermark);
+
+    const outputs = (Array.isArray(opts.outputs) && opts.outputs.length) ? opts.outputs : ['stream'];
+    const wantStream = outputs.includes('stream') || outputs.includes('trailer');
+    const wantDownload = outputs.includes('download');
+
+    const streamQs = wantStream
+        ? ((Array.isArray(opts.stream_qualities) && opts.stream_qualities.length)
+            ? opts.stream_qualities
+            : ((Array.isArray(opts.qualities) && opts.qualities.length) ? opts.qualities : [720, 480]))
+        : [];
+
+    const downloadQs = wantDownload
+        ? ((Array.isArray(opts.download_qualities) && opts.download_qualities.length) ? opts.download_qualities : [])
+        : [];
+
     const fields = {
-        qualities: opts.qualities || opts.stream_qualities || [],
-        stream_qualities: opts.stream_qualities || [],
-        download_qualities: opts.download_qualities || [],
-        outputs: opts.outputs || ['stream'],
+        qualities: streamQs.length ? streamQs : downloadQs,
+        stream_qualities: streamQs,
+        download_qualities: downloadQs,
+        outputs,
         storage_disk: opts.storage_disk || 'dl',
+        thumbnails_enabled: opts.thumbnails_enabled ? 1 : 0,
         watermark_enabled: watermark.enabled ? 1 : 0,
         watermark_type: watermark.type || 'text',
         watermark_text: watermark.text || '',

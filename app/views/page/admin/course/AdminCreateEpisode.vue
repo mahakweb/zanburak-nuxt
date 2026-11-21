@@ -1,3 +1,9 @@
+﻿<script setup>
+definePageMeta({
+  name: "admin-episode-create",
+  middleware: ['auth'],
+})
+</script>
 <template>
     <AdminMasterPage>
         <template #breadcrumb-actions>
@@ -175,19 +181,7 @@
                                 </span>
                             </div>
 
-                            <div class="mt-8 pt-6 border-t border-gray-200/80 dark:border-gray-700/80">
-                                <AdminAttachmentsField
-                                    ref="attachmentsField"
-                                    title="فایل پیوست (PDF، ZIP و...)"
-                                    hint="می‌توانید چند فایل انتخاب کنید و برای هر کدام نام نمایشی بگذارید"
-                                    :accept="fileValidationRules.attached_file.extensions.join(',')"
-                                    :allowed-extensions="fileValidationRules.attached_file.extensions"
-                                    :allowed-types="fileValidationRules.attached_file.types"
-                                    :max-size="fileValidationRules.attached_file.maxSize"
-                                    :uploading="attachmentUploading"
-                                    @change="onPendingAttachChange"
-                                />
-                            </div>
+
                         </section>
 
                         <!-- Step 2: Confirm -->
@@ -267,6 +261,7 @@
                 </div>
             </div>
         </BottomSheetDrawer>
+
         <component :is="'style'" type="text/css">{{ adminFormStyles }}</component>
     </AdminMasterPage>
 </template>
@@ -278,11 +273,9 @@ import { createStepperMixin, BTN_SECONDARY, ADMIN_FORM_STYLES } from "@/views/co
 import LoadingComponent from "@/views/components/LoadingComponent.vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import axiosInstance from "@/store/axiosInstance";
-import axios from "axios";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { setPendingEpisodeVideo } from "@/utils/episodeUploadBridge.js";
-import AdminAttachmentsField from "@/views/components/admin/AdminAttachmentsField.vue";
 
 const FORM_STEPS = [
     { id: "basic", label: "اطلاعات اولیه", hint: "عنوان و ویدیو" },
@@ -298,7 +291,6 @@ export default {
         AdminFormStepperNav,
         LoadingComponent,
         BottomSheetDrawer,
-        AdminAttachmentsField,
     },
     data() {
         return {
@@ -323,9 +315,6 @@ export default {
             video: null,
             videoPreview: { name: "", size: 0, duration: "", thumbnail: "" },
             showErrorModal: false,
-            attachmentUploading: false,
-            pendingAttachCount: 0,
-            pendingAttachTitles: [],
             fileValidationRules: {
                 video: {
                     maxSize: 2 * 1024 * 1024 * 1024,
@@ -335,35 +324,7 @@ export default {
                     errorKey: "video",
                     label: "ویدیو",
                 },
-                attached_file: {
-                    maxSize: 200 * 1024 * 1024,
-                    types: [
-                        "application/pdf",
-                        "text/plain",
-                        "application/zip",
-                        "application/x-zip-compressed",
-                        "text/csv",
-                        "image/png",
-                        "image/jpeg",
-                        "application/msword",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        "application/vnd.ms-word.document.macroEnabled.12",
-                        "application/vnd.ms-excel",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "application/vnd.ms-excel.sheet.macroEnabled.12",
-                        "application/vnd.ms-powerpoint",
-                        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                        "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
-                    ],
-                    extensions: [
-                        ".pdf", ".txt", ".zip", ".csv", ".png", ".jpg", ".jpeg",
-                        ".doc", ".docx", ".docm", ".xls", ".xlsx", ".xlsm",
-                        ".ppt", ".pptx", ".pptm",
-                    ],
-                    required: false,
-                    errorKey: "attached_file",
-                    label: "فایل پیوست",
-                },
+
             },
         };
     },
@@ -375,7 +336,6 @@ export default {
                 { label: "فصل", value: this.selectedSection?.title },
                 { label: "شماره جلسه", value: this.selectedOrder },
                 { label: "ویدیو", value: this.video ? this.videoPreview.name : "—" },
-                { label: "پیوست‌ها", value: this.pendingAttachTitles.length ? this.pendingAttachTitles.join("، ") : "—" },
             ];
         },
     },
@@ -441,20 +401,17 @@ export default {
             try {
                 await field.uploadAll(async (item, onProgress) => {
                     const file = item.file;
-                    const initRes = await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, {
-                        episode_id: episodeId,
-                        filename: file.name,
-                        mime: file.type || "application/octet-stream",
-                        size: file.size,
-                        title: item.title || file.name,
-                    });
-                    const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
                     const formData = new FormData();
-                    formData.append("path", uploadPath);
+                    formData.append("episode_id", episodeId);
                     formData.append("file", file);
-                    await axios.post(workerUploadUrl, formData, {
+                    formData.append("title", item.title || file.name);
+                    formData.append("filename", file.name);
+                    formData.append("mime", file.type || "application/octet-stream");
+                    formData.append("size", file.size);
+
+                    await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, formData, {
+                        headers: { "Content-Type": "multipart/form-data" },
                         timeout: 3600 * 1000,
-                        headers: { Authorization: `Bearer ${uploadToken}` },
                         onUploadProgress: (progressEvent) => {
                             const { loaded, total } = progressEvent;
                             onProgress(total ? Math.round((loaded * 100) / total) : 0);
@@ -547,6 +504,8 @@ export default {
                     size: file.size,
                     duration: this.formatDuration(Math.floor(videoEl.duration)),
                     thumbnail: canvas.toDataURL("image/jpeg"),
+                    videoWidth: videoEl.videoWidth,
+                    videoHeight: videoEl.videoHeight,
                 };
                 URL.revokeObjectURL(url);
             });
@@ -618,8 +577,10 @@ export default {
                     section_id: this.selectedSection.id,
                     episode_id: this.episode.id,
                 });
-                setPendingEpisodeVideo(this.video, this.videoPreview);
-                await this.uploadPendingAttachments();
+                setPendingEpisodeVideo(this.video, this.videoPreview, {
+                    videoWidth: this.videoPreview?.videoWidth || 0,
+                    videoHeight: this.videoPreview?.videoHeight || 0,
+                });
                 this.showToast("جلسه ایجاد شد؛ در حال انتقال به صفحه ویرایش...");
                 const savedEpisode = response.data?.episode || this.episode;
                 const episodeSlug = savedEpisode.slug || this.english_title;

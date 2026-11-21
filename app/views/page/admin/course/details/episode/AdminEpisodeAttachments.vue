@@ -395,21 +395,16 @@ export default {
         },
         async uploadOneFile(item, episodeId) {
             const file = item.file;
-            const initRes = await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, {
-                episode_id: episodeId,
-                filename: file.name,
-                mime: file.type || 'application/octet-stream',
-                size: file.size,
-                title: item.title || file.name,
-            });
-            const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
             const formData = new FormData();
-            formData.append('path', uploadPath);
+            formData.append('episode_id', episodeId);
             formData.append('file', file);
-
-            await axios.post(workerUploadUrl, formData, {
+            formData.append('title', item.title || file.name);
+            formData.append('filename', file.name);
+            formData.append('mime', file.type || 'application/octet-stream');
+            formData.append('size', file.size);
+            await axiosInstance.post(`admin/course/${this.courseSlug}/episode/uploadAttachedFile`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
                 timeout: 3600 * 1000,
-                headers: { Authorization: `Bearer ${uploadToken}` },
                 signal: this.uploadController?.signal,
                 onUploadProgress: (progressEvent) => {
                     const { loaded, total } = progressEvent;

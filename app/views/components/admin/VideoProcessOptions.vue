@@ -423,6 +423,43 @@
                 </div>
             </Transition>
         </section>
+
+        <!-- Scrubbing Thumbnails -->
+        <section
+            class="rounded-2xl border bg-white dark:bg-gray-900/70 p-4 shadow-sm transition duration-300"
+            :class="thumbnailsEnabled
+                ? 'border-yellow-400/60 ring-1 ring-yellow-400/20'
+                : 'border-gray-200/80 dark:border-gray-700/80'">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors"
+                         :class="thumbnailsEnabled ? 'bg-amber-400/20 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <rect x="2" y="3" width="20" height="14" rx="2" />
+                            <circle cx="8" cy="8" r="1.5" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 15l-5-5L5 21" />
+                            <path stroke-linecap="round" d="M2 19h20" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-900 dark:text-white">تصاویر پیش‌نمایش نوار پیشرفت (تامب‌نیل)</h4>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">تولید فریم‌های پیش‌نمایش جهت نمایش هنگام حرکت روی نوار پیشرفت پلیر</p>
+                    </div>
+                </div>
+                <AdminToggleSwitch
+                    :model-value="!!thumbnailsEnabled"
+                    size="sm"
+                    @update:model-value="onThumbnailsToggle" />
+            </div>
+            <Transition name="vpo-fade">
+                <div v-if="thumbnailsEnabled" class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>هنگام پردازش ویدیو، تصاویر فریم‌ها برای اسکراب نوار پیشرفت استخراج می‌شوند.</span>
+                </div>
+            </Transition>
+        </section>
     </div>
 </template>
 
@@ -444,6 +481,7 @@ export default {
     components: { AdminToggleSwitch },
     props: {
         sourceHeight: { type: Number, default: 720 },
+        sourceWidth: { type: Number, default: 0 },
         modelValue: {
             type: Object,
             default: () => ({
@@ -451,7 +489,7 @@ export default {
                 stream_qualities: [],
                 download_qualities: [],
                 qualities: [],
-                storage_disk: 'dl',
+                storage_disk: 'static',
                 watermark: defaultWatermarkOptions(),
             }),
         },
@@ -466,8 +504,9 @@ export default {
             wantDownload: false,
             streamSelected: [],
             downloadSelected: [],
+            thumbnailsEnabled: false,
             syncedHeight: null,
-            storageDisk: 'dl',
+            storageDisk: 'static',
             storageTargets: VIDEO_STORAGE_TARGETS,
             wm: defaultWatermarkOptions(),
             watermarkFileName: '',
@@ -499,9 +538,10 @@ export default {
             return this.variant === 'trailer';
         },
         available() {
-            return availableQualitiesForHeight(this.sourceHeight);
+            return availableQualitiesForHeight(this.sourceHeight, this.sourceWidth);
         },
         sourceLabel() {
+            if (!this.sourceHeight) return 'نامشخص';
             const top = this.available[0];
             return top ? `${top}p` : `${this.sourceHeight}p`;
         },
@@ -518,15 +558,16 @@ export default {
                 if (this.wantStream) outputs.push('stream');
                 if (this.wantDownload) outputs.push('download');
             }
-            const streamQs = [...this.streamSelected];
-            const downloadQs = [...this.downloadSelected];
+            const streamQs = (this.wantStream || this.isTrailer) ? [...this.streamSelected] : [];
+            const downloadQs = this.wantDownload ? [...this.downloadSelected] : [];
             const qualities = streamQs.length ? streamQs : downloadQs;
             return {
                 outputs: outputs.length ? outputs : ['stream'],
                 stream_qualities: streamQs,
                 download_qualities: downloadQs,
                 qualities,
-                storage_disk: this.storageDisk || 'dl',
+                storage_disk: this.storageDisk || 'static',
+                thumbnails_enabled: !!this.thumbnailsEnabled,
                 watermark: {
                     enabled: !!this.wm.enabled,
                     type: this.wm.type === 'image' ? 'image' : 'text',
@@ -555,8 +596,27 @@ export default {
             immediate: true,
             handler(h) {
                 if (h === this.syncedHeight) return;
+                const wasInitial = this.syncedHeight === null || this.syncedHeight === undefined;
                 this.syncedHeight = h;
-                this.hydrateFromModel(true);
+                if (!wasInitial && h) {
+                    const avail = this.available;
+                    this.streamSelected = this.streamSelected.filter((q) => avail.includes(q));
+                    this.downloadSelected = this.downloadSelected.filter((q) => avail.includes(q));
+                    if (!this.streamSelected.length && this.wantStream) {
+                        this.streamSelected = defaultSelectedQualities(h, this.sourceWidth);
+                    }
+                    if (!this.downloadSelected.length && this.wantDownload) {
+                        this.downloadSelected = defaultSelectedQualities(h, this.sourceWidth);
+                    }
+                    this.emitChange();
+                } else {
+                    this.hydrateFromModel(!this.streamSelected.length);
+                }
+            },
+        },
+        sourceWidth: {
+            handler() {
+                this.hydrateFromModel(false);
             },
         },
         previewFile: {
@@ -597,6 +657,10 @@ export default {
         },
         toggleWmPanel(key) {
             this.wmPanels[key] = !this.wmPanels[key];
+        },
+        onThumbnailsToggle(val) {
+            this.thumbnailsEnabled = !!val;
+            this.emitChange();
         },
         onWatermarkToggle(val) {
             this.wm.enabled = !!val;
@@ -775,16 +839,17 @@ export default {
             const outs = this.modelValue?.outputs || (this.isTrailer ? ['trailer'] : ['stream']);
             this.wantStream = this.isTrailer || outs.includes('stream') || outs.includes('trailer') || outs.length === 0;
             this.wantDownload = this.isTrailer ? false : outs.includes('download');
-            this.storageDisk = this.modelValue?.storage_disk || 'dl';
+            this.storageDisk = this.modelValue?.storage_disk || 'static';
+            this.thumbnailsEnabled = !!this.modelValue?.thumbnails_enabled;
             this.wm = {
                 ...defaultWatermarkOptions(),
                 ...(this.modelValue?.watermark || {}),
             };
 
-            const defaults = defaultSelectedQualities(this.sourceHeight);
+            const defaults = defaultSelectedQualities(this.sourceHeight || 1080, this.sourceWidth || 0);
             const pick = (list) => {
-                const arr = Array.isArray(list) ? list.map(Number).filter((q) => this.available.includes(q)) : [];
-                return arr.length ? arr.sort((a, b) => b - a) : [...defaults];
+                const arr = Array.isArray(list) ? list.map(Number).filter((q) => VIDEO_QUALITY_LADDER.includes(q)) : [];
+                return arr.length ? arr.sort((a, b) => b - a) : (defaults.length ? [...defaults] : [720, 480]);
             };
 
             if (resetQualities || !this.streamSelected.length) {
@@ -795,21 +860,21 @@ export default {
                 );
             }
             if (resetQualities || !this.downloadSelected.length) {
-                this.downloadSelected = pick(
-                    this.modelValue?.download_qualities?.length
-                        ? this.modelValue.download_qualities
-                        : this.modelValue?.qualities
-                );
+                if (this.modelValue?.download_qualities?.length) {
+                    this.downloadSelected = pick(this.modelValue.download_qualities);
+                } else {
+                    this.downloadSelected = [];
+                }
             }
 
             this.emitChange();
         },
         onOutputChange() {
             if (this.wantStream && !this.streamSelected.length) {
-                this.streamSelected = defaultSelectedQualities(this.sourceHeight);
+                this.streamSelected = defaultSelectedQualities(this.sourceHeight, this.sourceWidth);
             }
             if (this.wantDownload && !this.downloadSelected.length) {
-                this.downloadSelected = defaultSelectedQualities(this.sourceHeight);
+                this.downloadSelected = defaultSelectedQualities(this.sourceHeight, this.sourceWidth);
             }
             this.emitChange();
         },

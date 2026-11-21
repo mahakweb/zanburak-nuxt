@@ -431,8 +431,7 @@ export default {
 	},
 	watch: {
 		"$route.params.tagSlug"(slug, prev) {
-			if (prev === undefined) return;
-			if (slug === prev) return;
+			if (!slug || prev === undefined || slug === prev) return;
 			this.loadTag();
 		},
 	},
@@ -461,6 +460,7 @@ export default {
 			}
 		},
 		async loadTag() {
+			if (!this.tagSlug) return;
 			this.loading = true;
 			this.tabStates = { questions: emptyTabState(), courses: emptyTabState(), articles: emptyTabState() };
 			try {

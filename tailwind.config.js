@@ -16,6 +16,8 @@ module.exports = {
       fontFamily: {
         'YekanBakh': ['YekanBakh', 'sans-serif'],
         'anjoman': ['Anjoman', 'sans-serif'],
+        'Peyda': ['Peyda', 'sans-serif'],
+        'peyda': ['Peyda', 'sans-serif'],
       },
       keyframes: {
         shimmer: {

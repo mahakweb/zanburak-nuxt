@@ -61,6 +61,44 @@
                 </button>
             </div>
         </teleport>
+
+        <!-- Hidden canvas & video for scrubber thumbnail generation -->
+        <canvas ref="thumbCanvasRef" class="hidden" width="160" height="90"></canvas>
+        <video ref="thumbVideoRef" class="hidden" muted playsinline preload="metadata" crossorigin="anonymous"></video>
+
+        <!-- Scrubbing Thumbnail Tooltip -->
+        <teleport v-if="playerContainerEl && scrubThumbVisible" :to="playerContainerEl">
+            <div
+                class="zb-scrub-thumb-tooltip"
+                :style="{
+                    left: `${scrubThumbPosition.x}px`,
+                    bottom: `${scrubThumbPosition.bottom}px`,
+                }"
+            >
+                <div v-if="!thumbnailsDisabled" class="zb-scrub-thumb-card">
+                    <div class="zb-scrub-thumb-frame">
+                        <img
+                            v-if="scrubThumbUrl"
+                            :src="scrubThumbUrl"
+                            class="zb-scrub-thumb-img"
+                            alt=""
+                            @load="onThumbImageLoad"
+                            @error="onThumbImageError"
+                        />
+                        <div v-else class="zb-scrub-thumb-placeholder">
+                            <span class="zb-scrub-thumb-spinner"></span>
+                        </div>
+                    </div>
+                    <div class="zb-scrub-thumb-time">
+                        {{ formatScrubTime(scrubThumbTime) }}
+                    </div>
+                </div>
+                <div v-else class="zb-scrub-thumb-simple-time">
+                    {{ formatScrubTime(scrubThumbTime) }}
+                </div>
+                <div v-if="!thumbnailsDisabled" class="zb-scrub-thumb-arrow" />
+            </div>
+        </teleport>
     </div>
 </template>
 
@@ -437,6 +475,7 @@ onMounted(() => {
         updateSegmentsButtonVisibility();
         updateWatchHeatmapButtonVisibility();
         renderSegmentMarkers();
+        attachProgressScrubberListeners();
     }, 200);
 
     window.addEventListener('zan:video-seek', onExternalSeekEvent);
@@ -468,6 +507,390 @@ watch(() => props.controlsConfig, () => {
 const playerRef = ref(null);
 const router = useRouter();
 const playerContainerEl = ref(null);
+
+// Scrubber thumbnail preview state
+const thumbCanvasRef = ref(null);
+const thumbVideoRef = ref(null);
+const scrubThumbVisible = ref(false);
+const scrubThumbUrl = ref('');
+const scrubThumbLoaded = ref(false);
+const scrubThumbTime = ref(0);
+const scrubThumbPosition = ref({ x: 0, bottom: 48 });
+const thumbCache = new Map();
+const thumbFailedUrls = new Set();
+let consecutiveThumbErrors = 0;
+const thumbnailsDisabled = ref(false);
+let isCapturingThumb = false;
+let thumbHls = null;
+
+const formatScrubTime = (seconds) => {
+    if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+    const s = Math.floor(seconds);
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    const h = Math.floor(m / 60);
+    const min = m % 60;
+    if (h > 0) {
+        return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    }
+    return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+};
+
+const getEpisodeIdFromSource = () => {
+    if (!props.source) return null;
+    const match = props.source.match(/episode\/(\d+)/);
+    return match ? match[1] : null;
+};
+
+const getCourseIdFromSource = () => {
+    if (!props.source) return null;
+    const match = props.source.match(/course\/(\d+)/);
+    return match ? match[1] : null;
+};
+
+let maxValidThumbIndex = null;
+let currentThumbToken = 0;
+let removeScrubberListeners = null;
+
+const getThumbInfoForTime = (timeSec) => {
+    const duration = playerRef.value?.player?.duration || 0;
+    const totalEstimate = duration > 0 ? Math.max(1, Math.ceil(duration / 5)) : 9999;
+    const calculatedIndex = Math.max(1, Math.floor(Math.max(0, timeSec) / 5) + 1);
+    const maxIdx = maxValidThumbIndex !== null ? maxValidThumbIndex : totalEstimate;
+    const index = Math.max(1, Math.min(calculatedIndex, maxIdx));
+    const indexPadded = String(index).padStart(4, '0');
+
+    let url = null;
+    if (props.source && props.source.includes('/stream/')) {
+        const streamBase = props.source.substring(0, props.source.lastIndexOf('/'));
+        url = `${streamBase}/thumbnails/thumb_${indexPadded}.jpg`;
+    } else {
+        const epId = getEpisodeIdFromSource();
+        if (epId) {
+            url = `${config.apiBaseUrl}/episode/${epId}/thumbnail/${index}`;
+        } else {
+            const cId = getCourseIdFromSource();
+            if (cId) {
+                url = `${config.apiBaseUrl}/course/${cId}/thumbnail/${index}`;
+            } else if (props.streamVideoId) {
+                url = `${config.apiBaseUrl}/video/${props.streamVideoId}/thumbnail/${index}`;
+            }
+        }
+    }
+
+    if (!url) return null;
+    return { url, index };
+};
+
+const getThumbUrlForTime = (timeSec) => {
+    const info = getThumbInfoForTime(timeSec);
+    return info ? info.url : null;
+};
+
+const onThumbImageLoad = () => {
+    scrubThumbLoaded.value = true;
+};
+
+const onThumbImageError = () => {
+    // Handled by background load pipeline
+};
+
+const initThumbVideoSource = () => {
+    const video = thumbVideoRef.value;
+    if (!video) return;
+    const src = props.source;
+    if (!src) return;
+
+    video.crossOrigin = 'anonymous';
+
+    const isHls = src.includes('.m3u8') || src.includes('playlist') || src.includes('/hls/');
+    if (isHls && Hls && Hls.isSupported()) {
+        try {
+            if (thumbHls) {
+                thumbHls.destroy();
+                thumbHls = null;
+            }
+            thumbHls = new Hls({
+                autoStartLoad: true,
+                maxBufferLength: 4,
+                maxMaxBufferLength: 8,
+                startLevel: 0,
+                xhrSetup: (xhr, url) => {
+                    const headers = getPlayerRequestHeaders();
+                    Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+                }
+            });
+            thumbHls.loadSource(src);
+            thumbHls.attachMedia(video);
+        } catch (e) {
+            video.src = src;
+        }
+    } else {
+        video.src = src;
+    }
+};
+
+const captureThumbAt = async (timeSec) => {
+    const rounded = Math.round(timeSec);
+    if (thumbCache.has(`seek_${rounded}`)) {
+        scrubThumbUrl.value = thumbCache.get(`seek_${rounded}`);
+        scrubThumbLoaded.value = true;
+        return;
+    }
+
+    const video = thumbVideoRef.value;
+    const canvas = thumbCanvasRef.value;
+    if (!video || !canvas || isCapturingThumb) return;
+
+    if (!video.src && !thumbHls) {
+        initThumbVideoSource();
+    }
+
+    isCapturingThumb = true;
+    try {
+        await new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                cleanup();
+                resolve();
+            }, 600);
+
+            const onSeeked = () => {
+                cleanup();
+                try {
+                    const ctx = canvas.getContext('2d');
+                    if (ctx && video.videoWidth > 0) {
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        const url = canvas.toDataURL('image/jpeg', 0.65);
+                        thumbCache.set(`seek_${rounded}`, url);
+                        if (Math.round(scrubThumbTime.value) === rounded) {
+                            scrubThumbUrl.value = url;
+                            scrubThumbLoaded.value = true;
+                        }
+                    }
+                } catch (e) {}
+                resolve();
+            };
+
+            const cleanup = () => {
+                clearTimeout(timeout);
+                video.removeEventListener('seeked', onSeeked);
+            };
+
+            video.addEventListener('seeked', onSeeked);
+            try {
+                video.currentTime = Math.max(0, Math.min(video.duration || 99999, timeSec));
+            } catch (e) {
+                cleanup();
+                resolve();
+            }
+        });
+    } finally {
+        isCapturingThumb = false;
+    }
+};
+
+const checkAndPreloadThumbnails = () => {
+    thumbnailsDisabled.value = false;
+    consecutiveThumbErrors = 0;
+    maxValidThumbIndex = null;
+    thumbCache.clear();
+    thumbFailedUrls.clear();
+
+    const testUrl = getThumbUrlForTime(1);
+    if (!testUrl) {
+        thumbnailsDisabled.value = true;
+        return;
+    }
+    const img = new Image();
+    img.onload = () => {
+        thumbCache.set(testUrl, true);
+        thumbnailsDisabled.value = false;
+        if (!scrubThumbUrl.value) {
+            scrubThumbUrl.value = testUrl;
+            scrubThumbLoaded.value = true;
+        }
+        // Pre-warm the next few thumbnail frames (e.g. 5s, 10s)
+        [6, 11, 16].forEach((sec) => {
+            const nextUrl = getThumbUrlForTime(sec);
+            if (nextUrl && !thumbCache.has(nextUrl)) {
+                const preImg = new Image();
+                preImg.onload = () => thumbCache.set(nextUrl, true);
+                preImg.src = nextUrl;
+            }
+        });
+    };
+    img.onerror = () => {
+        thumbFailedUrls.add(testUrl);
+        thumbnailsDisabled.value = true;
+    };
+    img.src = testUrl;
+};
+
+const preloadAdjacent = (timeSec) => {
+    [timeSec + 5, timeSec + 10, Math.max(0, timeSec - 5)].forEach((sec) => {
+        const nextInfo = getThumbInfoForTime(sec);
+        if (nextInfo?.url && !thumbCache.has(nextInfo.url) && !thumbFailedUrls.has(nextInfo.url)) {
+            const preImg = new Image();
+            preImg.onload = () => thumbCache.set(nextInfo.url, true);
+            preImg.onerror = () => {
+                thumbFailedUrls.add(nextInfo.url);
+                if (nextInfo.index > 1 && (maxValidThumbIndex === null || nextInfo.index <= maxValidThumbIndex)) {
+                    maxValidThumbIndex = nextInfo.index - 1;
+                }
+            };
+            preImg.src = nextInfo.url;
+        }
+    });
+};
+
+const loadThumbAt = (timeSec) => {
+    if (thumbnailsDisabled.value) return;
+
+    const info = getThumbInfoForTime(timeSec);
+    if (!info || !info.url) return;
+    const { url, index } = info;
+
+    if (thumbFailedUrls.has(url)) {
+        if (index > 1) {
+            maxValidThumbIndex = index - 1;
+            const fallbackInfo = getThumbInfoForTime(timeSec);
+            if (fallbackInfo && fallbackInfo.url !== url && !thumbFailedUrls.has(fallbackInfo.url)) {
+                loadThumbAt(timeSec);
+            }
+        }
+        return;
+    }
+
+    if (scrubThumbUrl.value === url) {
+        scrubThumbLoaded.value = true;
+        return;
+    }
+
+    if (thumbCache.has(url)) {
+        scrubThumbUrl.value = url;
+        scrubThumbLoaded.value = true;
+        preloadAdjacent(timeSec);
+        return;
+    }
+
+    // Keep current visible thumbnail during fetch to avoid blanking or black box
+    const token = ++currentThumbToken;
+    const img = new Image();
+    img.onload = () => {
+        thumbCache.set(url, true);
+        if (token === currentThumbToken || Math.abs(scrubThumbTime.value - timeSec) <= 4) {
+            scrubThumbUrl.value = url;
+            scrubThumbLoaded.value = true;
+        }
+        preloadAdjacent(timeSec);
+    };
+    img.onerror = () => {
+        thumbFailedUrls.add(url);
+        if (index > 1 && (maxValidThumbIndex === null || index <= maxValidThumbIndex)) {
+            maxValidThumbIndex = index - 1;
+            loadThumbAt(timeSec);
+        }
+    };
+    img.src = url;
+};
+
+const attachProgressScrubberListeners = () => {
+    if (removeScrubberListeners) {
+        removeScrubberListeners();
+        removeScrubberListeners = null;
+    }
+
+    const container = playerContainerEl.value;
+    if (!container) return;
+    const progressEl = container.querySelector('.plyr__progress') || container.querySelector('input[data-plyr="seek"]');
+    if (!progressEl) return;
+
+    let isDragging = false;
+
+    const updatePositionAndTime = (clientX) => {
+        const rect = progressEl.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        const pct = Math.max(0, Math.min(1, (clientX - rect.left) / (rect.width || 1)));
+        const duration = playerRef.value?.player?.duration || 0;
+        if (duration <= 0) return;
+
+        const time = pct * duration;
+        scrubThumbTime.value = time;
+
+        const isMob = typeof window !== 'undefined' && window.innerWidth <= 640;
+        const cardHalfWidth = isMob ? 42 : 58;
+        // On mobile: closer to progress bar with minimal vertical gap
+        const bottomOffset = isMob
+            ? Math.max(10, containerRect.bottom - rect.top)
+            : Math.max(26, containerRect.bottom - rect.top + 8);
+
+        const pointerX = clientX - containerRect.left;
+        const minX = cardHalfWidth + 6;
+        const maxX = Math.max(minX, containerRect.width - cardHalfWidth - 6);
+        const clampedX = Math.max(minX, Math.min(maxX, pointerX));
+
+        scrubThumbPosition.value = {
+            x: clampedX,
+            bottom: bottomOffset,
+        };
+        scrubThumbVisible.value = true;
+        loadThumbAt(time);
+    };
+
+    const onScrubMove = (e) => {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        updatePositionAndTime(clientX);
+    };
+
+    const onPointerDown = (e) => {
+        isDragging = true;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        updatePositionAndTime(clientX);
+    };
+
+    const onWindowPointerMove = (e) => {
+        if (!isDragging) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        updatePositionAndTime(clientX);
+    };
+
+    const onWindowPointerUp = () => {
+        if (isDragging) {
+            isDragging = false;
+            scrubThumbVisible.value = false;
+        }
+    };
+
+    const onMouseLeave = () => {
+        if (!isDragging) {
+            scrubThumbVisible.value = false;
+        }
+    };
+
+    progressEl.addEventListener('mousemove', onScrubMove);
+    progressEl.addEventListener('mouseenter', onScrubMove);
+    progressEl.addEventListener('mouseleave', onMouseLeave);
+    progressEl.addEventListener('mousedown', onPointerDown);
+    progressEl.addEventListener('touchstart', onPointerDown, { passive: true });
+    progressEl.addEventListener('touchmove', onScrubMove, { passive: true });
+    progressEl.addEventListener('touchend', onWindowPointerUp);
+
+    window.addEventListener('mousemove', onWindowPointerMove);
+    window.addEventListener('mouseup', onWindowPointerUp);
+
+    removeScrubberListeners = () => {
+        progressEl.removeEventListener('mousemove', onScrubMove);
+        progressEl.removeEventListener('mouseenter', onScrubMove);
+        progressEl.removeEventListener('mouseleave', onMouseLeave);
+        progressEl.removeEventListener('mousedown', onPointerDown);
+        progressEl.removeEventListener('touchstart', onPointerDown);
+        progressEl.removeEventListener('touchmove', onScrubMove);
+        progressEl.removeEventListener('touchend', onWindowPointerUp);
+        window.removeEventListener('mousemove', onWindowPointerMove);
+        window.removeEventListener('mouseup', onWindowPointerUp);
+    };
+};
 
 const PLAYER_HEADER = 'X-Zanburak-Player';
 const PLAYER_HEADER_VALUE = '1';
@@ -550,6 +973,7 @@ const bindPlayerEvents = () => {
 const onPlayerLoadedMetadata = () => {
     renderSegmentMarkers();
     if (watchHeatmapEnabled.value) renderWatchHeatmap();
+    checkAndPreloadThumbnails();
 };
 const availableQualities = ref([]);
 const currentQuality = ref('auto');
@@ -1039,6 +1463,15 @@ watch(() => props.source, (newSource) => {
 }, { immediate: true });
 
 onBeforeUnmount(() => {
+    if (removeScrubberListeners) {
+        removeScrubberListeners();
+        removeScrubberListeners = null;
+    }
+    if (thumbHls) {
+        try { thumbHls.destroy(); } catch (e) {}
+        thumbHls = null;
+    }
+    thumbCache.clear();
     closeMenu();
     window.removeEventListener('resize', updateIsMobile);
     flushProgressOnLeave();
@@ -1117,40 +1550,23 @@ const renderSegmentMarkers = () => {
         progress.style.position = 'relative';
     }
 
-    const boundaries = [0];
-    for (const seg of segments.value) {
-        if (seg.time > 0 && seg.time < duration) {
-            boundaries.push(seg.time);
-        }
-    }
-    boundaries.push(duration);
-    const uniqueBoundaries = [...new Set(boundaries.map((t) => Math.round(t * 1000) / 1000))].sort((a, b) => a - b);
-
+    // Single unified progress bar: render elegant YouTube-like divider splits directly on the track
     const overlay = document.createElement('div');
     overlay.id = 'segments-markers';
-    overlay.className = 'zb-segments-track';
+    overlay.className = 'zb-segment-splitters';
     overlay.setAttribute('aria-hidden', 'true');
 
-    const gapPx = 3;
-    for (let i = 0; i < uniqueBoundaries.length - 1; i++) {
-        const start = uniqueBoundaries[i];
-        const end = uniqueBoundaries[i + 1];
-        if (end <= start) continue;
-
-        const leftPct = (start / duration) * 100;
-        const widthPct = ((end - start) / duration) * 100;
-
-        const chunk = document.createElement('div');
-        chunk.className = 'zb-segment-chunk';
-        chunk.style.left = `${leftPct}%`;
-        chunk.style.width = `calc(${widthPct}% - ${i === 0 ? gapPx / 2 : gapPx}px)`;
-        if (i > 0) {
-            chunk.style.marginLeft = `${gapPx / 2}px`;
+    for (const seg of segments.value) {
+        if (seg.time > 0.5 && seg.time < duration - 0.5) {
+            const leftPct = (seg.time / duration) * 100;
+            const split = document.createElement('div');
+            split.className = 'zb-segment-split';
+            split.style.left = `${leftPct}%`;
+            overlay.appendChild(split);
         }
-        overlay.appendChild(chunk);
     }
 
-    progress.insertBefore(overlay, progress.firstChild);
+    progress.appendChild(overlay);
 };
 
 const buildWatchRanges = (durationSec, watchedSet) => {
@@ -1207,6 +1623,7 @@ const renderWatchHeatmap = () => {
         || null;
     if (container) container.classList.add('plyr--watch-heatmap-active');
 
+    // Overlay directly replaces the track background so it remains a single bar
     const overlay = document.createElement('div');
     overlay.id = 'watch-heatmap-markers';
     overlay.className = 'zb-watch-heatmap-track';
@@ -1225,12 +1642,7 @@ const renderWatchHeatmap = () => {
         overlay.appendChild(chunk);
     }
 
-    const segmentMarkers = progress.querySelector('#segments-markers');
-    if (segmentMarkers) {
-        progress.insertBefore(overlay, segmentMarkers);
-    } else {
-        progress.insertBefore(overlay, progress.firstChild);
-    }
+    progress.appendChild(overlay);
 };
 
 const toggleWatchHeatmap = () => {
@@ -1373,7 +1785,7 @@ const attachMenuButtonListeners = () => {
     --plyr-range-thumb-background: #facc15;
     --plyr-range-thumb-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
     --plyr-range-thumb-active-shadow-width: 8px;
-    --plyr-range-track-height: 3px;
+    --plyr-range-track-height: 4px;
     --plyr-video-range-thumb-active-shadow-color: rgba(250, 204, 21, 0.45);
     --plyr-tooltip-background: rgba(17, 17, 17, 0.92);
     --plyr-tooltip-color: #ffffff;
@@ -1470,94 +1882,193 @@ const attachMenuButtonListeners = () => {
     }
 }
 
-.zb-segments-track {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 4px;
-    pointer-events: none;
-    z-index: 0;
+/* Single unified progress bar (YouTube style) */
+.plyr__progress {
+    position: relative !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer;
 }
 
-.zb-segment-chunk {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
+.plyr__progress:hover {
+    --plyr-range-track-height: 6px;
+    --plyr-range-thumb-height: 14px;
 }
 
-.plyr--segments .plyr__progress input[type="range"] {
-    position: relative;
-    z-index: 2;
+/* Layer 1: Background & Buffer bar */
+.plyr__progress__buffer {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 100% !important;
+    height: var(--plyr-range-track-height, 4px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 2px !important;
+    box-sizing: border-box !important;
+    z-index: 1 !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.38) !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    -webkit-appearance: none !important;
 }
 
-.plyr--segments .plyr__progress__buffer {
-    position: relative;
-    z-index: 1;
+.plyr__progress__buffer::-webkit-progress-bar {
+    background: transparent !important;
 }
 
+.plyr__progress__buffer::-webkit-progress-value {
+    background: rgba(255, 255, 255, 0.38) !important;
+    border-radius: 2px !important;
+    transition: width 0.15s ease;
+}
+
+.plyr__progress__buffer::-moz-progress-bar {
+    background: rgba(255, 255, 255, 0.38) !important;
+    border-radius: 2px !important;
+}
+
+/* Layer 2: Watch heatmap track (swaps colors to green/red on the single bar) */
 .zb-watch-heatmap-track {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: var(--plyr-range-track-height, 3px);
-    pointer-events: none;
-    z-index: 0;
-    border-radius: calc(var(--plyr-range-track-height, 3px) / 2);
-    overflow: hidden;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 100% !important;
+    height: var(--plyr-range-track-height, 4px) !important;
+    border-radius: 2px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
 }
 
 .zb-watch-chunk {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    border-radius: inherit;
+    position: absolute !important;
+    top: 0 !important;
+    height: 100% !important;
 }
 
 .zb-watch-chunk--watched {
-    background: rgba(34, 197, 94, 0.95);
+    background: #22c55e !important;
 }
 
 .zb-watch-chunk--unwatched {
-    background: rgba(239, 68, 68, 0.88);
+    background: #ef4444 !important;
 }
 
-.plyr--watch-heatmap-active .plyr__progress input[type="range"] {
-    position: relative;
-    z-index: 2;
+/* Layer 3: The Input Range / Played Fill / Thumb */
+.plyr__progress input[type="range"] {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 100% !important;
+    height: var(--plyr-range-track-height, 4px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    border: none !important;
     background: transparent !important;
-    color: var(--plyr-color-main, #facc15);
+    cursor: pointer;
+    z-index: 3 !important;
+    -webkit-appearance: none !important;
 }
 
+/* WebKit Track: Played progress fill */
+.plyr__progress input[type="range"]::-webkit-slider-runnable-track {
+    height: var(--plyr-range-track-height, 4px) !important;
+    border: none !important;
+    border-radius: 2px !important;
+    background-color: transparent !important;
+    background-image: linear-gradient(to right, var(--plyr-color-main, #facc15) var(--value, 0%), transparent var(--value, 0%)) !important;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Mozilla Track */
+.plyr__progress input[type="range"]::-moz-range-track {
+    height: var(--plyr-range-track-height, 4px) !important;
+    border: none !important;
+    border-radius: 2px !important;
+    background-color: transparent !important;
+    background-image: linear-gradient(to right, var(--plyr-color-main, #facc15) var(--value, 0%), transparent var(--value, 0%)) !important;
+    user-select: none;
+}
+
+/* WebKit Thumb Knob */
+.plyr__progress input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    width: var(--plyr-range-thumb-height, 12px) !important;
+    height: var(--plyr-range-thumb-height, 12px) !important;
+    border-radius: 50% !important;
+    background: var(--plyr-range-thumb-background, #facc15) !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4) !important;
+    margin-top: calc((var(--plyr-range-track-height, 4px) - var(--plyr-range-thumb-height, 12px)) / 2) !important;
+    cursor: pointer;
+    transition: width 0.15s ease, height 0.15s ease, margin-top 0.15s ease !important;
+}
+
+/* Mozilla Thumb Knob */
+.plyr__progress input[type="range"]::-moz-range-thumb {
+    width: var(--plyr-range-thumb-height, 12px) !important;
+    height: var(--plyr-range-thumb-height, 12px) !important;
+    border-radius: 50% !important;
+    background: var(--plyr-range-thumb-background, #facc15) !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4) !important;
+    cursor: pointer;
+    transition: width 0.15s ease, height 0.15s ease !important;
+}
+
+/* Layer 4: Segment Dividers (YouTube chapter cuts through the single track) */
+.zb-segment-splitters {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 100% !important;
+    height: var(--plyr-range-track-height, 4px) !important;
+    box-sizing: border-box !important;
+    pointer-events: none !important;
+    z-index: 4 !important;
+}
+
+.zb-segment-split {
+    position: absolute !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 2.5px !important;
+    background: #000000 !important;
+    transform: translateX(-50%) !important;
+}
+
+/* When heatmap is active: hide the yellow played fill and buffer bar so heatmap green/red shows */
 .plyr--watch-heatmap-active .plyr__progress input[type="range"]::-webkit-slider-runnable-track {
-    height: var(--plyr-range-track-height, 3px);
-    background: transparent !important;
+    background-image: none !important;
+    background-color: transparent !important;
 }
 
 .plyr--watch-heatmap-active .plyr__progress input[type="range"]::-moz-range-track {
-    height: var(--plyr-range-track-height, 3px);
-    background: transparent !important;
-}
-
-.plyr--watch-heatmap-active .plyr__progress input[type="range"]::-webkit-slider-thumb {
-    width: var(--plyr-range-thumb-height, 12px);
-    height: var(--plyr-range-thumb-height, 12px);
-    margin-top: calc((var(--plyr-range-track-height, 3px) - var(--plyr-range-thumb-height, 12px)) / 2);
-}
-
-.plyr--watch-heatmap-active .plyr__progress input[type="range"]::-moz-range-thumb {
-    width: var(--plyr-range-thumb-height, 12px);
-    height: var(--plyr-range-thumb-height, 12px);
+    background-image: none !important;
+    background-color: transparent !important;
 }
 
 .plyr--watch-heatmap-active .plyr__progress__buffer {
-    opacity: 0;
-    z-index: 0;
+    opacity: 0 !important;
 }
 
 .zb-watch-heatmap-btn {
@@ -1580,14 +2091,6 @@ const attachMenuButtonListeners = () => {
 .plyr__control--overlaid.zb-player-overlaid:hover {
     background: rgba(0, 0, 0, 0.7) !important;
     opacity: 1 !important;
-}
-
-.plyr__progress input[type="range"] {
-    cursor: pointer;
-}
-
-.plyr__progress__buffer {
-    color: rgba(255, 255, 255, 0.25);
 }
 
 .plyr__control:focus-visible {
@@ -1745,5 +2248,145 @@ const attachMenuButtonListeners = () => {
 .zb-player-next-popup__close.zb-player-glass-panel:hover {
     color: #fff;
     background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Scrubbing thumbnail tooltip */
+.zb-scrub-thumb-tooltip {
+    position: absolute;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 45;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: left 0.04s ease-out;
+    width: max-content !important;
+    max-width: none !important;
+    flex-shrink: 0 !important;
+}
+
+.zb-scrub-thumb-simple-time {
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.375rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.6875rem;
+    font-family: monospace;
+    font-weight: 700;
+    color: #f8fafc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+}
+
+.zb-scrub-thumb-card {
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
+    position: relative;
+    width: max-content !important;
+    max-width: none !important;
+    flex-shrink: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.zb-scrub-thumb-frame {
+    position: relative;
+    width: 6.25rem; /* 100px */
+    height: 3.515rem; /* 56.25px (16:9 ratio) */
+    aspect-ratio: 16 / 9;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    background: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.zb-scrub-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.375rem;
+    display: block;
+}
+
+.zb-scrub-thumb-time {
+    text-align: center;
+    font-size: 0.625rem;
+    font-family: monospace;
+    font-weight: 700;
+    color: #f8fafc;
+    padding-top: 0.2rem;
+    padding-bottom: 0.05rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.zb-scrub-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(30, 41, 59, 0.85);
+}
+
+.zb-scrub-thumb-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #38bdf8;
+    border-radius: 50%;
+    animation: zb-thumb-spin 0.6s linear infinite;
+}
+
+@keyframes zb-thumb-spin {
+    to { transform: rotate(360deg); }
+}
+
+.zb-scrub-thumb-arrow {
+    width: 0.45rem;
+    height: 0.45rem;
+    transform: rotate(45deg);
+    background: rgba(15, 23, 42, 0.94);
+    border-right: 1px solid rgba(255, 255, 255, 0.22);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+    margin-top: -0.22rem;
+}
+
+/* Mobile adjustments per user request */
+@media (max-width: 640px) {
+    .zb-scrub-thumb-card {
+        padding: 0.15rem !important;
+        border-radius: 0.375rem !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+        background: rgba(15, 23, 42, 0.94) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    .zb-scrub-thumb-frame {
+        width: 4.5rem !important; /* 72px */
+        height: 2.53rem !important;
+        aspect-ratio: 16 / 9 !important;
+    }
+
+    .zb-scrub-thumb-time {
+        font-size: 0.52rem !important;
+        padding: 1px 4px !important;
+    }
+
+    /* حذف مثلث ریز پایین در موبایل */
+    .zb-scrub-thumb-arrow {
+        display: none !important;
+    }
 }
 </style>

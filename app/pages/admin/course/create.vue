@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "admin-course-create",
@@ -1513,31 +1513,40 @@ export default {
                     return;
                 }
 
-                // Trailer / attachment: init token then upload to worker
-                let initUrl = '';
-                let initBody = { filename: file.name, mime: file.type, size: file.size };
-                if (fileType === 'trailer') {
-                    initUrl = 'admin/video/upload';
-                    initBody.course_id = courseId;
-                    initBody.episode_id = null;
-                    initBody.storage_disk = this.processOptions?.storage_disk || 'dl';
-                } else if (fileType === 'attached_file') {
-                    initUrl = 'admin/course/uploadAttachedFile';
-                    initBody.course_id = courseId;
-                }
+                // Trailer: init token then upload to worker; Attachment: direct upload to main server
+                let workerRes;
+                if (fileType === 'attached_file') {
+                    // Direct upload to main server
+                    const formData = new FormData();
+                    formData.append('course_id', courseId);
+                    formData.append('file', file);
+                    formData.append('title', file.name);
+                    formData.append('filename', file.name);
+                    formData.append('mime', file.type || 'application/octet-stream');
+                    formData.append('size', file.size);
+                    workerRes = await axiosInstance.post('admin/course/uploadAttachedFile', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        timeout: 3600 * 1000,
+                        signal: controller.signal,
+                        onUploadProgress: trackProgress,
+                    });
+                } else {
+                // Trailer: init token then upload to worker
+                const initBody = { filename: file.name, mime: file.type, size: file.size };
+                initBody.course_id = courseId;
+                initBody.episode_id = null;
+                initBody.storage_disk = this.processOptions?.storage_disk || 'dl';
 
-                const initRes = await axiosInstance.post(initUrl, initBody);
+                const initRes = await axiosInstance.post('admin/video/upload', initBody);
                 const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
-                if (fileType === 'trailer') {
-                    this._workerToken = uploadToken;
-                    try { this._workerOrigin = new URL(workerUploadUrl).origin; } catch (e) { this._workerOrigin = ''; }
-                }
+                this._workerToken = uploadToken;
+                try { this._workerOrigin = new URL(workerUploadUrl).origin; } catch (e) { this._workerOrigin = ''; }
 
                 const formData = new FormData();
                 formData.append('path', uploadPath);
                 formData.append('file', file);
 
-                const workerRes = await axios.post(workerUploadUrl, formData, {
+                workerRes = await axios.post(workerUploadUrl, formData, {
                     timeout: 3600 * 1000,
                     headers: {
                         'Authorization': `Bearer ${uploadToken}`,
@@ -1545,6 +1554,7 @@ export default {
                     signal: controller.signal,
                     onUploadProgress: trackProgress,
                 });
+                }
 
                 // Mark as completed
                 this.progress[fileType].completed = true;
@@ -1702,20 +1712,16 @@ export default {
             try {
                 await field.uploadAll(async (item, onProgress) => {
                     const file = item.file;
-                    const initRes = await axiosInstance.post('admin/course/uploadAttachedFile', {
-                        course_id: courseId,
-                        filename: file.name,
-                        mime: file.type || 'application/octet-stream',
-                        size: file.size,
-                        title: item.title || file.name,
-                    });
-                    const { uploadPath, uploadToken, workerUploadUrl } = initRes.data;
                     const formData = new FormData();
-                    formData.append('path', uploadPath);
+                    formData.append('course_id', courseId);
                     formData.append('file', file);
-                    await axios.post(workerUploadUrl, formData, {
+                    formData.append('title', item.title || file.name);
+                    formData.append('filename', file.name);
+                    formData.append('mime', file.type || 'application/octet-stream');
+                    formData.append('size', file.size);
+                    await axiosInstance.post('admin/course/uploadAttachedFile', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
                         timeout: 3600 * 1000,
-                        headers: { Authorization: `Bearer ${uploadToken}` },
                         onUploadProgress: (progressEvent) => {
                             const { loaded, total } = progressEvent;
                             onProgress(total ? Math.round((loaded * 100) / total) : 0);

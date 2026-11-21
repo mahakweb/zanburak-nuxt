@@ -97,8 +97,8 @@
                                     <div
                                         class="relative flex flex-col items-center justify-center h-72 sm:h-80 lg:h-[29rem] text-white bg-gray-950">
                                         <SeoImage
-                                            src="/assets/image/other/video_processing_1.gif"
-                                            alt="در حال پردازش ویدیو"
+                                            :src="videoProcessingGif"
+                                            :alt="$t('course.episode.videoProcessing')"
                                             :lazy="false"
                                             img-class="w-auto max-w-[85%] h-auto max-h-[70%] lg:max-h-[58%] object-contain"
                                         />
@@ -719,6 +719,7 @@ import { convertToOrdinal } from "@/store/convertToOrdinal";
 import VideoPlayer from "@/views/components/player/VideoPlayer.vue";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 import noVideoPlaceholder from "@/assets/image/other/video-recording-2.png";
+import videoProcessingGif from "@/assets/image/other/video_processing_1.gif";
 import { useSEO, generateEpisodeSchema, generateBreadcrumbSchema } from "@/composables/useSEO";
 import { useI18n } from "vue-i18n";
 import { emptyCourseRatings, sortCourseSections, flattenCourseEpisodes } from "@/utils/courseDisplay";
@@ -904,6 +905,7 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
     }
 
     async function getEpisode(preloaded = null) {
+        if (!courseSlug.value || !episodeOrder.value) return;
         contentBlocked.value = null;
         try {
             if (preloaded?.__ssrBlocked) {
@@ -1011,7 +1013,9 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
                 return;
             }
             if (error?.response?.status === 404) {
-                router.push({ name: "NotFound" });
+                if (route.name === 'episode.show' && route.params.courseSlug === courseSlug.value && String(route.params.episodeOrder) === String(episodeOrder.value)) {
+                    router.push({ name: "NotFound" });
+                }
             }
             if (error?.response?.statusText) {
                 console.error(error.response.statusText);
@@ -1335,7 +1339,9 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
 
     onMounted(async () => {
         // Refresh for auth-aware fields; public content already applied from SSR.
-        await getEpisode();
+        if (courseSlug.value && episodeOrder.value) {
+            await getEpisode();
+        }
         document.addEventListener('click', onClickOutside);
     });
     onBeforeUnmount(() => {
@@ -1344,7 +1350,9 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
     });
     watch(
         () => [route.params.courseSlug, route.params.episodeOrder],
-        async ([newCourseSlug, newEpisodeOrder]) => {
+        async ([newCourseSlug, newEpisodeOrder], [oldCourseSlug, oldEpisodeOrder] = []) => {
+            if (!newCourseSlug || !newEpisodeOrder) return;
+            if (newCourseSlug === oldCourseSlug && String(newEpisodeOrder) === String(oldEpisodeOrder)) return;
             stopVideoStatusPolling();
             courseSlug.value = newCourseSlug;
             episodeOrder.value = newEpisodeOrder;

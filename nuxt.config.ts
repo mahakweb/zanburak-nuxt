@@ -234,7 +234,6 @@ export default defineNuxtConfig({
     },
     routeRules: {
       '/**': {
-        ssr: false,
         headers: {
           'X-Content-Type-Options': 'nosniff',
           'X-Frame-Options': 'SAMEORIGIN',
