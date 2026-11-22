@@ -1,19 +1,21 @@
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
-const PRINT_ROOT_ID = 'payment-receipt-print-root';
-
-async function waitForFonts(timeoutMs = 4000) {
+async function waitForFonts(timeoutMs = 3000) {
 	if (!document.fonts?.ready) return;
-	await Promise.race([
-		document.fonts.ready,
-		new Promise((resolve) => setTimeout(resolve, timeoutMs)),
-	]);
+	try {
+		await Promise.race([
+			document.fonts.ready,
+			new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+		]);
+	} catch {
+		// continue even if font ready rejects
+	}
 }
 
 function getCaptureBackground(element) {
 	const computed = window.getComputedStyle(element).backgroundColor;
-	if (computed && computed !== 'rgba(0, 0, 0, 0)') {
+	if (computed && computed !== 'rgba(0, 0, 0, 0)' && computed !== 'transparent') {
 		return computed;
 	}
 
@@ -24,13 +26,36 @@ async function captureElement(el) {
 	await waitForFonts();
 	await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-	return toPng(el, {
+	const bg = getCaptureBackground(el);
+	const rect = el.getBoundingClientRect();
+	const options = {
 		pixelRatio: 2,
 		cacheBust: true,
-		backgroundColor: getCaptureBackground(el),
-		width: el.scrollWidth,
-		height: el.scrollHeight,
-	});
+		backgroundColor: bg,
+		width: Math.ceil(rect.width) || el.scrollWidth,
+		height: Math.ceil(rect.height) || el.scrollHeight,
+		style: {
+			transform: 'none',
+			margin: '0',
+			direction: document.documentElement.getAttribute('dir') || 'rtl',
+		},
+		filter: (node) => {
+			if (node?.classList && node.classList.contains('receipt-export-actions')) {
+				return false;
+			}
+			return true;
+		},
+	};
+
+	try {
+		return await toPng(el, options);
+	} catch (err) {
+		console.warn('Standard toPng failed, retrying without font inlining:', err);
+		return await toPng(el, {
+			...options,
+			fontEmbedCSS: '',
+		});
+	}
 }
 
 function downloadDataUrl(dataUrl, filename) {
@@ -42,25 +67,113 @@ function downloadDataUrl(dataUrl, filename) {
 	link.remove();
 }
 
-export function printPaymentReceipt(element) {
-	if (!element) return;
+export async function printPaymentReceipt(element) {
+	if (!element || typeof window === 'undefined') return;
 
-	let printRoot = document.getElementById(PRINT_ROOT_ID);
-	if (!printRoot) {
-		printRoot = document.createElement('div');
-		printRoot.id = PRINT_ROOT_ID;
-		document.body.appendChild(printRoot);
+	const dataUrl = await captureElement(element);
+	if (!dataUrl) return;
+
+	const existingIframe = document.getElementById('receipt-native-print-iframe');
+	if (existingIframe) {
+		existingIframe.remove();
 	}
 
-	printRoot.innerHTML = '';
-	printRoot.appendChild(element.cloneNode(true));
+	const iframe = document.createElement('iframe');
+	iframe.id = 'receipt-native-print-iframe';
+	iframe.style.position = 'fixed';
+	iframe.style.left = '-9999px';
+	iframe.style.top = '0';
+	iframe.style.width = '800px';
+	iframe.style.height = '1100px';
+	iframe.style.border = 'none';
+	iframe.setAttribute('aria-hidden', 'true');
+	document.body.appendChild(iframe);
 
-	const restore = () => {
-		printRoot.innerHTML = '';
-		window.removeEventListener('afterprint', restore);
+	const iframeWindow = iframe.contentWindow;
+	if (!iframeWindow) {
+		window.print();
+		return;
+	}
+
+	const iframeDoc = iframeWindow.document;
+	const dir = document.documentElement.getAttribute('dir') || 'rtl';
+
+	iframeDoc.open();
+	iframeDoc.write(`
+		<!DOCTYPE html>
+		<html dir="${dir}">
+		<head>
+			<meta charset="utf-8">
+			<title>رسید پرداخت</title>
+			<style>
+				@page {
+					size: A5 portrait;
+					margin: 8mm;
+				}
+				*, *::before, *::after {
+					box-sizing: border-box;
+				}
+				html, body {
+					margin: 0;
+					padding: 0;
+					background: #ffffff;
+					display: flex;
+					justify-content: center;
+					align-items: flex-start;
+					-webkit-print-color-adjust: exact !important;
+					print-color-adjust: exact !important;
+				}
+				.receipt-print-container {
+					width: 100%;
+					max-width: 480px;
+					margin: 4mm auto;
+					text-align: center;
+				}
+				.receipt-print-img {
+					width: 100%;
+					max-width: 480px;
+					height: auto;
+					display: block;
+					margin: 0 auto;
+					border-radius: 20px;
+					border: 1px solid #e2e8f0;
+				}
+			</style>
+		</head>
+		<body>
+			<div class="receipt-print-container">
+				<img id="receipt-img" class="receipt-print-img" src="${dataUrl}" alt="رسید پرداخت" />
+			</div>
+		</body>
+		</html>
+	`);
+	iframeDoc.close();
+
+	const img = iframeDoc.getElementById('receipt-img');
+	const triggerPrint = () => {
+		setTimeout(() => {
+			try {
+				iframeWindow.focus();
+				iframeWindow.print();
+			} catch (err) {
+				console.error('Iframe print failed:', err);
+				window.print();
+			} finally {
+				setTimeout(() => {
+					iframe.remove();
+				}, 2000);
+			}
+		}, 300);
 	};
-	window.addEventListener('afterprint', restore);
-	window.print();
+
+	if (img && img.complete) {
+		triggerPrint();
+	} else if (img) {
+		img.onload = triggerPrint;
+		img.onerror = triggerPrint;
+	} else {
+		triggerPrint();
+	}
 }
 
 export async function downloadPaymentReceiptPng(element, filename) {

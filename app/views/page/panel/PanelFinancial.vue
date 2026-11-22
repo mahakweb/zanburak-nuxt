@@ -686,6 +686,38 @@
 					<div v-if="paymentMethodForRetry === 'bank'" class="space-y-2">
 						<p class="text-xs font-semibold text-gray-700 dark:text-gray-200">{{ $t("panel.financial.selectGateway") }}</p>
 						<PaymentGatewayList v-model="selectedGateway" :gateways="availableGateways" />
+
+						<!-- Installment Phone Warning -->
+						<div v-if="isCurrentGatewayInstallment && isRetryFullyInstallment"
+							class="flex items-start bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 rounded-xl p-3 text-xs font-medium leading-5">
+							<svg class="shrink-0 w-4 h-4 me-1.5 mt-0.5 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" fill="none"
+								xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" clip-rule="evenodd"
+									d="m3.517 17 7.058-11.783a1.667 1.667 0 0 1 2.85 0L20.483 17a1.667 1.667 0 0 1-1.425 2.5H4.942A1.666 1.666 0 0 1 3.517 17ZM12 9a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Zm-1 7a1 1 0 0 1 1-1h.008a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1Z"
+									fill="currentColor"></path>
+							</svg>
+							<div class="space-y-1">
+								<p class="font-bold text-amber-800 dark:text-amber-300">
+									{{ $t('panel.financial.installmentMobileWarningTitle') }}
+									<span v-if="currentUser?.mobile" class="ms-1 font-mono font-normal">({{ $t('panel.financial.installmentMobileWarningRegistered') }}: {{ currentUser.mobile }})</span>
+								</p>
+								<p class="text-xs text-amber-800/90 dark:text-amber-200/90">
+									{{ $t('panel.financial.installmentMobileWarningDesc') }}
+								</p>
+							</div>
+						</div>
+
+						<!-- Ineligible items notice -->
+						<div v-else-if="isCurrentGatewayInstallment && !isRetryFullyInstallment"
+							class="flex items-start bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-200 rounded-xl p-3 text-xs font-medium leading-5">
+							<svg class="shrink-0 w-4 h-4 me-1.5 mt-0.5 text-rose-600 dark:text-rose-400" viewBox="0 0 24 24" fill="none"
+								xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" clip-rule="evenodd"
+									d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+									fill="currentColor"></path>
+							</svg>
+							<p>{{ $t('panel.financial.installmentIneligibleNotice') }}</p>
+						</div>
 					</div>
 				</div>
 
@@ -702,7 +734,7 @@
 						{{ $t("panel.financial.pleaseWait") }}
 					</button>
 					<button v-else @click="onRetryPay"
-						:disabled="paymentMethodForRetry === 'wallet' && retryPayableAmount > 0 && walletBalance <= 0"
+						:disabled="(paymentMethodForRetry === 'wallet' && retryPayableAmount > 0 && walletBalance <= 0) || (isCurrentGatewayInstallment && !isRetryFullyInstallment)"
 						class="px-4 h-9 flex items-center justify-center rounded-e-lg bg-gradient-to-r from-amber-400 to-yellow-500 hover:shadow-md text-gray-900 text-sm font-bold disabled:opacity-60 disabled:cursor-not-allowed transition-all active:scale-95">
 						{{ paymentMethodForRetry === 'wallet'
 							? (walletSufficientForRetry ? $t("panel.financial.confirmReceipt") : $t("cart.payWalletAndGateway"))
@@ -804,7 +836,7 @@ import axiosInstance from "@/store/axiosInstance";
 import PaginationComponent from "@/views/components/home/PaginationComponent.vue";
 import BottomSheetDrawer from "@/views/components/common/BottomSheetDrawer.vue";
 import PaymentGatewayList from "@/views/components/payment/PaymentGatewayList.vue";
-import { buildPaymentGateways, calculateCartGatewayPricing, cartHasInstallmentEligibleItems, filterDirectBankGateways, filterGatewaysForCart, findGatewayById, findGatewayByVariant, getDefaultGateway, findGatewayByDriver, gatewayPayPayload, getCartItemTitle, isDigipayFeeGateway, isInstallmentGateway } from "@/config/paymentGateways";
+import { buildPaymentGateways, calculateCartGatewayPricing, cartHasInstallmentEligibleItems, filterDirectBankGateways, filterGatewaysForCart, findGatewayById, findGatewayByVariant, getDefaultGateway, findGatewayByDriver, gatewayPayPayload, getCartItemTitle, isDigipayFeeGateway, isInstallmentGateway, isCartFullyInstallmentEligible, fetchGatewayCommissions } from "@/config/paymentGateways";
 import GatewayFeeHelp from "@/views/components/cart/GatewayFeeHelp.vue";
 import CartAnimatedPrice from "@/views/components/cart/CartAnimatedPrice.vue";
 import { toast } from "vue3-toastify";
@@ -1003,6 +1035,12 @@ export default {
 		hasInstallmentEligible() {
 			return cartHasInstallmentEligibleItems(this.retryCartItems);
 		},
+		isRetryFullyInstallment() {
+			return isCartFullyInstallmentEligible(this.retryCartItems);
+		},
+		isCurrentGatewayInstallment() {
+			return this.paymentMethodForRetry === 'bank' && isInstallmentGateway(this.selectedGateway);
+		},
 		retryPricing() {
 			const pricing = calculateCartGatewayPricing(
 				this.retryCartItems,
@@ -1067,6 +1105,7 @@ export default {
 	},
 	mounted() {
 		document.title = this.$t("panel.financial.documentTitle");
+		fetchGatewayCommissions();
 		this.selectedGateway = getDefaultGateway(this.gateways);
 		this.getPaymentsList();
 	},
@@ -1084,10 +1123,12 @@ export default {
 				return;
 			}
 
-			if (isInstallmentGateway(gateway) && !this.hasInstallmentEligible) {
-				toast.error(this.$t('cart.noInstallmentEligible'), {
+			if (isInstallmentGateway(gateway) && !this.isRetryFullyInstallment) {
+				toast.error(this.$t('panel.financial.installmentIneligibleNotice'), {
 					theme: "colored",
 					position: toast.POSITION.BOTTOM_CENTER,
+					bodyClassName: "font-YekanBakh",
+					toastClassName: "rounded-xl text-sm font-semibold mb-4 mx-3 md:mx-0",
 				});
 				this.selectedGateway = previous || getDefaultGateway(this.availableGateways);
 				return;
@@ -1215,6 +1256,14 @@ export default {
 			this.retryPay({ walletSplitConfirmed: true });
 		},
 		onRetryPay() {
+			if (this.isCurrentGatewayInstallment && !this.isRetryFullyInstallment) {
+				toast.error(this.$t('panel.financial.installmentIneligibleNotice'), {
+					theme: "colored",
+					bodyClassName: "font-YekanBakh",
+					toastClassName: "rounded-xl text-sm font-semibold mb-4 mx-3 md:mx-0",
+				});
+				return;
+			}
 			if (this.walletSplitActive) {
 				this.openWalletSplitSheet();
 				return;

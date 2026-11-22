@@ -30,8 +30,6 @@ provide('ssrCoursesBootstrap', ssrCoursesBootstrap)
         <section class="pt-5 pb-2 md:pt-10">
             <div class="mx-auto max-w-screen-xl px-3 md:px-4">
                 <div class="relative overflow-hidden rounded-2xl bg-white dark:bg-gray-900 ring-1 ring-slate-200/80 dark:ring-white/10 shadow-sm md:rounded-[1.75rem]">
-                    <div class="pointer-events-none absolute -top-16 -start-10 h-40 w-40 rounded-full bg-amber-400/20 blur-3xl"></div>
-                    <div class="pointer-events-none absolute -bottom-20 end-10 hidden h-40 w-40 rounded-full bg-amber-300/10 blur-3xl lg:block"></div>
                     <div class="relative flex w-full min-w-0 flex-col lg:grid lg:grid-cols-12">
                         <div class="flex w-full min-w-0 flex-col justify-center px-4 py-5 sm:px-5 md:px-8 md:py-8 lg:col-span-4 lg:py-10">
                             <div class="flex items-start justify-between gap-3">

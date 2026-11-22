@@ -1235,6 +1235,27 @@
 								</div>
 							</div>
 
+							<!-- DigiPay Mobile Match Warning -->
+							<div
+								v-if="isCurrentGatewayInstallment"
+								class="flex items-start bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 rounded-xl p-3 text-xs font-medium leading-5">
+								<svg class="shrink-0 w-4 h-4 me-1.5 mt-0.5 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" fill="none"
+									xmlns="http://www.w3.org/2000/svg">
+									<path fill-rule="evenodd" clip-rule="evenodd"
+										d="m3.517 17 7.058-11.783a1.667 1.667 0 0 1 2.85 0L20.483 17a1.667 1.667 0 0 1-1.425 2.5H4.942A1.666 1.666 0 0 1 3.517 17ZM12 9a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Zm-1 7a1 1 0 0 1 1-1h.008a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1Z"
+										fill="currentColor"></path>
+								</svg>
+								<div class="space-y-1">
+									<p class="font-bold text-amber-800 dark:text-amber-300">
+										{{ $t('cart.installmentMobileWarningTitle') }}
+										<span v-if="currentUser?.mobile" class="ms-1 font-normal">({{ $t('cart.installmentMobileWarningRegistered') }}: {{ currentUser.mobile }})</span>
+									</p>
+									<p class="text-xs text-amber-800/90 dark:text-amber-200/90">
+										{{ $t('cart.installmentMobileWarningDesc') }}
+									</p>
+								</div>
+							</div>
+
 							<!-- Warning -->
 							<div
 								class="flex items-start bg-yellow-400 text-black rounded-lg p-3 text-xs font-medium leading-4">
@@ -1309,6 +1330,79 @@
 			</div>
 		</BottomSheetDrawer>
 
+		<!-- Installment Cart Ineligible BottomSheet -->
+		<BottomSheetDrawer v-model="isOpenInstallmentRestrictionModal" max-width-class="max-w-lg">
+			<div class="px-2 py-3 text-start">
+				<div class="flex items-center gap-2 mb-3">
+					<div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+						<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" clip-rule="evenodd"
+								d="m3.517 17 7.058-11.783a1.667 1.667 0 0 1 2.85 0L20.483 17a1.667 1.667 0 0 1-1.425 2.5H4.942A1.666 1.666 0 0 1 3.517 17ZM12 9a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Zm-1 7a1 1 0 0 1 1-1h.008a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1Z"
+								fill="currentColor"></path>
+						</svg>
+					</div>
+					<div>
+						<h3 class="text-base font-bold text-gray-900 dark:text-gray-100">
+							{{ $t('cart.installmentRestrictionTitle') }}
+						</h3>
+						<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+							{{ $t('cart.installmentRestrictionDesc') }}
+						</p>
+					</div>
+				</div>
+
+				<!-- Ineligible Items List -->
+				<div class="my-4 space-y-2 max-h-56 overflow-y-auto px-1">
+					<div
+						v-for="item in nonInstallmentItemsInCart"
+						:key="item.id"
+						class="flex items-center justify-between p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20 text-xs"
+					>
+						<div class="flex items-center gap-2 min-w-0">
+							<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 shrink-0">
+								{{ $t('cart.installmentIneligibleBadge') }}
+							</span>
+							<span class="truncate font-medium text-gray-800 dark:text-gray-200">
+								{{ getCartItemTitle(item, $t) }}
+							</span>
+						</div>
+						<button
+							type="button"
+							@click="removeSingleNonInstallmentItem(item.id)"
+							class="text-rose-600 hover:text-rose-800 dark:text-rose-400 p-1 rounded-lg hover:bg-rose-100/50 dark:hover:bg-rose-900/40 shrink-0 transition-colors"
+						>
+							<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+							</svg>
+						</button>
+					</div>
+				</div>
+
+				<!-- Actions -->
+				<div class="flex flex-col sm:flex-row gap-2 mt-5">
+					<button
+						type="button"
+						@click="removeNonInstallmentItemsAndProceed"
+						:disabled="removingNonInstallmentItems"
+						class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-60"
+					>
+						<svg v-if="removingNonInstallmentItems" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+						</svg>
+						<span>{{ removingNonInstallmentItems ? $t('cart.installmentRemoving') : $t('cart.installmentRemoveIneligibleAndProceed') }}</span>
+					</button>
+					<button
+						type="button"
+						@click="switchToDirectBankGateway"
+						class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 transition-all text-center"
+					>
+						{{ $t('cart.installmentPayWithOtherGateways') }}
+					</button>
+				</div>
+			</div>
+		</BottomSheetDrawer>
+
 
 
 	</MasterPage>
@@ -1345,6 +1439,10 @@ import {
 	gatewayPayPayload,
 	isDigipayFeeGateway,
 	isInstallmentGateway,
+	isCartFullyInstallmentEligible,
+	getNonInstallmentCartItems,
+	isCartItemInstallmentEligible,
+	fetchGatewayCommissions,
 } from "@/config/paymentGateways";
 const { t } = useI18n();
 const router = useRouter();
@@ -1358,19 +1456,30 @@ const checkoutStep = ref('invoice');
 const walletSplitRemainder = ref(0);
 const walletSplitGateway = ref(null);
 const paymentLoading = ref(false);
+const isOpenInstallmentRestrictionModal = ref(false);
+const removingNonInstallmentItems = ref(false);
 let priceToastTimer = null;
 
 const currentUser = computed(() => authStore.status.userInfo);
 const cartItems = computed(() => cartStore.cartItems);
 const visibleCartItems = computed(() => {
-
 	return cartItems.value.filter(item => {
-
 		return !hiddenItems.value.includes(item.id);
-
 	});
-
 });
+
+const isCartFullyInstallment = computed(() => {
+	return isCartFullyInstallmentEligible(visibleCartItems.value);
+});
+
+const nonInstallmentItemsInCart = computed(() => {
+	return getNonInstallmentCartItems(visibleCartItems.value);
+});
+
+const isCurrentGatewayInstallment = computed(() => {
+	return paymentMethod.value === 'bank' && isInstallmentGateway(selectedGateway.value);
+});
+
 const cartLoading = computed(() => cartStore.loading);
 const totalCartPrice = computed(() => {
 	return cartStore.totalCartPrice;
@@ -1435,6 +1544,7 @@ function getItemPricing(item) {
 
 onMounted(() => {
 	document.title = t('cart.pageTitle');
+	fetchGatewayCommissions();
 	selectedGateway.value = getDefaultGateway(gateways.value);
 });
 
@@ -1545,11 +1655,21 @@ function onFeeHelpClose() {
 }
 
 function openCheckoutSheet() {
+	if (isCurrentGatewayInstallment.value && !isCartFullyInstallment.value) {
+		isOpenInstallmentRestrictionModal.value = true;
+		return;
+	}
 	checkoutStep.value = 'invoice';
 	isOpenCheckoutModal.value = true;
 }
 
 function onCheckoutPay() {
+	if (isCurrentGatewayInstallment.value && !isCartFullyInstallment.value) {
+		isOpenCheckoutModal.value = false;
+		isOpenInstallmentRestrictionModal.value = true;
+		return;
+	}
+
 	if (paymentMethod.value === 'wallet' && payableAmount.value > 0 && walletBalance.value > 0 && !walletSufficient.value) {
 		walletSplitRemainder.value = payableAmount.value - walletBalance.value;
 		walletSplitGateway.value = getDefaultGateway(directBankGateways.value);
@@ -1559,6 +1679,53 @@ function onCheckoutPay() {
 	}
 
 	sendPaymentRequest();
+}
+
+async function removeNonInstallmentItemsAndProceed() {
+	if (removingNonInstallmentItems.value) return;
+	removingNonInstallmentItems.value = true;
+	try {
+		const ineligible = [...nonInstallmentItemsInCart.value];
+		for (const item of ineligible) {
+			hiddenItems.value.push(item.id);
+		}
+		await Promise.all(ineligible.map(item => cartStore.removeFromCart(item.id)));
+		isOpenInstallmentRestrictionModal.value = false;
+		checkoutStep.value = 'invoice';
+		isOpenCheckoutModal.value = true;
+	} catch (error) {
+		console.error("Error removing non-installment items:", error);
+		toast.error(t('cart.toastRemoveError'));
+		await cartStore.getCart();
+	} finally {
+		removingNonInstallmentItems.value = false;
+	}
+}
+
+function switchToDirectBankGateway() {
+	isOpenInstallmentRestrictionModal.value = false;
+	const directGateway = getDefaultGateway(directBankGateways.value);
+	if (directGateway) {
+		selectedGateway.value = directGateway;
+	}
+	checkoutStep.value = 'invoice';
+	isOpenCheckoutModal.value = true;
+}
+
+async function removeSingleNonInstallmentItem(itemId) {
+	try {
+		hiddenItems.value.push(itemId);
+		await cartStore.removeFromCart(itemId);
+		if (isCartFullyInstallment.value) {
+			isOpenInstallmentRestrictionModal.value = false;
+			checkoutStep.value = 'invoice';
+			isOpenCheckoutModal.value = true;
+		}
+	} catch (error) {
+		console.error("Error removing item:", error);
+		toast.error(t('cart.toastRemoveError'));
+		await cartStore.getCart();
+	}
 }
 
 async function sendPaymentRequest(options = {}) {

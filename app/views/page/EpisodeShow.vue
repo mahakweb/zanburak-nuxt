@@ -2,45 +2,343 @@
     <MasterPage>
         <div class="md:mt-16 mx-auto max-w-screen-xl px-2">
             <section class="">
-                <div v-if="episode" class="bg-white dark:bg-gray-900 rounded my-4">
-                    <div class="grid md:grid-cols-12 gap-1 py-3">
-                        <div class="md:col-span-9 flex items-center justify-between px-3">
-                            <div class="mb-4 md:mb-0">
-                                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                    {{ episode.title }}
-                                </span>
-                            </div>
-                            <!-- <div class="hidden md:block mt-2 md:mt-0 rtl:md:ml-4 ltr:md:mr-4">
-                                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300 rtl:ml-2 ltr:mr-2">عنوان دوره:</span>
-                                <router-link
-                                    :to="{
-                                        name: 'course.show',
-                                        params: { courseSlug: course.slug },
-                                    }"
+                <!-- Modern Episode Top Bar -->
+                <div v-if="episode && course" class="relative z-30 mb-4 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-200/80 dark:border-gray-800 p-3 sm:p-4 shadow-sm">
+                    <!-- Desktop & Tablet Layout (md+) -->
+                    <div class="hidden md:flex items-center justify-between gap-3">
+                        <!-- Right side (RTL): Back to Course & Curriculum Dropdown Selector -->
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <!-- Back to course button -->
+                            <router-link
+                                v-if="course?.slug"
+                                :to="{ name: 'course.show', params: { courseSlug: course.slug } }"
+                                :title="$t('course.episode.backToCourse')"
+                                class="group shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700/80 border border-gray-200/60 dark:border-gray-700/60 transition"
+                            >
+                                <ChevronRightIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180 text-gray-400 group-hover:text-yellow-500 transition" />
+                                <span class="max-w-[130px] lg:max-w-[180px] truncate">{{ cleanCourseTitle(course.title) }}</span>
+                            </router-link>
+
+                            <span class="text-gray-300 dark:text-gray-700 select-none">/</span>
+
+                            <!-- Dropdown Selector (Popover) -->
+                            <Popover class="relative z-40" v-slot="{ open, close }">
+                                <PopoverButton
+                                    class="group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-gray-900 dark:text-gray-100 bg-gray-50 hover:bg-yellow-400/10 dark:bg-gray-800/80 dark:hover:bg-gray-700/80 border border-gray-200/80 dark:border-gray-700/80 hover:border-yellow-400/60 dark:hover:border-yellow-400/60 transition focus:outline-none"
                                 >
-                                    <span class="text-lg font-bold text-slate-700 hover:text-yellow-400 dark:text-slate-300 dark:hover:text-yellow-400">
-                                        {{ course.title }}
+                                    <span class="relative flex h-2 w-2">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400"></span>
                                     </span>
-                                </router-link>
-                            </div> -->
+                                    <span v-if="currentSection" class="text-gray-500 dark:text-gray-400 font-medium hidden lg:inline">
+                                        بخش {{ convertToOrdinal(currentSectionIndex + 1) }}:
+                                    </span>
+                                    <span class="max-w-[180px] lg:max-w-[280px] xl:max-w-[360px] truncate">
+                                        جلسه {{ episode.order }}: {{ episode.title }}
+                                    </span>
+                                    <ChevronDownIcon
+                                        class="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-transform duration-200 shrink-0"
+                                        :class="open ? 'rotate-180 text-yellow-500' : ''"
+                                    />
+                                </PopoverButton>
+
+                                <transition
+                                    enter-active-class="transition duration-150 ease-out"
+                                    enter-from-class="transform scale-95 opacity-0 -translate-y-1"
+                                    enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                                    leave-active-class="transition duration-100 ease-in"
+                                    leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                                    leave-to-class="transform scale-95 opacity-0 -translate-y-1"
+                                >
+                                    <PopoverPanel
+                                        class="absolute start-0 z-50 mt-2 w-80 sm:w-96 lg:w-[28rem] rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl shadow-black/20 overflow-hidden flex flex-col focus:outline-none max-h-[30rem]"
+                                    >
+                                        <!-- Popover Header -->
+                                        <div class="p-3 bg-gray-50/80 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-gray-900 dark:text-gray-100 truncate">
+                                                    {{ cleanCourseTitle(course.title) }}
+                                                </div>
+                                                <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    {{ sortedCourseSections.length }} بخش · {{ flatEpisodes.length }} جلسه
+                                                </div>
+                                            </div>
+                                            <span v-if="isLoggedin && course" class="text-[11px] font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-400/10 dark:bg-yellow-400/15 px-2.5 py-1 rounded-full shrink-0">
+                                                {{ Math.floor(course?.progressPercentage ?? 0) }}% تکمیل
+                                            </span>
+                                        </div>
+
+                                        <!-- Popover List of Sections & Episodes -->
+                                        <div class="overflow-y-auto custom-scrollbar p-2 space-y-3 flex-1">
+                                            <div v-for="(sec, sIdx) in sortedCourseSections" :key="sec.id ?? sIdx" class="space-y-1">
+                                                <!-- Section Header -->
+                                                <div class="px-2.5 py-1.5 text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-100/80 dark:bg-gray-800/80 rounded-lg flex items-center justify-between">
+                                                    <span class="truncate">بخش {{ convertToOrdinal(sIdx + 1) }}: {{ sec.title }}</span>
+                                                    <span class="text-[10px] text-gray-400 dark:text-gray-500 shrink-0">{{ sec.episode?.length || 0 }} جلسه</span>
+                                                </div>
+
+                                                <!-- Section Episodes -->
+                                                <div class="space-y-0.5">
+                                                    <router-link
+                                                        v-for="ep in sec.episode"
+                                                        :key="ep.id ?? ep.order"
+                                                        :to="episodeShowRoute(course.slug, ep.order)"
+                                                        @click="close()"
+                                                        class="flex items-center justify-between px-2.5 py-2 rounded-xl text-xs transition group/item"
+                                                        :class="isActiveEpisode(route.params.episodeOrder, ep.order)
+                                                            ? 'bg-yellow-400/15 text-yellow-600 dark:text-yellow-400 font-bold border border-yellow-400/40'
+                                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'"
+                                                    >
+                                                        <div class="flex items-center gap-2 min-w-0">
+                                                            <span
+                                                                class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0"
+                                                                :class="isActiveEpisode(route.params.episodeOrder, ep.order)
+                                                                    ? 'bg-yellow-400 text-black'
+                                                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                                                            >
+                                                                {{ ep.order }}
+                                                            </span>
+                                                            <span class="truncate">{{ ep.title }}</span>
+                                                        </div>
+
+                                                        <div class="flex items-center gap-1.5 shrink-0 rtl:mr-2 ltr:ml-2">
+                                                            <span v-if="isActiveEpisode(route.params.episodeOrder, ep.order)" class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 font-semibold">
+                                                                در حال پخش
+                                                            </span>
+                                                            <svg v-else-if="ep.fullWatched" class="w-4 h-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            <svg v-else-if="ep.lock === 1 && !userCanSeeCourse" class="w-3.5 h-3.5 text-rose-500" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+                                                            </svg>
+                                                        </div>
+                                                    </router-link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </PopoverPanel>
+                                </transition>
+                            </Popover>
                         </div>
-                        <div class="md:col-span-3 px-2 md:px-3">
-                            <div class="flex flex-col" v-if="isLoggedin && course">
+
+                        <!-- Middle: Quick Navigation Controls (Prev / Next & Counter) -->
+                        <div class="flex items-center gap-1 shrink-0">
+                            <!-- Prev episode -->
+                            <router-link
+                                v-if="prevEpisode"
+                                :to="episodeShowRoute(course.slug, prevEpisode.order)"
+                                class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition"
+                                title="جلسه قبلی"
+                            >
+                                <ChevronRightIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+                                <span class="hidden xl:inline">جلسه قبل</span>
+                            </router-link>
+                            <span
+                                v-else
+                                class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-400 dark:text-gray-600 bg-gray-100/50 dark:bg-gray-800/40 cursor-not-allowed opacity-50"
+                            >
+                                <ChevronRightIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+                                <span class="hidden xl:inline">جلسه قبل</span>
+                            </span>
+
+                            <!-- Counter badge -->
+                            <div v-if="flatEpisodes.length" class="text-[11px] font-bold text-gray-500 dark:text-gray-400 px-2 select-none">
+                                <span class="text-gray-800 dark:text-gray-200 font-extrabold">{{ currentEpisodeIndex + 1 }}</span>
+                                <span class="text-gray-400 dark:text-gray-600 mx-1">/</span>
+                                <span>{{ flatEpisodes.length }}</span>
+                            </div>
+
+                            <!-- Next episode -->
+                            <router-link
+                                v-if="nextEpisode"
+                                :to="episodeShowRoute(course.slug, nextEpisode.order)"
+                                class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition"
+                                title="جلسه بعدی"
+                            >
+                                <span class="hidden xl:inline">جلسه بعد</span>
+                                <ChevronLeftIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+                            </router-link>
+                            <span
+                                v-else
+                                class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-400 dark:text-gray-600 bg-gray-100/50 dark:bg-gray-800/40 cursor-not-allowed opacity-50"
+                            >
+                                <span class="hidden xl:inline">جلسه بعد</span>
+                                <ChevronLeftIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+                            </span>
+                        </div>
+
+                        <!-- Left: Course Progress Widget -->
+                        <div v-if="isLoggedin && course" class="shrink-0 flex items-center gap-3 bg-gray-50 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 rounded-xl px-3 py-1.5">
+                            <div class="flex flex-col text-end">
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">{{ $t('course.episode.yourProgress') }}</span>
+                                <span class="text-xs font-extrabold text-gray-900 dark:text-white">{{ Math.floor(course?.progressPercentage ?? 0) }}%</span>
+                            </div>
+                            <div class="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                 <div
-                                    class="flex justify-between items-center mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                    <div class="">{{ $t('course.episode.yourProgress') }}</div>
-                                    <div class="">{{ Math.floor(course?.progressPercentage ?? 0) }}%</div>
-                                </div>
-                                <div class="">
-                                    <div class="h-1 rounded-xl bg-blue-100 dark:bg-blue-400/10 overflow-hidden">
-                                        <div class="h-full bg-yellow-400" :style="{
-                                            width: `${Math.floor(course?.progressPercentage ?? 0)}%`,
-                                        }"></div>
-                                    </div>
-                                </div>
+                                    class="h-full bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full transition-all duration-500"
+                                    :style="{ width: `${Math.floor(course?.progressPercentage ?? 0)}%` }"
+                                ></div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Mobile (< md) Layout -->
+                    <div class="flex md:hidden flex-col gap-2.5">
+                        <!-- Row 1: Back to Course + Progress -->
+                        <div class="flex items-center justify-between gap-2">
+                            <router-link
+                                v-if="course?.slug"
+                                :to="{ name: 'course.show', params: { courseSlug: course.slug } }"
+                                class="flex items-center gap-1 text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-yellow-500 transition min-w-0"
+                            >
+                                <ChevronRightIcon class="w-4 h-4 shrink-0 rtl:rotate-0 ltr:rotate-180 text-yellow-500" />
+                                <span class="truncate">{{ cleanCourseTitle(course.title) }}</span>
+                            </router-link>
+
+                            <div v-if="isLoggedin && course" class="shrink-0 flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800/80 rounded-lg px-2.5 py-1 border border-gray-200/60 dark:border-gray-700/60">
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">پیشرفت:</span>
+                                <span class="text-xs font-bold text-yellow-600 dark:text-yellow-400">{{ Math.floor(course?.progressPercentage ?? 0) }}%</span>
+                                <div class="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                        class="h-full bg-yellow-400 rounded-full"
+                                        :style="{ width: `${Math.floor(course?.progressPercentage ?? 0)}%` }"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Dropdown Selector + Prev / Next -->
+                        <div class="flex items-center gap-1.5">
+                            <Popover class="relative flex-1 min-w-0" v-slot="{ open, close }">
+                                <PopoverButton
+                                    class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none"
+                                >
+                                    <div class="flex items-center gap-1.5 min-w-0 truncate">
+                                        <span class="w-2 h-2 rounded-full bg-yellow-400 shrink-0"></span>
+                                        <span class="truncate">جلسه {{ episode.order }}: {{ episode.title }}</span>
+                                    </div>
+                                    <ChevronDownIcon class="w-4 h-4 shrink-0 text-gray-400" :class="open ? 'rotate-180' : ''" />
+                                </PopoverButton>
+
+                                <Teleport to="body">
+                                    <div v-if="open" class="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-xs" @click="close()"></div>
+                                    <transition
+                                        enter-active-class="transition duration-150 ease-out"
+                                        enter-from-class="transform scale-95 opacity-0 -translate-y-2"
+                                        enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                                        leave-active-class="transition duration-100 ease-in"
+                                        leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                                        leave-to-class="transform scale-95 opacity-0 -translate-y-2"
+                                    >
+                                        <PopoverPanel
+                                            class="fixed inset-x-3 top-20 sm:top-24 z-[9999] rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden flex flex-col focus:outline-none max-h-[75vh]"
+                                        >
+                                            <!-- Mobile Popover Header -->
+                                            <div class="p-3 bg-gray-50/90 dark:bg-gray-800/80 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                                                <div class="min-w-0">
+                                                    <div class="text-xs font-bold text-gray-900 dark:text-gray-100 truncate">
+                                                        {{ cleanCourseTitle(course.title) }}
+                                                    </div>
+                                                    <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        {{ sortedCourseSections.length }} بخش · {{ flatEpisodes.length }} جلسه
+                                                    </div>
+                                                </div>
+                                                <button @click="close()" class="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                                    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            <!-- Mobile Popover List -->
+                                            <div class="overflow-y-auto custom-scrollbar p-2 space-y-3 flex-1">
+                                                <div v-for="(sec, sIdx) in sortedCourseSections" :key="sec.id ?? sIdx" class="space-y-1">
+                                                    <div class="px-2 py-1 text-[11px] font-bold text-gray-500 dark:text-gray-400 bg-gray-100/70 dark:bg-gray-800/70 rounded-lg flex items-center justify-between">
+                                                        <span class="truncate">بخش {{ convertToOrdinal(sIdx + 1) }}: {{ sec.title }}</span>
+                                                        <span class="text-[10px] opacity-70 shrink-0">{{ sec.episode?.length || 0 }} جلسه</span>
+                                                    </div>
+
+                                                    <div class="space-y-0.5">
+                                                        <router-link
+                                                            v-for="ep in sec.episode"
+                                                            :key="ep.id ?? ep.order"
+                                                            :to="episodeShowRoute(course.slug, ep.order)"
+                                                            @click="close()"
+                                                            class="flex items-center justify-between px-2.5 py-2.5 rounded-xl text-xs transition"
+                                                            :class="isActiveEpisode(route.params.episodeOrder, ep.order)
+                                                                ? 'bg-yellow-400/15 text-yellow-600 dark:text-yellow-400 font-bold border border-yellow-400/40'
+                                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'"
+                                                        >
+                                                            <div class="flex items-center gap-2 min-w-0">
+                                                                <span
+                                                                    class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0"
+                                                                    :class="isActiveEpisode(route.params.episodeOrder, ep.order)
+                                                                        ? 'bg-yellow-400 text-black'
+                                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                                                                >
+                                                                    {{ ep.order }}
+                                                                </span>
+                                                                <span class="truncate">{{ ep.title }}</span>
+                                                            </div>
+
+                                                            <div class="flex items-center gap-1.5 shrink-0 rtl:mr-2 ltr:ml-2">
+                                                                <span v-if="isActiveEpisode(route.params.episodeOrder, ep.order)" class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 font-semibold">
+                                                                    در حال پخش
+                                                                </span>
+                                                                <svg v-else-if="ep.fullWatched" class="w-4 h-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                                                                </svg>
+                                                                <svg v-else-if="ep.lock === 1 && !userCanSeeCourse" class="w-3.5 h-3.5 text-rose-500" viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                        </router-link>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </PopoverPanel>
+                                    </transition>
+                                </Teleport>
+                            </Popover>
+
+                            <!-- Quick Prev / Next Mobile -->
+                            <div class="flex items-center gap-1 shrink-0">
+                                <router-link
+                                    v-if="prevEpisode"
+                                    :to="episodeShowRoute(course.slug, prevEpisode.order)"
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition"
+                                    title="جلسه قبلی"
+                                >
+                                    <ChevronRightIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+                                </router-link>
+                                <span
+                                    v-else
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100/50 dark:bg-gray-800/40 text-gray-400 dark:text-gray-600 opacity-50"
+                                >
+                                    <ChevronRightIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+                                </span>
+
+                                <router-link
+                                    v-if="nextEpisode"
+                                    :to="episodeShowRoute(course.slug, nextEpisode.order)"
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition"
+                                    title="جلسه بعدی"
+                                >
+                                    <ChevronLeftIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+                                </router-link>
+                                <span
+                                    v-else
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100/50 dark:bg-gray-800/40 text-gray-400 dark:text-gray-600 opacity-50"
+                                >
+                                    <ChevronLeftIcon class="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Player & Sidebar Box -->
+                <div v-if="episode" class="relative z-10 bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-800/60 my-4">
                     <div class="grid md:grid-cols-12">
                         <div class="md:col-span-9">
                             <EpisodePlayerPlaceholder v-if="contentBlocked"
@@ -392,7 +690,7 @@
                             </template>
                         </div>
                         <div class="md:col-span-3">
-                            <div ref="episodeSidebarRef" class="max-h-[400px] md:max-h-[630px] overflow-auto custom-scrollbar">
+                            <div ref="episodeSidebarRef" class="max-h-[400px] md:max-h-[630px] overflow-y-auto hover-scrollbar custom-scrollbar">
                                 <Disclosure :defaultOpen="section.id === episode.section_id ? true : false" as="div"
                                     class="" v-for="(section, sectionIndex) in sortedCourseSections" :key="section.id ?? sectionIndex" v-slot="{ open }">
                                     <!-- Use the `open` state to conditionally change the direction of an icon. -->
@@ -528,33 +826,37 @@
                         </div>
                     </div>
                 </div>
-                <div v-else class="bg-white dark:bg-gray-900 rounded-xl my-4">
-                    <div class="grid md:grid-cols-12 gap-1 p-2 md:p-4">
-                        <div class="md:col-span-9 mb-4 md:mb-0">
-                            <div class="mt-2 md:mt-0">
-                                <div
-                                    class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-300 rounded-lg dark:bg-gray-700 h-2 w-48">
-                                </div>
+                <div v-else class="space-y-4 my-4">
+                    <!-- Top Bar Skeleton -->
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800 p-3.5 sm:p-4 shadow-sm overflow-hidden">
+                        <!-- Desktop Skeleton (md+) -->
+                        <div class="hidden md:flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-200 dark:bg-gray-700 h-9 w-36 rounded-xl"></div>
+                                <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-200 dark:bg-gray-700 h-9 w-60 rounded-xl"></div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-200 dark:bg-gray-700 h-8 w-24 rounded-xl"></div>
+                                <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-200 dark:bg-gray-700 h-9 w-32 rounded-xl"></div>
                             </div>
                         </div>
-                        <div class="md:col-span-3">
-                            <div class="flex flex-col">
-                                <div
-                                    class="flex justify-between items-center mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                    <div
-                                        class="banimate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-300 rounded-lg dark:bg-gray-700 h-2 w-20">
-                                    </div>
-                                    <div
-                                        class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-300 rounded-lg dark:bg-gray-700 h-2 w-12">
-                                    </div>
-                                </div>
-                                <div
-                                    class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-300 rounded-lg dark:bg-gray-700 h-1.5">
-                                </div>
+
+                        <!-- Mobile Skeleton (< md) -->
+                        <div class="flex md:hidden flex-col gap-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-200 dark:bg-gray-700 h-6 w-28 rounded-lg"></div>
+                                <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-200 dark:bg-gray-700 h-6 w-24 rounded-lg"></div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-200 dark:bg-gray-700 h-9 flex-1 min-w-0 rounded-xl"></div>
+                                <div class="animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-200 dark:bg-gray-700 h-9 w-16 shrink-0 rounded-xl"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="grid md:grid-cols-12 gap-1 p-2">
+
+                    <!-- Player Skeleton Box -->
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-800/60">
+                        <div class="grid md:grid-cols-12 gap-1 p-2">
                         <div class="md:col-span-9">
                             <div role="status"
                                 class="flex items-center justify-center h-56 md:h-80 lg:h-[550px] w-full animate-shimmer shimmer-gray-200 dark:shimmer-gray-600 bg-gray-300 rounded-lg dark:bg-gray-700">
@@ -634,6 +936,7 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </section>
             <section class="">
                 <div v-if="episode" class="">
@@ -689,6 +992,9 @@
     </MasterPage>
 </template>
 <script setup>
+definePageMeta({
+    name: 'episode.show',
+});
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 const authStore = useAuthStore()
@@ -705,9 +1011,8 @@ const cartStore = useCartStore()
     import axiosInstance from "@/store/axiosInstance";
     import config from "@/store/config";
     import router from "@/routes/router";
-    import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
-    import { ChevronRightIcon } from "@heroicons/vue/20/solid";
-    import { ChevronLeftIcon } from "@heroicons/vue/20/solid";
+    import { Disclosure, DisclosureButton, DisclosurePanel, Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
+    import { ChevronRightIcon, ChevronLeftIcon, ChevronDownIcon } from "@heroicons/vue/20/solid";
     // Hls import moved to VideoPlayer component
     import { toast } from "vue3-toastify";
     import "vue3-toastify/dist/index.css";
@@ -718,7 +1023,7 @@ import noVideoPlaceholder from "@/assets/image/other/video-recording-2.png";
 import videoProcessingGif from "@/assets/image/other/video_processing_1.gif";
 import { useSEO, generateEpisodeSchema, generateBreadcrumbSchema } from "@/composables/useSEO";
 import { useI18n } from "vue-i18n";
-import { emptyCourseRatings, sortCourseSections, flattenCourseEpisodes } from "@/utils/courseDisplay";
+import { emptyCourseRatings, sortCourseSections, flattenCourseEpisodes, cleanCourseTitle } from "@/utils/courseDisplay";
 import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/episodeRoute";
 
 // Custom controls moved to VideoPlayer component
@@ -840,6 +1145,43 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
             routeName: 'episode.show',
             link,
         };
+    });
+
+    const flatEpisodes = computed(() => {
+        if (!course.value?.section) return [];
+        return flattenCourseEpisodes(course.value.section, {
+            courseSlug: course.value.slug,
+        });
+    });
+
+    const currentEpisodeIndex = computed(() => {
+        if (!episode.value || !flatEpisodes.value.length) return -1;
+        return flatEpisodes.value.findIndex(
+            (ep) => String(ep.order) === String(episode.value.order) || ep.id === episode.value.id
+        );
+    });
+
+    const prevEpisode = computed(() => {
+        if (currentEpisodeIndex.value <= 0) return null;
+        return flatEpisodes.value[currentEpisodeIndex.value - 1];
+    });
+
+    const nextEpisode = computed(() => {
+        if (currentEpisodeIndex.value === -1 || currentEpisodeIndex.value >= flatEpisodes.value.length - 1) return null;
+        return flatEpisodes.value[currentEpisodeIndex.value + 1];
+    });
+
+    const currentSection = computed(() => {
+        if (!sortedCourseSections.value?.length || !episode.value) return null;
+        return sortedCourseSections.value.find((s) =>
+            (s.id && episode.value.section_id && s.id === episode.value.section_id) ||
+            s.episode?.some((e) => String(e.order) === String(episode.value.order) || e.id === episode.value.id)
+        ) || null;
+    });
+
+    const currentSectionIndex = computed(() => {
+        if (!currentSection.value || !sortedCourseSections.value?.length) return -1;
+        return sortedCourseSections.value.findIndex((s) => s.id === currentSection.value.id);
     });
 
     const computedSource = computed(() => {
@@ -1378,20 +1720,6 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
     }
 
     @media only screen and (min-width: 768px) {
-        :root {
-            --scrollbar-primary: #f1f1f1;
-            --scrollbar-secondary: #c1c1c1;
-            --scrollbar-secondary-hover: #b7b5b5;
-            --scrollbar-secondary-active: #d2d1d1;
-        }
-
-        .dark {
-            --scrollbar-primary: #424242;
-            --scrollbar-secondary: #686868;
-            --scrollbar-secondary-hover: #777676;
-            --scrollbar-secondary-active: #868585;
-        }
-
         /* .plyr styles are defined in the reusable VideoPlayer component */
 
         .plyr__controls {

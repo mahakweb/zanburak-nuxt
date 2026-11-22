@@ -576,14 +576,12 @@ function handleEsc(event) {
 
 function lockBodyScroll() {
     if (!props.lockScroll || typeof document === "undefined") return;
-    if (previousBodyOverflow.value === null) {
-        previousBodyOverflow.value = document.body.style.overflow || "";
-        document.body.style.overflow = "hidden";
-    }
+    document.documentElement.classList.add("drawer-open");
 }
 
 function unlockBodyScroll() {
     if (typeof document === "undefined") return;
+    document.documentElement.classList.remove("drawer-open");
     if (previousBodyOverflow.value !== null) {
         document.body.style.overflow = previousBodyOverflow.value;
         previousBodyOverflow.value = null;
@@ -661,12 +659,12 @@ watch(
         <!-- Backdrop fade -->
         <transition name="bottom-sheet-fade">
             <div v-if="isOpen" :class="[
-                'fixed inset-0',
+                'fixed inset-0 w-screen h-screen',
                 backdropZClass,
                 backdropClass && backdropClass.length !== 0
                     ? backdropClass
                     : 'messenger-sheet-backdrop'
-            ]" @click="handleBackdropClick"></div>
+            ]" @click="handleBackdropClick" @wheel.prevent @touchmove.prevent></div>
         </transition>
 
         <!-- Sheet slide from bottom (JS hooks: fit height off-screen, then animate) -->
@@ -713,6 +711,7 @@ watch(
 
 <style scoped>
 .bottom-sheet-panel {
+    overscroll-behavior: contain;
     /* Height / keyboard inset after open — open/close transform is JS-driven */
     transition:
         height 0.22s cubic-bezier(0.22, 1, 0.36, 1),

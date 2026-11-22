@@ -318,35 +318,15 @@ definePageMeta({
 											<div>
 												<button v-if="!updateLoading" type="submit"
 													@click.prevent="updateQuestion"
-													class="w-24 h-10 dark:hover:bg-transparent bg-amber-500 border-amber-500 border text-white text-sm font-semibold rounded-md transition duration-200 hover:bg-transparent hover:text-amber-500">{{ $t('discuss.form.editQuestion') }}</button>
+													class="cursor-pointer inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 px-8 py-3 text-sm font-bold text-gray-900 shadow-md shadow-amber-500/20 hover:shadow-lg transition duration-200">
+													<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+													{{ $t('discuss.form.editQuestion') || 'ویرایش پرسش' }}
+												</button>
 												<button v-else type="button" disabled
-													class="disabled w-24 items-center justify-center flex h-10 bg-amber-500 border-amber-500 border text-white text-sm font-semibold rounded-md transition duration-200">
-													<svg class="w-5 h-5" version="1.1"
-														xmlns="http://www.w3.org/2000/svg"
-														xmlns:xlink="http://www.w3.org/1999/xlink"
-														viewBox="25 25 50 50">
-
-														<circle class="stroke-current text-white text-opacity-30"
-															cx="50" cy="50" r="20" fill="none" stroke-width="8"
-															stroke-linecap="round" stroke-dashoffset="0"
-															stroke-dasharray="200, 300">
-
-														</circle>
-														<circle class="stroke-current text-white" cx="50" cy="50" r="20"
-															fill="none" stroke-width="8" stroke-linecap="round"
-															stroke-dashoffset="0" stroke-dasharray="100, 200">
-															<animateTransform attributeName="transform"
-																attributeType="XML" type="rotate" from="0 50 50"
-																to="360 50 50" dur="2.5s" repeatCount="indefinite">
-															</animateTransform>
-															<animate attributeName="stroke-dashoffset"
-																values="0;-30;-124" dur="1.25s"
-																repeatCount="indefinite"></animate>
-															<animate attributeName="stroke-dasharray"
-																values="0,200;110,200;110,200" dur="1.25s"
-																repeatCount="indefinite"></animate>
-														</circle>
-													</svg> </button>
+													class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400/80 px-8 py-3 text-sm font-bold text-gray-900 cursor-not-allowed">
+													<svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="32" stroke-linecap="round"/></svg>
+													<span>{{ $t('discuss.form.submitting') || 'در حال ذخیره...' }}</span>
+												</button>
 											</div>
 										</div>
 									</div>
@@ -533,7 +513,6 @@ import "vue3-toastify/dist/index.css";
 import { ref } from "vue";
 import debounce from 'lodash/debounce';
 export default {
-		setup() { return { authStore: useAuthStore() } },
 	components: {
 		MasterPage,
 		// LoadingComponent,
@@ -565,11 +544,14 @@ export default {
 	},
 
 	computed: {
+		authStore() {
+			return useAuthStore();
+		},
 		isLoggedin() {
-			return this.authStore.status.loggedIn;
+			return this.authStore?.status?.loggedIn || false;
 		},
 		currentUser() {
-			return this.authStore.status.userInfo;
+			return this.authStore?.status?.userInfo || null;
 		},
 		metaKeywordsCount() {
 			if (!this.meta_keywords) return 0;

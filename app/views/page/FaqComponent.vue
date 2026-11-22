@@ -1,12 +1,6 @@
 <template>
     <MasterPage>
-        <div class="relative overflow-hidden">
-            <!-- Decorative background glow -->
-            <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-                <div class="absolute -top-40 start-1/2 -translate-x-1/2 h-[36rem] w-[36rem] rounded-full bg-amber-300/25 dark:bg-amber-500/10 blur-3xl"></div>
-                <div class="absolute top-1/2 -end-40 h-96 w-96 rounded-full bg-yellow-200/40 dark:bg-yellow-500/5 blur-3xl"></div>
-            </div>
-
+        <div class="relative">
             <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
                 <!-- Hero -->
                 <div class="mx-auto max-w-2xl text-center pt-14 md:pt-20 pb-8">

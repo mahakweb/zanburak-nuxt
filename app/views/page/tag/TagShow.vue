@@ -6,8 +6,8 @@
 				<!-- Hero skeleton — mirrors loaded hero layout -->
 				<section class="relative my-5 md:my-7 rounded-2xl overflow-hidden border border-gray-100 dark:border-[#1e2a3f]">
 					<div class="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-[#0f1524] dark:via-[#151c2c] dark:to-[#1a1220]"></div>
-					<div class="absolute -top-20 -start-20 w-56 h-56 rounded-full bg-amber-400/20 dark:bg-amber-400/10 blur-3xl"></div>
-					<div class="absolute -bottom-12 -end-12 w-48 h-48 rounded-full bg-orange-400/15 dark:bg-rose-500/10 blur-3xl"></div>
+					
+					
 
 					<div class="relative grid lg:grid-cols-12 gap-5 px-4 py-6 md:px-8 md:py-8 items-center">
 						<div class="lg:col-span-8 flex flex-col justify-center text-center lg:text-start">
@@ -208,8 +208,8 @@
                 <section id="tag-content" class="relative my-6 md:my-8 rounded-2xl border border-blue-100/60 dark:border-[#1e2a3f] shadow-[0_4px_24px_-4px_rgba(59,130,246,0.1)] dark:shadow-none">
                     <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-50/90 via-slate-50/80 to-sky-50/70 dark:from-[#0a0f18] dark:via-[#0f1524] dark:to-[#131b28]" aria-hidden="true"></div>
-                    <div class="pointer-events-none absolute -top-16 -end-12 w-44 h-44 rounded-full bg-amber-400/12 dark:bg-amber-500/8 blur-3xl" aria-hidden="true"></div>
-                    <div class="pointer-events-none absolute -bottom-12 -start-10 w-36 h-36 rounded-full bg-blue-400/10 dark:bg-blue-600/8 blur-3xl" aria-hidden="true"></div>
+                    
+                    
                     <div class="pointer-events-none absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[80%] bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.06),transparent_65%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.04),transparent_65%)]" aria-hidden="true"></div>
                     </div>
 

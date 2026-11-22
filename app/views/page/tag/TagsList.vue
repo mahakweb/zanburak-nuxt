@@ -4,8 +4,8 @@
             <!-- Hero -->
             <section class="relative my-5 md:my-7 rounded-2xl overflow-hidden border border-gray-100 dark:border-[#1e2a3f]">
                 <div class="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-[#0f1524] dark:via-[#151c2c] dark:to-[#1a1220]"></div>
-                <div class="absolute -top-20 -start-20 w-56 h-56 rounded-full bg-amber-400/20 dark:bg-amber-400/10 blur-3xl"></div>
-                <div class="absolute -bottom-12 -end-12 w-48 h-48 rounded-full bg-orange-400/15 dark:bg-rose-500/10 blur-3xl"></div>
+                
+                
 
                 <div class="relative grid lg:grid-cols-12 gap-5 px-4 py-6 md:px-8 md:py-8 items-center">
                     <div class="lg:col-span-7 flex flex-col justify-center text-center lg:text-start">

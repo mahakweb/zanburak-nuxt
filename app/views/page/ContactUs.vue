@@ -1,13 +1,6 @@
 <template>
     <MasterPage>
-        <div class="relative overflow-hidden">
-            <!-- Decorative background glow -->
-            <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-                <div class="absolute -top-40 start-1/2 -translate-x-1/2 h-[38rem] w-[38rem] rounded-full bg-amber-300/25 dark:bg-amber-500/10 blur-3xl"></div>
-                <div class="absolute top-1/3 -end-40 h-96 w-96 rounded-full bg-yellow-200/40 dark:bg-yellow-500/5 blur-3xl"></div>
-                <div class="absolute bottom-0 -start-40 h-96 w-96 rounded-full bg-orange-200/30 dark:bg-orange-500/5 blur-3xl"></div>
-            </div>
-
+        <div class="relative">
             <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
                 <!-- ===================== HERO ===================== -->
@@ -162,7 +155,7 @@
                         <!-- Map link -->
                         <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir//33.4511423,48.3613157/@33.4512278,48.3591612,17.5z?hl=fa&entry=ttu"
                             class="group relative overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-amber-50 to-white dark:from-gray-800 dark:to-gray-900 p-8 shadow-sm flex flex-col items-center justify-center text-center transition hover:shadow-xl">
-                            <div class="pointer-events-none absolute -top-10 -end-10 h-40 w-40 rounded-full bg-amber-300/20 blur-2xl"></div>
+                            
                             <SeoImage
                                 img-class="w-52 md:w-60 transition duration-300 group-hover:scale-105"
                                 :src="earth_map"

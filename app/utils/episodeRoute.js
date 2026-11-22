@@ -1,9 +1,12 @@
 export function episodeShowRoute(courseSlug, order) {
+    const slug = courseSlug || '';
+    const ord = String(order ?? '');
     return {
+        path: `/course/${slug}/episode/${ord}`,
         name: 'episode.show',
         params: {
-            courseSlug,
-            episodeOrder: String(order),
+            courseSlug: slug,
+            episodeOrder: ord,
         },
     };
 }

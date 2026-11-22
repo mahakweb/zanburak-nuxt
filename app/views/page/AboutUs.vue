@@ -1,12 +1,6 @@
 <template>
     <MasterPage>
         <div class="relative overflow-hidden">
-            <!-- Decorative background glow -->
-            <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-                <div class="absolute -top-40 start-1/2 -translate-x-1/2 h-[36rem] w-[36rem] rounded-full bg-amber-300/25 dark:bg-amber-500/10 blur-3xl"></div>
-                <div class="absolute top-1/3 -end-40 h-96 w-96 rounded-full bg-yellow-200/40 dark:bg-yellow-500/5 blur-3xl"></div>
-            </div>
-
             <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
                 <main class="font-medium space-y-20 md:space-y-28 py-14 md:py-20">
                     <!-- ===================== HERO ===================== -->
@@ -28,7 +22,6 @@
                         </div>
                         <div class="order-1 md:order-2 flex justify-center">
                             <div class="relative">
-                                <div class="pointer-events-none absolute inset-0 -z-10 m-auto h-64 w-64 rounded-full bg-amber-400/20 blur-3xl"></div>
                                 <SeoImage
                                     priority
                                     img-class="w-64 md:w-96 drop-shadow-xl"

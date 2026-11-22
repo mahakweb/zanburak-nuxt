@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 definePageMeta({
   name: "quiz-resume",
   middleware: ['auth'],
+  layout: 'blank',
   props: true,
 })
 </script>

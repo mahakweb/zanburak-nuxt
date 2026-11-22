@@ -10,11 +10,6 @@ definePageMeta({
 <template>
     <MasterPage>
         <div class="relative overflow-hidden">
-            <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden dark:hidden">
-                <div class="absolute top-1/3 -end-40 h-80 w-80 rounded-full bg-yellow-200/30 blur-3xl"></div>
-                <div class="absolute bottom-0 -start-40 h-80 w-80 rounded-full bg-orange-200/20 blur-3xl"></div>
-            </div>
-
             <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
                 <!-- ===================== HERO ===================== -->

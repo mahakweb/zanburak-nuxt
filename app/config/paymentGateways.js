@@ -1,6 +1,47 @@
+import { ref } from 'vue';
+import axiosInstance from '@/store/axiosInstance';
 import zibalIcon from '@/assets/image/gateways/has-bg/zibal.png';
 import zarinpalIcon from '@/assets/image/gateways/has-bg/zarinpal.png';
 import digipayIcon from '@/assets/image/gateways/has-bg/digipay.png';
+
+export const gatewayCommissions = ref({
+	'digipay-installment': 15,
+	'zibal': 0,
+	'zarinpal': 0,
+	'digipay-ipg': 0,
+});
+
+export function setGatewayCommissions(commissions) {
+	if (!commissions || typeof commissions !== 'object') return;
+	if (typeof commissions.digipay === 'number' || typeof commissions.digipay === 'string') {
+		gatewayCommissions.value['digipay-installment'] = Number(commissions.digipay);
+	}
+	if (commissions.drivers && typeof commissions.drivers === 'object') {
+		for (const [drv, rate] of Object.entries(commissions.drivers)) {
+			if (drv in gatewayCommissions.value) {
+				gatewayCommissions.value[drv] = Number(rate);
+			}
+		}
+	}
+}
+
+let fetchPromise = null;
+export async function fetchGatewayCommissions() {
+	if (fetchPromise) return fetchPromise;
+	fetchPromise = (async () => {
+		try {
+			const res = await axiosInstance.get('/payment/gateways');
+			if (res?.data?.commissions) {
+				setGatewayCommissions(res.data.commissions);
+			}
+		} catch (e) {
+			// silent fallback to defaults
+		} finally {
+			fetchPromise = null;
+		}
+	})();
+	return fetchPromise;
+}
 
 export function buildPaymentGateways(t) {
 	return [
@@ -9,7 +50,7 @@ export function buildPaymentGateways(t) {
 			driver: 'zibal',
 			english_name: 'zibal',
 			directBank: true,
-			commissionPercent: 0,
+			commissionPercent: gatewayCommissions.value['zibal'] ?? 0,
 			name: t('cart.gatewayZibal'),
 			description: t('cart.gatewayZibalDesc'),
 			icon: zibalIcon,
@@ -19,7 +60,7 @@ export function buildPaymentGateways(t) {
 			driver: 'zarinpal',
 			english_name: 'zarinpal',
 			directBank: true,
-			commissionPercent: 0,
+			commissionPercent: gatewayCommissions.value['zarinpal'] ?? 0,
 			name: t('cart.gatewayZarinpal'),
 			description: t('cart.gatewayZarinpalDesc'),
 			icon: zarinpalIcon,
@@ -30,7 +71,7 @@ export function buildPaymentGateways(t) {
 			english_name: 'digipay',
 			digipayUnified: true,
 			requiresInstallment: true,
-			commissionPercent: 15,
+			commissionPercent: gatewayCommissions.value['digipay-installment'] ?? 15,
 			name: t('cart.gatewayDigipayInstallment'),
 			description: t('cart.gatewayDigipayInstallmentDesc'),
 			icon: digipayIcon,
@@ -42,7 +83,7 @@ export function buildPaymentGateways(t) {
 			preferredGateway: 2,
 			directBank: true,
 			cartHidden: true,
-			commissionPercent: 0,
+			commissionPercent: gatewayCommissions.value['digipay-ipg'] ?? 0,
 			name: t('cart.gatewayDigipayIpg'),
 			description: t('cart.gatewayDigipayIpgDesc'),
 			icon: digipayIcon,
@@ -103,8 +144,30 @@ export function isDigipayFeeGateway(gateway) {
 	return gateway?.id === 'digipay-installment' || Boolean(gateway?.digipayUnified);
 }
 
+export function isCartItemInstallmentEligible(item) {
+	if (!item) return false;
+	if (typeof item.allows_installment === 'boolean') {
+		return item.allows_installment;
+	}
+	return Boolean(
+		item.allows_installment ||
+		item.course?.allows_installment ||
+		item.path?.allows_installment ||
+		item.vip?.allows_installment
+	);
+}
+
 export function cartHasInstallmentEligibleItems(cartItems) {
-	return (cartItems || []).some((item) => Boolean(item?.allows_installment));
+	return (cartItems || []).some(isCartItemInstallmentEligible);
+}
+
+export function isCartFullyInstallmentEligible(cartItems) {
+	const items = cartItems || [];
+	return items.length > 0 && items.every(isCartItemInstallmentEligible);
+}
+
+export function getNonInstallmentCartItems(cartItems) {
+	return (cartItems || []).filter((item) => !isCartItemInstallmentEligible(item));
 }
 
 export function filterGatewaysForCart(gateways, cartItems) {

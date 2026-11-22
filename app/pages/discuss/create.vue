@@ -34,67 +34,60 @@ definePageMeta({
                 </div>
                 <div class="mx-auto max-w-screen-xl md:grid lg:grid-cols-12 gap-3 md:gap-5 lg:gap-7 mb-20">
                     <div class="xl:col-span-9 lg:col-span-8">
-                        <div class="p-1 rounded-xl border border-gray-300/30 dark:border-gray-500/30">
-                            <div
-                                class="overflow-hidden w-full rounded-xl p-3 md:p-5 lg:p-7 bg-white dark:bg-slate-900/40">
-                                <div class="flex items-center justify-between rtl:space-x-reverse mb-8">
-                                    <div class="relative flex items-center" style="">
-                                        <div
-                                            class="w-16 h-16 flex me-2 bg-gray-300 group relative rounded-full overflow-hidden border-4 border-solid border-amber-500">
-                                            <router-link
-                                                :to="{ name: 'profile-page', params: { username: currentUser.username } }">
-                                                <SeoImage
-                                                    :src="currentUser.profile_pic"
-                                                    alt="user-avatar"
-                                                    :width="64"
-                                                    :height="64"
-                                                    sizes-preset="avatar"
-                                                    img-class="transition duration-200 transform group-hover:scale-110 w-full h-full object-cover"
-                                                />
-                                                <div
-                                                    class="w-full h-full absolute top-0 right-0 bg-biscay-700 bg-opacity-20 z-0">
-                                                </div>
-                                            </router-link>
-                                        </div>
-                                        <div class="">
-                                            <div class="space-y-1">
-                                                <span class="flex flex-col">
-                                                    <router-link
-                                                        :to="{ name: 'profile-page', params: { username: currentUser.username } }"
-                                                        class="line-clamp-1 text-lg font-semibold dark:text-gray-50 text-gray-800 hover:text-amber-500">
-                                                        {{ currentUser.first_name + " " + currentUser.last_name }}
-                                                    </router-link>
-                                                </span>
-                                                <div class="flex text-sm space-x-2 space-x-reverse">
-                                                    <div
-                                                        class="dark:hover:text-blue-450 dark:text-gray-920 text-gray-400 hover:text-gray-500 ltr">
-                                                        <router-link
-                                                            :to="{ name: 'profile-page', params: { username: currentUser.username } }"
-                                                            dir="ltr" class="line-clamp-1">@{{ currentUser.username
-                                                            }}</router-link>
-                                                    </div>
-                                                </div>
-                                            </div>
+                        <div class="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 md:p-8 shadow-sm">
+                            <!-- User Profile Info -->
+                            <div v-if="currentUser" class="flex items-center justify-between rtl:space-x-reverse pb-6 mb-6 border-b border-gray-100 dark:border-gray-800">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-14 h-14 shrink-0 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-amber-400 shadow-sm">
+                                        <router-link :to="{ name: 'profile-page', params: { username: currentUser.username || 'user' } }">
+                                            <SeoImage
+                                                :src="currentUser.profile_pic"
+                                                alt="user-avatar"
+                                                :width="56"
+                                                :height="56"
+                                                sizes-preset="avatar"
+                                                img-class="w-full h-full object-cover transition duration-200 hover:scale-105"
+                                            />
+                                        </router-link>
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <router-link
+                                            :to="{ name: 'profile-page', params: { username: currentUser.username || 'user' } }"
+                                            class="line-clamp-1 text-base font-bold dark:text-gray-100 text-gray-800 hover:text-amber-500 transition">
+                                            {{ (currentUser.first_name || '') + " " + (currentUser.last_name || '') }}
+                                        </router-link>
+                                        <div dir="ltr" class="text-xs text-gray-400 dark:text-gray-500 font-mono text-end">
+                                            @{{ currentUser.username }}
                                         </div>
                                     </div>
-                                    <div></div>
                                 </div>
-                                <div
-                                    class="font-anjoman dark:bg-slate-900 bg-gray-400 bg-opacity-10 rounded-xl p-4 mb-8">
-                                    <div
-                                        class="font-bold dark:text-gray-300 text-gray-700 text-xs leading-7">
-                                        <span class="text-lg text-yellow-400">*</span>
-                                        {{ $t('discuss.form.beforeSubmit') }} 
-                                        <span class="text-lg text-yellow-400">*</span>
-                                        <p class="mt-2 font-medium dark:text-gray-400 text-gray-600">{{ $t('discuss.form.beforeSubmitDescription') }}</p>
-                                    </div>
+                                <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-700 dark:text-amber-300">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                    {{ is_private ? 'گفتگوی خصوصی' : 'پرسش عمومی' }}
+                                </span>
+                            </div>
+                            <div v-else class="flex items-center gap-3 pb-6 mb-6 border-b border-gray-100 dark:border-gray-800">
+                                <div class="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
+                                <div class="space-y-2">
+                                    <div class="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
+                                    <div class="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
+                                </div>
+                            </div>
 
-                                    <ul class="mt- text-xs">
-                                        <li class="font-medium dark:text-gray-400 text-gray-600 leading-7">{{ $t('discuss.form.tipNoDuplicate') }}</li>
-                                        <li class="font-medium dark:text-gray-400 text-gray-600 leading-7">{{ $t('discuss.form.tipPreview') }}
-                                        </li>
-                                    </ul>
+                            <!-- Rules and Tips Box -->
+                            <div class="rounded-2xl border border-amber-300/40 dark:border-amber-500/20 bg-amber-50/70 dark:bg-amber-500/5 p-4 md:p-5 mb-8">
+                                <div class="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300 text-sm mb-2">
+                                    <svg class="w-4 h-4 shrink-0 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    {{ $t('discuss.form.beforeSubmit') }}
                                 </div>
+                                <p class="text-xs md:text-sm font-medium text-amber-900/80 dark:text-amber-200/80 leading-6 mb-3">
+                                    {{ $t('discuss.form.beforeSubmitDescription') }}
+                                </p>
+                                <ul class="space-y-1.5 text-xs text-gray-600 dark:text-gray-400 list-disc list-inside">
+                                    <li>{{ $t('discuss.form.tipNoDuplicate') }}</li>
+                                    <li>{{ $t('discuss.form.tipPreview') }}</li>
+                                </ul>
+                            </div>
                                 <form class="">
                                     <div>
                                         <label for="subject"
@@ -304,44 +297,24 @@ definePageMeta({
                                         </div>
                                     </div>
                                     <hr class="my-2 h-0.5 border border-gray-200 dark:border-gray-500" />
-                                    <div>
-                                        <div class="flex justify-between sm:flex-row flex-col items-center mt-7">
-                                            <div
-                                                class="flex flex-col text-sm font-normal dark:text-gray-300 text-gray-600 space-y-2">
-                                                <span class="">{{ $t('discuss.form.mentionHint') }}</span>
-                                                <span class="">{{ $t('discuss.form.editorHint') }}</span>
+                                    <div class="pt-6 border-t border-gray-100 dark:border-gray-800">
+                                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                            <div class="flex flex-col text-xs text-gray-500 dark:text-gray-400 space-y-1 text-center sm:text-start">
+                                                <span>{{ $t('discuss.form.mentionHint') }}</span>
+                                                <span>{{ $t('discuss.form.editorHint') }}</span>
                                             </div>
 
                                             <div>
                                                 <button v-if="!submitLoading" type="submit"
                                                     @click.prevent="submitQuestion"
-                                                    class="w-24 h-10 dark:hover:bg-transparent bg-amber-500 border-amber-500 border text-white text-sm font-semibold rounded-md transition duration-200 hover:bg-transparent hover:text-amber-500">{{ $t('discuss.form.submitDiscussion') }}</button>
+                                                    class="cursor-pointer inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 px-8 py-3 text-sm font-bold text-gray-900 shadow-md shadow-amber-500/20 hover:shadow-lg transition duration-200">
+                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                                                    {{ $t('discuss.form.submitDiscussion') }}
+                                                </button>
                                                 <button v-else type="button" disabled
-                                                    class="disabled w-24 items-center justify-center flex h-10 bg-amber-500 border-amber-500 border text-white text-sm font-semibold rounded-md transition duration-200">
-                                                    <svg class="w-5 h-5" version="1.1"
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                        viewBox="25 25 50 50">
-                                                        <circle class="stroke-current text-white text-opacity-30"
-                                                            cx="50" cy="50" r="20" fill="none" stroke-width="8"
-                                                            stroke-linecap="round" stroke-dashoffset="0"
-                                                            stroke-dasharray="200, 300">
-                                                        </circle>
-                                                        <circle class="stroke-current text-white" cx="50" cy="50" r="20"
-                                                            fill="none" stroke-width="8" stroke-linecap="round"
-                                                            stroke-dashoffset="0" stroke-dasharray="100, 200">
-                                                            <animateTransform attributeName="transform"
-                                                                attributeType="XML" type="rotate" from="0 50 50"
-                                                                to="360 50 50" dur="2.5s" repeatCount="indefinite">
-                                                            </animateTransform>
-                                                            <animate attributeName="stroke-dashoffset"
-                                                                values="0;-30;-124" dur="1.25s"
-                                                                repeatCount="indefinite"></animate>
-                                                            <animate attributeName="stroke-dasharray"
-                                                                values="0,200;110,200;110,200" dur="1.25s"
-                                                                repeatCount="indefinite"></animate>
-                                                        </circle>
-                                                    </svg>
+                                                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400/80 px-8 py-3 text-sm font-bold text-gray-900 cursor-not-allowed">
+                                                    <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="32" stroke-linecap="round"/></svg>
+                                                    <span>{{ $t('discuss.form.submitting') || 'در حال ثبت...' }}</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -349,7 +322,6 @@ definePageMeta({
                                 </form>
                             </div>
                         </div>
-                    </div>
                     <div class="xl:col-span-3 lg:col-span-4 lg:order-first order-last">
                         <div class="hidden lg:block">
                             <div v-if="initLoading" class="flex flex-col">
@@ -529,7 +501,6 @@ import { ref } from "vue";
 import debounce from "lodash/debounce";
 import SeoImage from "@/views/components/seo/SeoImage.vue";
 export default {
-		setup() { return { authStore: useAuthStore() } },
     components: {
         MasterPage,
         // LoadingComponent,
@@ -561,11 +532,14 @@ export default {
     },
 
     computed: {
+        authStore() {
+            return useAuthStore();
+        },
         isLoggedin() {
-            return this.authStore.status.loggedIn;
+            return this.authStore?.status?.loggedIn || false;
         },
         currentUser() {
-            return this.authStore.status.userInfo;
+            return this.authStore?.status?.userInfo || null;
         },
         metaKeywordsCount() {
             if (!this.meta_keywords) return 0;
@@ -631,7 +605,7 @@ export default {
                     is_private: this.is_private,
                     mention_users: this.mention_users,
                 })
-                .then(() => {
+                .then((response) => {
                     toast.success(this.$t('discuss.form.createSuccess'), {
                         theme: "colored",
                         hideProgressBar: false,
@@ -641,12 +615,22 @@ export default {
                         transition: toast.TRANSITIONS.BOUNCE,
                         position: toast.POSITION.BOTTOM_RIGHT,
                     });
+                    const slug = response?.data?.slug || response?.data?.question?.slug;
+                    if (slug) {
+                        setTimeout(() => {
+                            this.$router.push({ name: 'question-show', params: { questionSlug: slug } });
+                        }, 500);
+                    } else {
+                        setTimeout(() => {
+                            this.$router.push({ name: 'discuss-index' });
+                        }, 500);
+                    }
                 })
                 .catch((error) => {
-                    if (error.response.status === 422) {
+                    if (error.response?.status === 422) {
                         this.errors = error.response.data.errors;
                     }
-                    console.error(error.response.data.errors);
+                    console.error(error.response?.data?.errors || error);
                 })
                 .finally(() => {
                     this.submitLoading = false;

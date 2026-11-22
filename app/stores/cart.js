@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axiosInstance from "@/store/axiosInstance";
+import { setGatewayCommissions } from "@/config/paymentGateways";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
@@ -50,6 +51,9 @@ const state = {
 
 
 function applyCartPayload(piniaStore, data) {
+  if (data.gateway_commissions) {
+    setGatewayCommissions(data.gateway_commissions);
+  }
   piniaStore._apply_setCartItems(data.cartItems || []);
   piniaStore._apply_setDiscountCode(data.discount_code || null);
   piniaStore._apply_setAppliedCoupon(data.applied_coupon || null);
