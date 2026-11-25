@@ -6,17 +6,19 @@
                     <path d="M0.75 9.5C0.75 11.4387 0.854858 12.9454 1.11637 14.1221C1.37598 15.2903 1.77991 16.0867 2.34661 16.6534C2.91331 17.2201 3.70973 17.624 4.8779 17.8836C6.05459 18.1451 7.56131 18.25 9.5 18.25C11.4387 18.25 12.9454 18.1451 14.1221 17.8836C15.2903 17.624 16.0867 17.2201 16.6534 16.6534C17.2201 16.0867 17.624 15.2903 17.8836 14.1221C18.1451 12.9454 18.25 11.4387 18.25 9.5C18.25 7.56131 18.1451 6.05459 17.8836 4.8779C17.624 3.70973 17.2201 2.91331 16.6534 2.34661C16.0867 1.77991 15.2903 1.37598 14.1221 1.11637C12.9454 0.854858 11.4387 0.75 9.5 0.75C7.56131 0.75 6.05459 0.854858 4.8779 1.11637C3.70973 1.37598 2.91331 1.77991 2.34661 2.34661C1.77991 2.91331 1.37598 3.70973 1.11637 4.8779C0.854858 6.05459 0.75 7.56131 0.75 9.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </span>
-            <h3 class="text-sm font-bold text-gray-800 dark:text-white">{{ $t('articles.show.toc') }}</h3>
+            <h3 class="text-sm font-bold text-gray-800 dark:text-white">{{ $t('articles.show.toc') || 'فهرست مطالب' }}</h3>
         </div>
         <ul class="article-toc__tree">
             <li
                 v-for="item in items"
                 :key="item.id"
                 class="article-toc__item"
+                :class="{ 'article-toc__item--active': activeId === item.id }"
                 :style="{ '--toc-depth': tocDepth(item.level) }">
                 <a
                     :href="'#' + item.id"
                     class="article-toc__link"
+                    :class="{ 'article-toc__link--active': activeId === item.id }"
                     @click.prevent="$emit('navigate', item.id)">
                     {{ item.text }}
                 </a>
@@ -29,11 +31,14 @@
 export default {
     props: {
         items: { type: Array, default: () => [] },
+        activeId: { type: String, default: "" },
     },
     emits: ["navigate"],
     methods: {
         tocDepth(level) {
-            return Math.max(0, (level || 2) - 2);
+            if (!this.items.length) return 0;
+            const minLevel = Math.min(...this.items.map((i) => i.level || 1));
+            return Math.max(0, (level || minLevel) - minLevel);
         },
     },
 };
@@ -70,6 +75,11 @@ export default {
     border-radius: 1px;
 }
 
+.article-toc__item--active::before {
+    background-color: rgb(59 130 246) !important;
+    height: 3px !important;
+}
+
 .article-toc__link {
     display: block;
     margin-inline-start: calc(var(--toc-branch) + 4px + var(--toc-depth, 0) * var(--toc-step));
@@ -83,16 +93,28 @@ export default {
 }
 
 :global(.dark) .article-toc__link {
-    color: rgb(156 163 175);
+    color: rgb(229 231 235);
 }
 
 .article-toc__link:hover {
     color: rgb(29 78 216);
-    background-color: rgb(239 246 255 / 0.8);
+    background-color: transparent;
 }
 
 :global(.dark) .article-toc__link:hover {
-    color: rgb(96 165 250);
-    background-color: rgb(59 130 246 / 0.1);
+    color: rgb(147 197 253);
+    background-color: transparent;
+}
+
+.article-toc__link--active {
+    color: rgb(37 99 235) !important;
+    font-weight: 800 !important;
+    background-color: transparent !important;
+}
+
+:global(.dark) .article-toc__link--active {
+    color: rgb(96 165 250) !important;
+    font-weight: 800 !important;
+    background-color: transparent !important;
 }
 </style>

@@ -340,7 +340,7 @@ import { stopMediaPlayer } from '@/views/components/messenger/mediaPlayer';
 import E2eRecoveryDialog from '@/views/components/messenger/E2eRecoveryDialog.vue';
 import {
   getUserProfile, presenceOfflineBeacon, leaveCommunity,
-  previewJoin, joinByInvite, joinByUsername, joinConversation, getConversation,
+  previewJoin, joinByInvite, joinByUsername, joinConversation, getConversation, lookupContact,
 } from '@/services/messenger';
 import { formatTypingStatus } from '@/views/components/messenger/typingHelpers';
 import { peerDisplayName, conversationPartner, conversationIdentityReady } from '@/utils/messengerPeerName';
@@ -666,7 +666,7 @@ export default {
     },
     '$route.fullPath'() {
       if (!this.bootReady) return;
-      if (this.$route?.params?.code || this.$route?.params?.username) {
+      if (this.$route?.params?.code || this.getRouteTargetUsername()) {
         this.handleJoinRoute();
         return;
       }
@@ -678,7 +678,7 @@ export default {
       if (!this.bootReady) return;
       if (this.syncingChatUrl) return;
       // Keep the address bar in sync with the open chat (skip drafts / join flows).
-      if (this.$route?.params?.code || this.$route?.params?.username) return;
+      if (this.$route?.params?.code || this.getRouteTargetUsername()) return;
       this.syncChatUrl(id);
     },
     // Keep the open profile/group rail aligned with the chat being viewed.
@@ -2049,9 +2049,25 @@ export default {
       this.$nextTick(() => this.onRevealMessage({ id: messageId, duration: 5000 }));
     },
 
+    getRouteTargetUsername() {
+      if (this.$route?.params?.username) {
+        return String(this.$route.params.username).replace(/^@+/, '').trim();
+      }
+      const chatId = this.$route?.params?.chatId;
+      if (typeof chatId === 'string' && chatId.startsWith('@')) {
+        return chatId.replace(/^@+/, '').trim();
+      }
+      const fullPath = this.$route?.fullPath || this.$route?.path || '';
+      if (fullPath.includes('/messenger/@')) {
+        const seg = fullPath.split('/messenger/@')[1]?.split('/')[0]?.split('?')[0];
+        if (seg) return seg.replace(/^@+/, '').trim();
+      }
+      return null;
+    },
+
     async handleJoinRoute() {
       const code = this.$route?.params?.code;
-      const username = this.$route?.params?.username;
+      const username = this.getRouteTargetUsername();
       if (!code && !username) return;
       await this.openJoinTarget({ code, username });
     },
@@ -2059,10 +2075,26 @@ export default {
     /** Open invite / @username destination from a route or in-message link. */
     async openJoinTarget({ code = null, username = null } = {}) {
       if (!code && !username) return;
+      const cleanUsername = username ? String(username).replace(/^@+/, '').trim() : null;
+
+      // 1. Try resolving as user direct chat first
+      if (cleanUsername) {
+        try {
+          const res = await lookupContact(cleanUsername);
+          if (res?.user?.id) {
+            await this.onStartChat(res.user);
+            return;
+          }
+        } catch (e) {
+          /* continue to channel/group preview if lookup fails */
+        }
+      }
+
+      // 2. Try group/channel previewJoin
       try {
         const preview = await previewJoin({
           code: code || undefined,
-          username: username || undefined,
+          username: cleanUsername || undefined,
         });
         const conv = preview?.conversation;
         if (!conv?.id) return;

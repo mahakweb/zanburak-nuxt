@@ -24,10 +24,11 @@
                             </a>
                         </div>
                     </div>
-                    <div class="flex lg:mt-0 lg:col-span-5 items-center mt-8 md:mt-0">
+                    <div class="col-span-12 md:col-span-5 flex justify-center items-center mt-6 md:mt-0 w-full">
                         <SeoImage
                             priority
-                            img-class="mx-auto w-80 h-auto md:scale-110"
+                            picture-class="block w-full flex justify-center items-center"
+                            img-class="mx-auto w-full max-w-[18rem] sm:max-w-xs md:max-w-sm lg:max-w-md h-auto md:scale-110 object-contain"
                             :src="engineering_team"
                             :alt="$t('coop.seo.title')"
                         />

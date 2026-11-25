@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";import { useAuthStore } from "@/stores/auth";import {
+import { defineStore, getActivePinia } from "pinia";import { useAuthStore } from "@/stores/auth";import {
   getConversations,
   getConversation,
   createConversation,
@@ -1626,6 +1626,7 @@ const state = {
     show_last_seen: true,
     show_phone: false,
     show_email: false,
+    show_profile_chat: true,
     privacy: {
       last_seen: { rule: 'everybody', always_allow: [], never_allow: [] },
       online: { rule: 'everybody', always_allow: [], never_allow: [] },
@@ -8041,4 +8042,4 @@ const actions = {
       if (!flag) return true;
       return uploads?.[flag] !== false;
     };}
-};function getRootState() {const auth = useAuthStore();return { auth: { ...auth.$state, user: auth.status?.userInfo } };}function getRootGetters() {return {};}export const useMessengerStore = defineStore("messenger", { state: () => JSON.parse(JSON.stringify(state)), getters: Object.fromEntries(Object.entries(getters || {}).filter(([name]) => !Object.prototype.hasOwnProperty.call(state, name))), actions });
+};function getRootState() {if (!getActivePinia()) return { auth: { user: null } };try {const auth = useAuthStore();return { auth: { ...auth.$state, user: auth.status?.userInfo } };} catch { return { auth: { user: null } }; }}function getRootGetters() {return {};}export const useMessengerStore = defineStore("messenger", { state: () => JSON.parse(JSON.stringify(state)), getters: Object.fromEntries(Object.entries(getters || {}).filter(([name]) => !Object.prototype.hasOwnProperty.call(state, name))), actions });

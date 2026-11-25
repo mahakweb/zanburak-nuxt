@@ -139,6 +139,10 @@
                                         <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none"><path d="M20 15V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18L4 15M8 11L12 15M12 15L16 11M12 15V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                         پیوست
                                     </span>
+                                    <span v-if="(episode.download_qualities && episode.download_qualities.length) || (episode.qualities && episode.qualities.length)" title="کیفیت‌های آماده پخش و دانلود" class="episode-meta-chip font-mono gap-1 text-[10.5px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded">
+                                        <svg class="w-3 h-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 9l5 3-5 3V9z"/></svg>
+                                        {{ (episode.download_qualities || episode.qualities).map(q => q + 'p').join(' · ') }}
+                                    </span>
                                 </div>
                             </div>
                         </div>

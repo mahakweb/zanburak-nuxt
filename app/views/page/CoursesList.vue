@@ -159,6 +159,51 @@
 
                 <div class="mb-8 grid items-start gap-5 lg:grid-cols-12 lg:gap-6">
                     <div id="courses-list" class="lg:col-span-9">
+                        <!-- Google Gemini / AI Inspired Course Search Bar -->
+                        <div class="relative mb-6">
+                            <div class="relative group">
+                                <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 via-purple-500 to-amber-400 rounded-2xl blur-md opacity-35 group-hover:opacity-65 group-focus-within:opacity-85 transition duration-500"></div>
+                                <div class="relative flex items-center bg-white dark:bg-gray-900 rounded-2xl p-2 border border-slate-200/80 dark:border-white/10 shadow-sm transition">
+                                    <div class="flex items-center ps-3 pe-2 pointer-events-none text-indigo-500 dark:text-indigo-400">
+                                        <!-- AI Sparkle Icon -->
+                                        <svg class="w-5 h-5 animate-pulse" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
+                                            <path d="M18.5 15L19.5 17.5L22 18.5L19.5 19.5L18.5 22L17.5 19.5L15 18.5L17.5 17.5L18.5 15Z" opacity="0.6" />
+                                        </svg>
+                                    </div>
+                                    <input
+                                        v-model="courseSearchKey"
+                                        @input="handleCourseSearchInput"
+                                        @keydown.enter="getCourses(true)"
+                                        type="text"
+                                        class="w-full bg-transparent border-0 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm md:text-base px-2 py-2 focus:ring-0 focus:outline-none font-medium"
+                                        placeholder="جستجوی هوشمند در دوره‌ها (مثال: پایتون، ری‌اکت، ویو، لاراول...)"
+                                    />
+                                    <button
+                                        v-if="courseSearchKey"
+                                        type="button"
+                                        @click="clearCourseSearch"
+                                        class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg me-1 transition"
+                                        aria-label="پاک کردن"
+                                    >
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="getCourses(true)"
+                                        class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-gray-900 font-bold text-xs md:text-sm shadow-sm transition active:scale-95"
+                                    >
+                                        <span>بیاب</span>
+                                        <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div v-for="index in 6" :key="index">
                                 <CourseCard2Loading />
@@ -309,6 +354,8 @@ export default {
             courses: [],
             paths: [],
             currentPage: this.$route.query.page ?? 1,
+            courseSearchKey: this.$route.query.search || '',
+            courseSearchTimeout: null,
             filters: {
                 type: [],
                 order: 'newest',
@@ -366,6 +413,18 @@ export default {
             }
             this.getCourses();
         },
+        handleCourseSearchInput() {
+            if (this.courseSearchTimeout) {
+                clearTimeout(this.courseSearchTimeout);
+            }
+            this.courseSearchTimeout = setTimeout(() => {
+                this.getCourses(true);
+            }, 1500);
+        },
+        clearCourseSearch() {
+            this.courseSearchKey = '';
+            this.getCourses(true);
+        },
         applyFiltersAndClose() {
             this.isFilterDrawerOpen = false;
             this.$nextTick(() => {
@@ -375,6 +434,10 @@ export default {
         },
         buildReadableQueryString() {
             const parts = [];
+
+            if (this.courseSearchKey && this.courseSearchKey.trim()) {
+                parts.push(`search=${encodeURIComponent(this.courseSearchKey.trim())}`);
+            }
 
             this.filters.cat.forEach((category, index) => {
                 parts.push(`cat[${index}]=${category}`);
@@ -419,6 +482,10 @@ export default {
                 page: this.currentPage,
                 order: this.filters.order || 'newest',
             };
+
+            if (this.courseSearchKey && this.courseSearchKey.trim()) {
+                params.search = this.courseSearchKey.trim();
+            }
 
             if (this.filters.cat.length) {
                 params.cat = this.filters.cat;
@@ -549,6 +616,10 @@ export default {
 
         if (query.discounted === 'yes' && !this.filters.type.includes('discounted')) {
             this.filters.type.push('discounted');
+        }
+
+        if (query.search) {
+            this.courseSearchKey = query.search;
         }
 
         this.filters.status = Object.keys(query)

@@ -399,7 +399,8 @@
                                             :src="videoProcessingGif"
                                             :alt="$t('course.episode.videoProcessing')"
                                             :lazy="false"
-                                            img-class="w-auto max-w-[85%] h-auto max-h-[70%] lg:max-h-[58%] object-contain"
+                                            picture-class="flex items-center justify-center w-full h-full"
+                                            img-class="mx-auto w-auto max-w-[85%] h-auto max-h-[70%] lg:max-h-[58%] object-contain"
                                         />
                                         <div class="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pb-5 lg:pb-8 px-4 pt-10 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none">
                                             <p class="text-sm md:text-base font-semibold drop-shadow">
@@ -414,6 +415,7 @@
                                 <div v-else>
                                     <VideoPlayer
                                         v-if="episode && course && canPlayVideo"
+                                        :key="episode?.id || computedSource"
                                         :source="computedSource" :title="episode.title" :poster="course.poster"
                                         :is-logged-in="isLoggedin"
                                         :stream-video-id="episode?.stream_video_id || null"
@@ -569,26 +571,26 @@
                                                 </button>
 
                                                 <div v-if="isDownloadMenuOpen"
-                                                    class="absolute z-20 mt-2 w-48 rounded-lg shadow-md shadow-slate-200 dark:shadow-slate-800 bg-gray-100 dark:bg-gray-300 backdrop-blur-lg ">
-                                                    <div class="space-y-0.5 p-1">
+                                                    class="absolute z-50 bottom-full mb-2 start-0 w-52 rounded-xl shadow-xl border border-gray-200/80 dark:border-gray-700 bg-white dark:bg-gray-800 backdrop-blur-lg">
+                                                    <div class="space-y-0.5 p-1.5">
                                                         <button v-for="opt in availableDownloadOptions"
                                                             :key="opt.quality"
                                                             @click.prevent="selectDownloadQuality(opt.quality)"
-                                                            class="first:rounded-t-lg last:rounded-b-lg w-full flex items-center justify-between text-start px-4 py-2 text-sm text-gray-800  hover:bg-gray-200  hover:dark:bg-gray-200">
-                                                            <span class="flex items-center gap-1.5">
-                                                                <svg class="w-4 h-4" viewBox="0 0 24 25"
+                                                            class="first:rounded-t-lg last:rounded-b-lg w-full flex items-center justify-between text-start px-3.5 py-2 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-100 hover:dark:bg-gray-700 transition">
+                                                            <span class="flex items-center gap-1.5 font-medium">
+                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" viewBox="0 0 24 25"
                                                                     fill="currentColor">
                                                                     <path
                                                                         d="M21 14.75V20C21 20.3978 20.842 20.7794 20.5607 21.0607C20.2794 21.342 19.8978 21.5 19.5 21.5H4.5C4.10218 21.5 3.72064 21.342 3.43934 21.0607C3.15804 20.7794 3 20.3978 3 20V14.75C3 14.5511 3.07902 14.3603 3.21967 14.2197C3.36032 14.079 3.55109 14 3.75 14C3.94891 14 4.13968 14.079 4.28033 14.2197C4.42098 14.3603 4.5 14.5511 4.5 14.75V20H19.5V14.75C19.5 14.5511 19.579 14.3603 19.7197 14.2197C19.8603 14.079 20.0511 14 20.25 14C20.4489 14 20.6397 14.079 20.7803 14.2197C20.921 14.3603 21 14.5511 21 14.75ZM11.4694 15.2806C11.539 15.3504 11.6217 15.4057 11.7128 15.4434C11.8038 15.4812 11.9014 15.5006 12 15.5006C12.0986 15.5006 12.1962 15.4812 12.2872 15.4434C12.3783 15.4057 12.461 15.3504 12.5306 15.2806L16.2806 11.5306C16.3503 11.4609 16.4056 11.3782 16.4433 11.2872C16.481 11.1961 16.5004 11.0985 16.5004 11C16.5004 10.9015 16.481 10.8039 16.4433 10.7128C16.4056 10.6218 16.3503 10.5391 16.2806 10.4694C16.2109 10.3997 16.1282 10.3444 16.0372 10.3067C15.9461 10.269 15.8485 10.2496 15.75 10.2496C15.6515 10.2496 15.5539 10.269 15.4628 10.3067C15.3718 10.3444 15.2891 10.3997 15.2194 10.4694L12.75 12.9397V4.25C12.75 4.05109 12.671 3.86032 12.5303 3.71967C12.3897 3.57902 12.1989 3.5 12 3.5C11.8011 3.5 11.6103 3.57902 11.4697 3.71967C11.329 3.86032 11.25 4.05109 11.25 4.25V12.9397L8.78063 10.4694C8.63989 10.3286 8.44902 10.2496 8.25 10.2496C8.05098 10.2496 7.86011 10.3286 7.71937 10.4694C7.57864 10.6101 7.49958 10.801 7.49958 11C7.49958 11.199 7.57864 11.3899 7.71937 11.5306L11.4694 15.2806Z">
-                                                                    </path>
-                                                                </svg>
-                                                                {{ opt.quality }}p</span>
+                                                                        </path>
+                                                                    </svg>
+                                                                    {{ opt.quality }}p</span>
                                                             <span
-                                                                class="text-[11px] text-gray-700 dark:text-gray-700 font-medium">{{
+                                                                class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{
                                                                     formatBytes(opt.size, locale) }}</span>
                                                         </button>
                                                         <div v-if="availableDownloadOptions.length === 0"
-                                                            class="px-4 py-2 text-sm text-gray-800">
+                                                            class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
                                                             {{ $t('course.episode.noDownloadQuality') }}
                                                         </div>
                                                     </div>
@@ -1191,7 +1193,7 @@ import { episodeShowRoute, episodeShowPath, isActiveEpisode } from "@/utils/epis
     });
 
     const computedSource = computed(() => {
-        return episode.value ? (config.apiBaseUrl + "/episode/" + episode.value.id + "/playlist") : "";
+        return episode.value?.stream_url || (episode.value ? (config.apiBaseUrl + "/episode/" + episode.value.id + "/playlist") : "");
     });
 
     async function getEpisode() {

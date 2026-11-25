@@ -58,7 +58,7 @@
     </div>
     <div v-else>
         <div v-if="showDateTimeAbove">
-            <hr class="border-t-2 border-gray-400/20 dark:border-gray-500/20 -mb-3 mx-16" />
+            <hr class="border-t-2 border-gray-400/20 dark:border-gray-500/20 -mb-3 mx-4 md:mx-16" />
             <div class="flex items-center justify-between text-sm font-medium text-gray-400/60 dark:text-gray-500/70 px-2">
                 <div dir="ltr" class="bg-gray-100 dark:bg-gray-800 ps-3">
                     {{
@@ -258,9 +258,9 @@
                         '': best,
                         'bg-white dark:bg-gray-900': !pinned && !best,
                     }"
-                    class="bg-white dark:bg-gray-900 w-[calc(100%-3rem)] md:w-[calc(100%-4rem)] relative rating-button-area before:start-[-2rem] rounded-b-xl md:rounded-b-3xl p-1 md:p-2"
+                    class="bg-white dark:bg-gray-900 w-[calc(100%-3.5rem)] md:w-[calc(100%-4rem)] min-w-0 overflow-hidden relative rating-button-area before:start-[-2rem] rounded-b-xl md:rounded-b-3xl p-1 md:p-2"
                 >
-                    <div class="bg-gray-50 dark:bg-gray-600 dark:bg-opacity-10 rounded-lg md:rounded-2xl w-full h-full p-2 md:p-3 text-sm font-semibold text-gray-600 dark:text-gray-100">
+                    <div class="bg-gray-50 dark:bg-gray-600 dark:bg-opacity-10 rounded-lg md:rounded-2xl w-full h-full p-2 md:p-3 text-sm font-semibold text-gray-600 dark:text-gray-100 overflow-x-auto break-words min-w-0">
                         <MarkdownRenderer startClass="rendered-content" :source="localAnswer.answer" />
                     </div>
                 </div>

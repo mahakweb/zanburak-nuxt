@@ -1,28 +1,37 @@
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
-export function getToastConfig() {
+export function getToastConfig(customOptions = {}) {
+    const isClient = typeof window !== 'undefined';
+    const isRtl = isClient ? (localStorage.getItem('direction') !== 'ltr') : true;
+
     return {
         theme: 'colored',
         hideProgressBar: false,
-        rtl: import.meta.client
-            ? localStorage.getItem('direction') === 'rtl'
-            : true,
-        bodyClassName: 'font-YekanBakh',
-        toastClassName: 'rounded-xl text-sm font-semibold mb-4 mx-3 md:mx-0',
-        transition: toast.TRANSITIONS.BOUNCE,
+        autoClose: 3500,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        rtl: isRtl,
+        bodyClassName: 'font-YekanBakh text-sm font-semibold',
+        toastClassName: 'zb-modern-toast',
+        transition: toast.TRANSITIONS.SLIDE,
         position: toast.POSITION.BOTTOM_RIGHT,
+        ...customOptions,
     };
 }
 
-export function showToastSuccess(message) {
-    toast.success(message, getToastConfig());
+export function showToastSuccess(message, options = {}) {
+    return toast.success(message, getToastConfig(options));
 }
 
-export function showToastError(message) {
-    toast.error(message, getToastConfig());
+export function showToastError(message, options = {}) {
+    return toast.error(message, getToastConfig(options));
 }
 
-export function showToastWarning(message) {
-    toast.warning(message, getToastConfig());
+export function showToastWarning(message, options = {}) {
+    return toast.warning(message, getToastConfig(options));
+}
+
+export function showToastInfo(message, options = {}) {
+    return toast.info(message, getToastConfig(options));
 }

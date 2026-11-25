@@ -933,7 +933,7 @@
                             errors && errors['otp'],
                         }"
                         class="w-9 h-9 text-center rounded-xl placeholder-gray-400 dark:placeholder-gray-500 bg-slate-400 dark:bg-slate-800 bg-opacity-10 transition duration-200 text-sm text-gray-600 dark:text-gray-200 focus:dark:text-white px-0 font-semibold border border-amber-400 border-opacity-0 focus:border-opacity-100 ring-0 ring-offset-0 outline-none"
-                        :maxlength="index === 0 ? OTP_LENGTH : 1"
+                        :maxlength="OTP_LENGTH"
                         @beforeinput="handleBeforeInput($event, index)"
                         @input="handleInput($event, index)"
                         @change="handleOtpChange($event, index)"
@@ -1137,7 +1137,7 @@
                             errors && errors['otp'],
                         }"
                         class="w-9 h-9 text-center rounded-xl placeholder-gray-400 dark:placeholder-gray-500 bg-slate-400 dark:bg-slate-800 bg-opacity-10 transition duration-200 text-sm text-gray-600 dark:text-gray-200 focus:dark:text-white px-0 font-semibold border border-amber-400 border-opacity-0 focus:border-opacity-100 ring-0 ring-offset-0 outline-none"
-                        :maxlength="index === 0 ? OTP_LENGTH : 1"
+                        :maxlength="OTP_LENGTH"
                         @beforeinput="handleBeforeInput($event, index)"
                         @input="handleInput($event, index)"
                         @change="handleOtpChange($event, index)"
@@ -1541,7 +1541,7 @@
                             errors && errors['otp'],
                         }"
                         class="w-9 h-9 text-center rounded-xl placeholder-gray-400 dark:placeholder-gray-500 bg-slate-400 dark:bg-slate-800 bg-opacity-10 transition duration-200 text-sm text-gray-600 dark:text-gray-200 focus:dark:text-white px-0 font-semibold border border-amber-400 border-opacity-0 focus:border-opacity-100 ring-0 ring-offset-0 outline-none"
-                        :maxlength="index === 0 ? OTP_LENGTH : 1"
+                        :maxlength="OTP_LENGTH"
                         @beforeinput="handleBeforeInput($event, index)"
                         @input="handleInput($event, index)"
                         @change="handleOtpChange($event, index)"
@@ -3440,10 +3440,25 @@ export default {
     // OTP input handling (copied from ProfileManagePhone)
 
     handleInput(event, index) {
-      const digitsOnly = normalizeOtpCode(event.target.value, OTP_LENGTH);
+      const rawValue = event.target.value;
+      const digitsOnly = normalizeOtpCode(rawValue, OTP_LENGTH);
 
       if (digitsOnly.length > 1) {
-        this.applyOtpCode(digitsOnly);
+        if (digitsOnly.length === OTP_LENGTH) {
+          this.applyOtpCode(digitsOnly);
+        } else {
+          for (let i = 0; i < digitsOnly.length && index + i < OTP_LENGTH; i++) {
+            this.otp[index + i] = digitsOnly[i];
+          }
+          this.$nextTick(() => {
+            syncOtpInputElements(this.inputRefs, this.otp);
+            const nextIdx = Math.min(index + digitsOnly.length, OTP_LENGTH - 1);
+            this.inputRefs[nextIdx]?.focus();
+            if (isOtpComplete(this.otp)) {
+              this.triggerOtpVerification();
+            }
+          });
+        }
         return;
       }
 
@@ -3468,8 +3483,8 @@ export default {
       const digitsOnly = normalizeOtpCode(event.target.value, OTP_LENGTH);
       if (digitsOnly.length > 1) {
         this.applyOtpCode(digitsOnly);
-      } else if (index === 0 && digitsOnly.length === 1 && !this.otp[0]) {
-        this.otp[0] = digitsOnly;
+      } else if (digitsOnly.length === 1) {
+        this.otp[index] = digitsOnly;
       }
     },
 
@@ -3490,6 +3505,10 @@ export default {
       this.otp = splitOtpDigits(digits, OTP_LENGTH);
       this.$nextTick(() => {
         syncOtpInputElements(this.inputRefs, this.otp);
+        const lastEl = (this.inputRefs && this.inputRefs[OTP_LENGTH - 1]) || document.getElementById(`otp-part-${OTP_LENGTH - 1}`);
+        if (lastEl && typeof lastEl.focus === "function") {
+          lastEl.focus();
+        }
         if (isOtpComplete(this.otp)) {
           this.triggerOtpVerification();
         }
@@ -3527,8 +3546,14 @@ export default {
       event.preventDefault();
     },
 
-    handleBeforeInput() {
-      // TO DO
+    handleBeforeInput(event, index) {
+      if (event?.data) {
+        const normalized = normalizeOtpCode(event.data, OTP_LENGTH);
+        if (normalized.length === OTP_LENGTH) {
+          event.preventDefault();
+          this.applyOtpCode(normalized);
+        }
+      }
     },
 
     cancelOtpAutoFill() {
@@ -3569,8 +3594,9 @@ export default {
           signal: controller.signal,
         });
 
-        if (content && content.code) {
-          this.fillOtpDigits(content.code);
+        const smsCode = content?.code || content?.id || (typeof content === "string" ? content : null);
+        if (smsCode) {
+          this.fillOtpDigits(smsCode);
         }
       } catch (err) {
         if (err && err.name !== "AbortError") {

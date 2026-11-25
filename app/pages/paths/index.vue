@@ -18,23 +18,23 @@ provide('ssrPathsData', ssrPathsData)
 </script>
 
 <template>
-        <section class="mx-auto max-w-screen-xl px-2">
-            <div class="bg-white dark:bg-gray-900 my-10 md:mt-20 rounded-xl">
+        <section class="mx-auto max-w-screen-xl px-2 sm:px-4 overflow-hidden">
+            <div class="bg-white dark:bg-gray-900 my-6 sm:my-10 md:mt-20 rounded-xl overflow-hidden">
                 <div class="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
                     <div class="md:ps-10 mt-8 md:mt-0 order-last md:order-first col-span-12 md:col-span-7 text-gray-800 dark:text-gray-50 flex flex-col gap-3">
                         <h1 class="max-w-3xl mb-4 text-center ltr:md:text-left rtl:md:text-right text-3xl font-extrabold tracking-tight leading-none md:text-4xl xl:text-5xl text-gray-800 dark:text-white">{{ $t('path.list.hero_title') }}</h1>
                         <p class="text-lg font-light text-gray-500 dark:text-gray-400 text-center md:text-start md:me-16">{{ $t('path.list.hero_description') }}</p>
-                        <div class="flex items-center mt-auto gap-2 justify-center md:justify-start">
-                            <a href="#paths" class="whitespace-nowrap h-10 rounded-lg flex items-center justify-center px-4 text-sm font-semibold focus:outline-none focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 text-gray-800 bg-amber-400 hover:shadow-md shadow-amber-400 hover:opacity-90">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center mt-auto gap-2.5 justify-center md:justify-start w-full sm:w-auto">
+                            <a href="#paths" class="w-full sm:w-auto whitespace-nowrap h-11 sm:h-10 rounded-xl flex items-center justify-center px-5 text-sm font-bold focus:outline-none focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 text-gray-900 bg-amber-400 hover:shadow-md shadow-amber-400/30 hover:opacity-90 transition">
                                 {{ $t('path.list.start_journey') }}
-                                <svg class="ms-1 w-4 h-4" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg class="ms-1.5 w-4 h-4 shrink-0" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path opacity="0.4" d="M16.5073 6.34863L21.0752 5.94466C22.1003 5.94466 22.9315 6.7839 22.9315 7.81901C22.9315 8.85412 22.1003 9.69336 21.0752 9.69336L16.5073 9.28938C15.7031 9.28938 15.0511 8.63105 15.0511 7.81901C15.0511 7.00561 15.7031 6.34863 16.5073 6.34863" fill="currentColor"></path>
                                     <path d="M1.16786 6.42292C1.23926 6.35083 1.50598 6.04614 1.75653 5.79314C3.21811 4.20852 7.03437 1.61734 9.03073 0.824345C9.33382 0.697847 10.1003 0.428528 10.5112 0.409485C10.9032 0.409485 11.2776 0.500618 11.6346 0.680164C12.0805 0.931801 12.4361 1.32898 12.6328 1.79689C12.7581 2.12061 12.9548 3.09315 12.9548 3.11084C13.1501 4.17315 13.2565 5.9006 13.2565 7.81032C13.2565 9.62754 13.1501 11.2843 12.9898 12.3643C12.9723 12.3833 12.7756 13.5898 12.5614 14.0033C12.1694 14.7596 11.4029 15.2275 10.5826 15.2275H10.5112C9.97638 15.2098 8.85292 14.7405 8.85292 14.7242C6.96297 13.9312 3.23697 11.4652 1.73902 9.82613C1.73902 9.82613 1.31604 9.40447 1.13284 9.14195C0.84726 8.76381 0.70447 8.29591 0.70447 7.828C0.70447 7.30568 0.864772 6.82009 1.16786 6.42292" fill="currentColor"></path>
                                 </svg>
                             </a>
-                            <NuxtLink to="" class="whitespace-nowrap h-10 rounded-lg flex items-center justify-center px-4 text-sm font-semibold focus:outline-none focus:ring-2 ring-gray-300 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 text-gray-800 bg-gray-300 hover:shadow-md shadow-gray-400">
+                            <a href="#paths" class="w-full sm:w-auto whitespace-nowrap h-11 sm:h-10 rounded-xl flex items-center justify-center px-5 text-sm font-semibold focus:outline-none focus:ring-2 ring-gray-300 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition">
                                 {{ $t('path.common.path_guide') }}
-                                <svg class="ms-1 w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg class="ms-1.5 w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         fill-rule="evenodd"
                                         clip-rule="evenodd"
@@ -42,11 +42,11 @@ provide('ssrPathsData', ssrPathsData)
                                         fill="currentColor"
                                     ></path>
                                 </svg>
-                            </NuxtLink>
+                            </a>
                         </div>
                     </div>
-                    <div class="flex lg:mt-0 lg:col-span-5 items-center mt-8 md:mt-0">
-                        <svg class="mx-auto w-80 h-auto md:scale-110" viewBox="0 0 792.41214 763.67855" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <div class="col-span-12 md:col-span-5 flex justify-center items-center mt-6 md:mt-0 w-full">
+                        <svg class="mx-auto w-full max-w-[18rem] sm:max-w-xs md:max-w-sm lg:max-w-md h-auto md:scale-110" viewBox="0 0 792.41214 763.67855" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                             <circle cx="180.18" cy="49.43208" r="49.43208" fill="#ff6584"></circle>
                             <path
                                 d="M439.60693,433.14822a81.05685,81.05685,0,0,1-52.68051-19.45347c-4.89745-4.19218-10.1157-11.48032-15.50943-21.66053a49.53621,49.53621,0,0,1-1.57108-42.76506,56.842,56.842,0,0,1-9.38677,7.69937l-1.71614,1.14183-.09914-2.05778c-.06506-1.33843-.098-2.67236-.098-3.9646,0-7.61572,5.76007-15.34359,3.10358-22.383-11.19647-29.66913-46.70888-59.1543,4.75943-105.0715,4.76112-4.24762-1.599-12.74018-1.599-19.16674,0-62.98182,68.43238-157.45982,114.24335-114.22108,26.74027,25.23883,82.45206,43.16815,108.46375,78.27408l.34446,1.04016-1.01509.41065a61.2228,61.2228,0,0,1-16.2668,4.32653,77.56881,77.56881,0,0,0,18.13813,1.51954l.94355-.03295.22983.91707a114.74268,114.74268,0,0,1,3.4058,27.766l-.00423,1.01171a50.592,50.592,0,0,0,16.71267,37.72313,81.24432,81.24432,0,0,1,26.50586,59.95092c0,13.35194-9.07469,30.87859-16.68759,43.23064A24.44537,24.44537,0,0,1,601.8781,358.8776a23.87313,23.87313,0,0,1-19.26673-6.22406A78.94867,78.94867,0,0,0,596.534,372.365l1.03875,1.07029-1.28971.75146a80.99749,80.99749,0,0,1-40.83178,11.02687l-.84018-.00226c-21.78164,0-42.45665,8.43844-56.72369,23.15219A81.67332,81.67332,0,0,1,439.60693,433.14822Z"

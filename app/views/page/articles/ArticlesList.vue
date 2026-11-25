@@ -265,7 +265,7 @@
                         :my-tags="myTags" :categories="categories" :selected-category-slug="selectedCategorySlug"
                         :is-loggedin="isLoggedin" @select-category="selectCategory" />
 
-                    <div class="lg:col-span-9 col-span-12">
+                    <div id="articles-list" class="lg:col-span-9 col-span-12">
                         <!-- Filters -->
                         <div
                             class="flex items-center justify-between pb-6px-2 sm:px-4 sm:flex-row flex-col mb-7 gap-4">
@@ -353,27 +353,46 @@
                                 </div>
 
                                 <!-- Search -->
-                                <div class="relative flex-1 min-w-[180px] lg:max-w-sm w-full">
-                                    <input v-model="searchKey" @input="onSearchInput" type="text"
-                                        :placeholder="$t('articles.list.searchPlaceholder')"
-                                        class="w-full h-11 ps-10 pe-10 rounded-md border-gray-800/80 dark:border-white/20 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                                        :class="{ 'opacity-80': showListLoading }" />
-                                    <svg v-if="!isSearchBusy"
-                                        class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                                        viewBox="0 0 20 20" fill="none">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                            stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                                    </svg>
-                                    <svg v-else
-                                        class="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 animate-spin"
-                                        viewBox="0 0 24 24" fill="none">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                            stroke-width="3" />
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                    </svg>
-                                </div>
-                            </div>
+                                <div class="relative flex-1 min-w-[200px] lg:max-w-md w-full">
+                                    <div class="relative group">
+                                        <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 via-purple-500 to-amber-400 rounded-2xl blur-md opacity-25 group-hover:opacity-55 group-focus-within:opacity-75 transition duration-300"></div>
+                                        <div class="relative flex items-center bg-white dark:bg-gray-900 rounded-2xl p-1.5 border border-slate-200/80 dark:border-white/10 shadow-sm transition">
+                                            <div class="flex items-center ps-3 pe-2 pointer-events-none text-indigo-500 dark:text-indigo-400">
+                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M22 22L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            <input
+                                                v-model="searchKey"
+                                                @input="onSearchInput"
+                                                type="text"
+                                                :placeholder="$t('articles.list.searchPlaceholder')"
+                                                class="w-full bg-transparent border-0 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm px-2 py-1.5 focus:ring-0 focus:outline-none font-medium"
+                                                :class="{ 'opacity-80': showListLoading }"
+                                            />
+                                            <svg
+                                                v-if="isSearchBusy"
+                                                class="w-4 h-4 text-blue-500 animate-spin me-2"
+                                                viewBox="0 0 24 24"
+                                                fill="none">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" />
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            <button
+                                                v-else-if="searchKey"
+                                                type="button"
+                                                @click="clearSearch"
+                                                class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg me-1 transition"
+                                                aria-label="پاک کردن"
+                                            >
+                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>                            </div>
 
                             <div v-if="isLoggedin" class="flex items-center sm:mt-0 shrink-0">
                                 <span
@@ -757,7 +776,7 @@ export default {
             }
 
             this.searchPending = false;
-        }, 500),
+        }, 1500),
         onSearchInput() {
             const trimmed = this.searchKey.trim();
             this.searchPending = trimmed.length > 2 && trimmed !== this.searchFor;

@@ -158,33 +158,33 @@
                     <div class="mb-8 grid gap-5 lg:grid-cols-12 lg:gap-6">
                         <div id="questions-list" class="lg:col-span-9 lg:self-start">
                             <div class="mb-6">
-                                <label class="discuss-search">
-                                    <span class="discuss-search__shine" aria-hidden="true"></span>
-                                    <svg class="discuss-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" />
-                                        <path d="M20 20l-3.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                                    </svg>
-                                    <input
-                                        @keyup="handleSearch"
-                                        @keydown.enter.prevent="submitSearch"
-                                        v-model="searchKey"
-                                        type="search"
-                                        :placeholder="$t('discuss.list.searchPlaceholder')"
-                                        class="discuss-search-input" />
-                                    <span v-if="searchLoading" class="discuss-search__spin" aria-hidden="true">
-                                        <svg viewBox="25 25 50 50">
-                                            <circle class="stroke-current opacity-30" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="200, 300"></circle>
-                                            <circle class="stroke-current" cx="50" cy="50" r="20" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="100, 200">
-                                                <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 50 50" to="360 50 50" dur="2.5s" repeatCount="indefinite"></animateTransform>
-                                                <animate attributeName="stroke-dashoffset" values="0;-30;-124" dur="1.25s" repeatCount="indefinite"></animate>
-                                                <animate attributeName="stroke-dasharray" values="0,200;110,200;110,200" dur="1.25s" repeatCount="indefinite"></animate>
-                                            </circle>
-                                        </svg>
-                                    </span>
-                                    <button v-else-if="searchKey" type="button" class="discuss-search__clear" @click="deleteSearchKey()">
-                                        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
-                                    </button>
-                                </label>
+                                <div class="relative group">
+                                    <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 via-purple-500 to-amber-400 rounded-2xl blur-md opacity-25 group-hover:opacity-55 group-focus-within:opacity-75 transition duration-300"></div>
+                                    <div class="relative flex items-center bg-white dark:bg-gray-900 rounded-2xl p-1.5 border border-slate-200/80 dark:border-white/10 shadow-sm transition">
+                                        <div class="flex items-center ps-3 pe-2 pointer-events-none text-indigo-500 dark:text-indigo-400">
+                                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" />
+                                                <path d="M20 20l-3.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            @keyup="handleSearch"
+                                            @keydown.enter.prevent="submitSearch"
+                                            v-model="searchKey"
+                                            type="search"
+                                            :placeholder="$t('discuss.list.searchPlaceholder')"
+                                            class="w-full bg-transparent border-0 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm px-2 py-1.5 focus:ring-0 focus:outline-none font-medium" />
+                                        <span v-if="searchLoading" class="flex items-center pe-3 text-indigo-500" aria-hidden="true">
+                                            <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" />
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                        </span>
+                                        <button v-else-if="searchKey" type="button" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg me-1 transition" @click="deleteSearchKey()">
+                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
                                 <div v-if="searchFor.length > 0" class="mt-3 flex items-center gap-2 text-xs font-semibold">
                                     <span class="discuss-search__chip">
                                         <span class="font-medium opacity-70">{{ $t('discuss.list.searchFor') }}</span>
@@ -472,7 +472,7 @@ export default {
                 this.searchFor = "";
                 this.handleFilterChange({});
             }
-        }, 1000),
+        }, 1500),
 
         submitSearch() {
             const q = (this.searchKey || "").trim();
@@ -540,10 +540,10 @@ export default {
         },
         clearSidebarPinStyles(panel) {
             this.sidebarPinned = false;
-            if (!panel) {
-                return;
-            }
+            if (!panel) return;
             panel.style.height = '';
+            panel.style.maxHeight = '';
+            panel.style.minHeight = '';
             panel.style.width = '';
             panel.style.left = '';
             panel.style.right = '';
@@ -551,37 +551,43 @@ export default {
         },
         updateSidebarPin() {
             const panel = this.$refs.sidebarPanel;
-
             if (!import.meta.client || window.innerWidth < 1024) {
                 this.clearSidebarPinStyles(panel);
                 return;
             }
-            if (!panel) {
-                return;
-            }
+            if (!panel) return;
             const host = panel.parentElement;
-            const list = document.getElementById('questions-list');
+            const content = document.getElementById('questions-list');
             if (!host) {
                 this.clearSidebarPinStyles(panel);
                 return;
             }
 
             const hostRect = host.getBoundingClientRect();
-            const listTop = list ? list.getBoundingClientRect().top : hostRect.top;
+            const contentTop = content ? content.getBoundingClientRect().top : hostRect.top;
             const footer = document.querySelector('footer');
             const footerTop = footer
                 ? footer.getBoundingClientRect().top - 8
                 : Number.POSITIVE_INFINITY;
 
-            if (!this.sidebarPinned && listTop <= 8) {
+            if (!this.sidebarPinned && contentTop <= 8) {
                 this.sidebarPinned = true;
-            } else if (this.sidebarPinned && listTop > 72) {
+            } else if (this.sidebarPinned && contentTop > 72) {
                 this.sidebarPinned = false;
             }
 
             const usedTop = this.sidebarPinned ? 0 : Math.max(hostRect.top, 12);
-            const bottomLimit = Math.min(footerTop, hostRect.bottom, window.innerHeight);
-            panel.style.height = `${Math.max(0, Math.round(bottomLimit - usedTop))}px`;
+            const viewportAvailable = Math.max(0, Math.min(footerTop, window.innerHeight) - usedTop);
+
+            if (viewportAvailable > 0) {
+                panel.style.maxHeight = Math.round(viewportAvailable) + 'px';
+                if (this.sidebarPinned) {
+                    panel.style.height = Math.round(viewportAvailable) + 'px';
+                } else {
+                    panel.style.height = '';
+                }
+            }
+            panel.style.minHeight = '0px';
             panel.style.width = '';
             panel.style.left = '';
             panel.style.right = '';
@@ -801,17 +807,18 @@ html {
 
 @media (min-width: 1024px) {
     .discuss-sidebar-col {
-        height: 0;
         min-height: 100%;
         overflow-anchor: none;
     }
 
     .discuss-sidebar-panel {
+        max-height: calc(100vh - 1.5rem);
         position: sticky;
         top: 0.75rem;
+        min-height: 0;
         overflow-x: hidden;
         overflow-y: auto;
-        overscroll-behavior: contain;
+        overscroll-behavior: auto;
         border-radius: 1.5rem;
         overflow-anchor: none;
         scrollbar-width: none;
@@ -832,6 +839,7 @@ html {
     }
 
     .discuss-sidebar-panel.is-pinned {
+        max-height: 100vh;
         top: 0;
         padding: 1rem 0.7rem;
         border-radius: 0;

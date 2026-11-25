@@ -52,12 +52,12 @@ definePageMeta({
 			</TabGroup>
 
 		<div v-if="loadingMissions"
-			class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
+			class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
 			<MissionCardLoading v-for="i in 6" :key="i" />
 		</div>
 		<div v-else>
 			<div v-if="missions && missions.length > 0"
-				class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
+				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
 				<MissionCard v-for="mission in missions" :key="mission.id" :mission="mission"
 					@mission-details="handleMissionDetails" />
 			</div>

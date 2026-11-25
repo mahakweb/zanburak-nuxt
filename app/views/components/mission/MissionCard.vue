@@ -2,24 +2,24 @@
 	<!-- Card -->
 	<div @click="missionDetails" class="cursor-pointer relative w-full p-1 z-10">
 		<div :class="[
-			'h-full bg-white/60 dark:bg-gray-950/60 rounded-2xl p-2 md:p-3',
-			'before:absolute before:hover:rotate-6  before:hover:shadow-xl before:hover:shadow-gray-100/80 before:hover:dark:shadow-gray-900/80 before:duration-200 before:top-1.5  before:left-2 before:w-[calc(100%-1rem)] before:h-[calc(100%-1.8rem)] before:bg-white/30 before:dark:bg-gray-950/30 before:-z-10 before:rounded-3xl',
+			'h-full bg-white/70 dark:bg-gray-900/70 border border-gray-100 dark:border-gray-800 rounded-2xl p-3.5 sm:p-4 shadow-sm hover:shadow-md transition-all duration-200',
+			'before:absolute before:hover:rotate-3 before:hover:shadow-xl before:hover:shadow-gray-200/50 before:hover:dark:shadow-gray-900/50 before:duration-200 before:top-1.5 before:left-2 before:w-[calc(100%-1rem)] before:h-[calc(100%-1.8rem)] before:bg-white/30 before:dark:bg-gray-950/30 before:-z-10 before:rounded-2xl',
 		]">
 			<div class="w-full flex flex-col">
 				<div class="flex items-center">
 					<div
-						class="me-2 md:me-3 lg:me-4 w-8 md:w-12 lg:w-14 2xl:w-16 h-8 md:h-12 lg:h-14 2xl:h-16 rounded-xl hover:rounded-full transition-all duration-200 border-2 border-gray-200 dark:border-opacity-20 overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+						class="me-3 sm:me-3.5 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shrink-0 rounded-2xl hover:rounded-full transition-all duration-200 border-2 border-gray-100 dark:border-gray-800 overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-gray-800/80 shadow-sm">
 						<img onerror="this.style.display='none'" class="w-full h-full object-cover hover:scale-105 transition-all duration-150"
 							:src="mission.icon" />
 					</div>
-					<div class="flex flex-col">
+					<div class="flex flex-col min-w-0 flex-1">
 						<div
-							class="text-[10px] md:text-xs font-[500] md:font-semibold lg:text-sm text-black dark:text-white line-clamp-1">
+							class="text-xs sm:text-sm md:text-base font-bold text-gray-900 dark:text-white line-clamp-1">
 							{{ mission.title }}
 						</div>
 						<div
-							class="flex items-center mt-1 md:mt-2 text-[8px] md:text-[10px] font-[500] md:font-semibold lg:text-xs text-gray-500">
-							<svg class="w-3 md:w-4 h-3 md:h-4 text-amber-400 me-1" viewBox="0 0 24 24" fill="none"
+							class="flex items-center mt-1 sm:mt-1.5 text-[11px] sm:text-xs font-medium text-gray-500 dark:text-gray-400">
+							<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 me-1 shrink-0" viewBox="0 0 24 24" fill="none"
 								xmlns="http://www.w3.org/2000/svg">
 								<path
 									d="M11.8114 6.7267C12.8247 4.9089 13.3314 4 14.0889 4C14.8464 4 15.353 4.9089 16.3663 6.7267L16.6285 7.19699C16.9164 7.71355 17.0604 7.97183 17.2849 8.14225C17.5094 8.31266 17.789 8.37592 18.3482 8.50244L18.8572 8.61762C20.825 9.06284 21.8089 9.28545 22.0429 10.0382C22.277 10.7909 21.6063 11.5753 20.2648 13.1439L19.9177 13.5498C19.5365 13.9955 19.3459 14.2184 19.2602 14.4942C19.1744 14.7699 19.2032 15.0673 19.2609 15.662L19.3133 16.2035C19.5162 18.2965 19.6176 19.343 19.0047 19.8082C18.3919 20.2734 17.4707 19.8492 15.6283 19.0009L15.1517 18.7815C14.6281 18.5404 14.3664 18.4199 14.0889 18.4199C13.8114 18.4199 13.5496 18.5404 13.0261 18.7815L12.5494 19.0009C10.707 19.8492 9.78581 20.2734 9.17299 19.8082C8.56016 19.343 8.66157 18.2965 8.86438 16.2035L8.91685 15.662C8.97449 15.0673 9.0033 14.7699 8.91756 14.4942C8.83181 14.2184 8.64121 13.9955 8.26 13.5498L7.91295 13.1439C6.57147 11.5753 5.90073 10.7909 6.1348 10.0382C6.36888 9.28545 7.35275 9.06284 9.3205 8.61762L9.82958 8.50244C10.3887 8.37592 10.6683 8.31266 10.8928 8.14225C11.1173 7.97183 11.2613 7.71355 11.5492 7.19699L11.8114 6.7267Z"
@@ -34,27 +34,28 @@
 					</div>
 				</div>
 				<div dir="ltr"
-					class="flex items-center my-1 h-[6px] p-[1.5px] md:h-[8px] md:p-[2px] overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
-					<div class="h-full rounded-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-orange-600" :style="{ width: `${mission.progressPercent}%` }"></div>
-					<div class="flex items-center justify-center absolute -mt-7 lg:-mt-10 rounded px-2 py-0.5 text-[7px] md:text-[10px] text-gray-700 dark:text-white bg-gray-200 dark:bg-gray-900">{{ mission.progressPercent }}%</div>
+					class="flex items-center my-2.5 h-2 md:h-2.5 p-[1.5px] overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+					<div class="h-full rounded-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-orange-500" :style="{ width: `${mission.progressPercent}%` }"></div>
+					<div class="flex items-center justify-center absolute -mt-7 lg:-mt-8 rounded px-2 py-0.5 text-[8px] md:text-[10px] font-semibold text-gray-700 dark:text-white bg-gray-200 dark:bg-gray-900 shadow-sm">{{ mission.progressPercent }}%</div>
 				</div>
 				
-				<div class="my-1.5 mx-1 h-[1.5px] bg-gray-200 dark:bg-opacity-10"></div>
+				<div class="my-2 mx-1 h-[1px] bg-gray-100 dark:bg-gray-800"></div>
 				<div
-					class="flex items-center rounded-md bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-50 p-1.5">
+					class="flex items-center rounded-xl bg-gray-50 dark:bg-gray-800/60 text-gray-800 dark:text-gray-50 p-2 text-xs sm:text-sm">
 					<div
-						class="w-3/12 md:w-4/12 text-[10px] font-[500] flex items-center border-e-2 border-gray-200 dark:border-opacity-10 pe-1">
-						<span class="hidden md:flex me-1.5">{{ $t('mission.level') }}</span>
-						<span class="">{{ mission.currentLevel + '/' + mission.maxLevel }}</span>
+						class="w-4/12 text-xs font-semibold flex items-center border-e border-gray-200 dark:border-gray-700 pe-2">
+						<span class="hidden sm:inline me-1 text-[11px] text-gray-500 dark:text-gray-400">{{ $t('mission.level') }}</span>
+						<span class="font-bold text-amber-600 dark:text-amber-400">{{ mission.currentLevel + '/' + mission.maxLevel }}</span>
 					</div>
 					<div v-if="mission.completed"
-						class="w-9/12 md:w-8/12 space-x-[0.15rem] flex items-center text-green-500 text-xs font-semibold text-center justify-center">
+						class="w-8/12 flex items-center text-green-500 text-xs font-bold text-center justify-center gap-1">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
 						{{ $t('mission.completed') }}
 					</div>
-					<div v-else dir="ltr" class="w-9/12 md:w-8/12 space-x-[0.15rem] font-[500] flex items-center">
+					<div v-else dir="ltr" class="w-8/12 space-x-1 font-medium flex items-center justify-center">
 						<svg v-for="i in mission.maxLevel" :key="i" :class="[
-							'hover:scale-110 focus:scale-110 duration-150 text-gray-800 dark:text-white',
-							i <= mission.currentLevel ? 'w-[9px] h-[9px] md:w-[14px] md:h-[14px]' : 'w-2 h-2 md:w-3 md:h-3',
+							'hover:scale-110 focus:scale-110 duration-150 text-amber-400',
+							i <= mission.currentLevel ? 'w-3 h-3 sm:w-3.5 sm:h-3.5' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-300 dark:text-gray-600',
 							i <= mission.currentLevel ? 'fill-current' : 'stroke-current'
 						]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path

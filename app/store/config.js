@@ -54,17 +54,31 @@ function buildConfig() {
   const env = envDefaults()
   const isProd = !import.meta.dev
 
-  const apiBaseUrl = envStr('NUXT_PUBLIC_API_BASE_URL') || env.apiBaseUrl
-  const appUrl = envStr('NUXT_PUBLIC_APP_URL') || env.appUrl
+  // In the browser, read the runtimeConfig injected into window.__NUXT__ by Nuxt/Nitro
+  let clientRuntimeConfig = null
+  if (typeof window !== 'undefined' && window.__NUXT__?.config?.public) {
+    clientRuntimeConfig = window.__NUXT__.config.public
+  }
+
+  // If in browser on current origin, fallback to origin + /api so it always hits the same host
+  let browserApiFallback = env.apiBaseUrl
+  let browserAppFallback = env.appUrl
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    browserApiFallback = `${window.location.origin}/api`
+    browserAppFallback = window.location.origin
+  }
+
+  const apiBaseUrl = clientRuntimeConfig?.apiBaseUrl || envStr('NUXT_PUBLIC_API_BASE_URL') || browserApiFallback
+  const appUrl = clientRuntimeConfig?.appUrl || envStr('NUXT_PUBLIC_APP_URL') || browserAppFallback
 
   const pusherConfig = {
     broadcaster: 'pusher',
-    key: envStr('NUXT_PUBLIC_PUSHER_KEY') || env.pusherKey,
-    cluster: envStr('NUXT_PUBLIC_PUSHER_CLUSTER') || 'mt1',
-    wsHost: envStr('NUXT_PUBLIC_PUSHER_WS_HOST') || env.wsHost,
-    wsPort: envNum('NUXT_PUBLIC_PUSHER_WS_PORT', env.wsPort),
-    wssPort: envNum('NUXT_PUBLIC_PUSHER_WSS_PORT', env.wssPort),
-    forceTLS: envBool('NUXT_PUBLIC_PUSHER_FORCE_TLS', isProd ? env.forceTLS : false),
+    key: clientRuntimeConfig?.pusher?.key || envStr('NUXT_PUBLIC_PUSHER_KEY') || env.pusherKey,
+    cluster: clientRuntimeConfig?.pusher?.cluster || envStr('NUXT_PUBLIC_PUSHER_CLUSTER') || 'mt1',
+    wsHost: clientRuntimeConfig?.pusher?.wsHost || envStr('NUXT_PUBLIC_PUSHER_WS_HOST') || (typeof window !== 'undefined' ? window.location.hostname : env.wsHost),
+    wsPort: clientRuntimeConfig?.pusher?.wsPort || envNum('NUXT_PUBLIC_PUSHER_WS_PORT', env.wsPort),
+    wssPort: clientRuntimeConfig?.pusher?.wssPort || envNum('NUXT_PUBLIC_PUSHER_WSS_PORT', env.wssPort),
+    forceTLS: clientRuntimeConfig?.pusher?.forceTLS ?? envBool('NUXT_PUBLIC_PUSHER_FORCE_TLS', isProd ? env.forceTLS : false),
     disableStats: true,
     enabledTransports: ['ws', 'wss'],
     withCredentials: false,
@@ -76,7 +90,7 @@ function buildConfig() {
     appUrl,
     apiBaseUrl,
     googleRecaptchaSitekey:
-      envStr('NUXT_PUBLIC_RECAPTCHA_SITEKEY') || env.googleRecaptchaSitekey,
+      clientRuntimeConfig?.googleRecaptchaSitekey || envStr('NUXT_PUBLIC_RECAPTCHA_SITEKEY') || env.googleRecaptchaSitekey,
   }
 }
 

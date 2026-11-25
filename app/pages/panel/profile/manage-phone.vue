@@ -279,7 +279,7 @@ definePageMeta({
 											? 'border-rose-400 bg-rose-50 dark:bg-rose-900/20 text-rose-600 focus:border-rose-400 focus:ring-rose-400/30'
 											: 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 text-gray-800 dark:text-white focus:border-amber-400 focus:ring-amber-400/30'"
 										class="w-10 h-12 text-center rounded-xl border font-mono font-bold text-base outline-none focus:ring-2 transition-all duration-200"
-										:maxlength="index === 0 ? OTP_LENGTH : 1" @beforeinput="handleBeforeInput($event, index)"
+										:maxlength="OTP_LENGTH" @beforeinput="handleBeforeInput($event, index)"
 										@input="handleInput($event, index)"
 										@change="handleOtpChange($event, index)"
 										@keydown.backspace="handleBackspace($event, index)" @paste="handlePaste($event)"
@@ -392,7 +392,21 @@ export default {
 			const digitsOnly = normalizeOtpCode(event.target.value, OTP_LENGTH);
 
 			if (digitsOnly.length > 1) {
-				this.applyOtpCode(digitsOnly);
+				if (digitsOnly.length === OTP_LENGTH) {
+					this.applyOtpCode(digitsOnly);
+				} else {
+					for (let i = 0; i < digitsOnly.length && index + i < OTP_LENGTH; i++) {
+						this.otp[index + i] = digitsOnly[i];
+					}
+					this.$nextTick(() => {
+						syncOtpInputElements(this.inputRefs, this.otp);
+						const nextIdx = Math.min(index + digitsOnly.length, OTP_LENGTH - 1);
+						this.inputRefs[nextIdx]?.focus();
+						if (isOtpComplete(this.otp)) {
+							this.verifyOtp();
+						}
+					});
+				}
 				return;
 			}
 
@@ -416,8 +430,8 @@ export default {
 			const digitsOnly = normalizeOtpCode(event.target.value, OTP_LENGTH);
 			if (digitsOnly.length > 1) {
 				this.applyOtpCode(digitsOnly);
-			} else if (index === 0 && digitsOnly.length === 1 && !this.otp[0]) {
-				this.otp[0] = digitsOnly;
+			} else if (digitsOnly.length === 1) {
+				this.otp[index] = digitsOnly;
 			}
 		},
 
@@ -428,6 +442,9 @@ export default {
 			this.otp = splitOtpDigits(digits, OTP_LENGTH);
 			this.$nextTick(() => {
 				syncOtpInputElements(this.inputRefs, this.otp);
+				if (this.inputRefs && this.inputRefs[OTP_LENGTH - 1]) {
+					this.inputRefs[OTP_LENGTH - 1].focus();
+				}
 				if (isOtpComplete(this.otp)) {
 					this.verifyOtp();
 				}
@@ -458,8 +475,14 @@ export default {
 			}
 			event.preventDefault();
 		},
-		handleBeforeInput() {
-			// TO DO
+		handleBeforeInput(event, index) {
+			if (event?.data) {
+				const normalized = normalizeOtpCode(event.data, OTP_LENGTH);
+				if (normalized.length === OTP_LENGTH) {
+					event.preventDefault();
+					this.applyOtpCode(normalized);
+				}
+			}
 		},
 		cancelOtpAutoFill() {
 			if (this.otpAbortController) {

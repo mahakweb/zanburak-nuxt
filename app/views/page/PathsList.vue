@@ -6,17 +6,17 @@
                     <div class="md:ps-10 mt-8 md:mt-0 order-last md:order-first col-span-12 md:col-span-7 text-gray-800 dark:text-gray-50 flex flex-col gap-3">
                         <h1 class="max-w-3xl mb-4 text-center ltr:md:text-left rtl:md:text-right text-3xl font-extrabold tracking-tight leading-none md:text-4xl xl:text-5xl text-gray-800 dark:text-white">{{ $t('path.list.hero_title') }}</h1>
                         <p class="text-lg font-light text-gray-500 dark:text-gray-400 text-center md:text-start md:me-16">{{ $t('path.list.hero_description') }}</p>
-                        <div class="flex items-center mt-auto gap-2 justify-center md:justify-start">
-                            <a href="#paths" class="whitespace-nowrap h-10 rounded-lg flex items-center justify-center px-4 text-sm font-semibold focus:outline-none focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 text-gray-800 bg-amber-400 hover:shadow-md shadow-amber-400 hover:opacity-90">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center mt-auto gap-2.5 justify-center md:justify-start w-full sm:w-auto">
+                            <a href="#paths" class="w-full sm:w-auto whitespace-nowrap h-11 sm:h-10 rounded-xl flex items-center justify-center px-5 text-sm font-bold focus:outline-none focus:ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 text-gray-900 bg-amber-400 hover:shadow-md shadow-amber-400/30 hover:opacity-90 transition">
                                 {{ $t('path.list.start_journey') }}
-                                <svg class="ms-1 w-4 h-4" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg class="ms-1.5 w-4 h-4 shrink-0" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path opacity="0.4" d="M16.5073 6.34863L21.0752 5.94466C22.1003 5.94466 22.9315 6.7839 22.9315 7.81901C22.9315 8.85412 22.1003 9.69336 21.0752 9.69336L16.5073 9.28938C15.7031 9.28938 15.0511 8.63105 15.0511 7.81901C15.0511 7.00561 15.7031 6.34863 16.5073 6.34863" fill="currentColor"></path>
                                     <path d="M1.16786 6.42292C1.23926 6.35083 1.50598 6.04614 1.75653 5.79314C3.21811 4.20852 7.03437 1.61734 9.03073 0.824345C9.33382 0.697847 10.1003 0.428528 10.5112 0.409485C10.9032 0.409485 11.2776 0.500618 11.6346 0.680164C12.0805 0.931801 12.4361 1.32898 12.6328 1.79689C12.7581 2.12061 12.9548 3.09315 12.9548 3.11084C13.1501 4.17315 13.2565 5.9006 13.2565 7.81032C13.2565 9.62754 13.1501 11.2843 12.9898 12.3643C12.9723 12.3833 12.7756 13.5898 12.5614 14.0033C12.1694 14.7596 11.4029 15.2275 10.5826 15.2275H10.5112C9.97638 15.2098 8.85292 14.7405 8.85292 14.7242C6.96297 13.9312 3.23697 11.4652 1.73902 9.82613C1.73902 9.82613 1.31604 9.40447 1.13284 9.14195C0.84726 8.76381 0.70447 8.29591 0.70447 7.828C0.70447 7.30568 0.864772 6.82009 1.16786 6.42292" fill="currentColor"></path>
                                 </svg>
                             </a>
-                            <router-link to="" class="whitespace-nowrap h-10 rounded-lg flex items-center justify-center px-4 text-sm font-semibold focus:outline-none focus:ring-2 ring-gray-300 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 text-gray-800 bg-gray-300 hover:shadow-md shadow-gray-400">
+                            <a href="#paths" class="w-full sm:w-auto whitespace-nowrap h-11 sm:h-10 rounded-xl flex items-center justify-center px-5 text-sm font-semibold focus:outline-none focus:ring-2 ring-gray-300 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition">
                                 {{ $t('path.common.path_guide') }}
-                                <svg class="ms-1 w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg class="ms-1.5 w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         fill-rule="evenodd"
                                         clip-rule="evenodd"
@@ -24,7 +24,7 @@
                                         fill="currentColor"
                                     ></path>
                                 </svg>
-                            </router-link>
+                            </a>
                         </div>
                     </div>
                     <div class="flex lg:mt-0 lg:col-span-5 items-center mt-8 md:mt-0">

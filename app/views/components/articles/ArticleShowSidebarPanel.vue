@@ -49,7 +49,7 @@
             </div>
 
             <!-- TOC -->
-            <ArticleToc v-if="tocItems.length" :items="tocItems" @navigate="$emit('navigate-toc', $event)" />
+            <ArticleToc v-if="tocItems.length" :items="tocItems" :active-id="activeHeadingId" @navigate="$emit('navigate-toc', $event)" />
 
             <!-- Recent by author -->
             <div v-if="author?.recent_articles?.length" class="pt-6 border-t border-blue-100/80 dark:border-gray-700/60">
@@ -219,6 +219,7 @@ export default {
         relatedCourses: { type: Array, default: () => [] },
         relatedQuestions: { type: Array, default: () => [] },
         tocItems: { type: Array, default: () => [] },
+        activeHeadingId: { type: String, default: "" },
         isLoggedin: { type: Boolean, default: false },
         currentUserId: { type: [Number, String], default: null },
         followLoading: { type: Boolean, default: false },

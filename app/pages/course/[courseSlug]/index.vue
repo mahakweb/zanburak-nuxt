@@ -2076,6 +2076,9 @@ const addToCart = async (type, itemId) => {
 
 const trailerSource = computed(() => {
     if (!course.value) return "";
+    if (course.value.trailer_stream_url) {
+        return course.value.trailer_stream_url;
+    }
     const processed = course.value.trailer_status === 'processed' || course.value.has_stream_trailer === true;
     if (processed && course.value.id) {
         return `${config.apiBaseUrl}/course/${course.value.id}/playlist`;

@@ -36,7 +36,7 @@
                                 repeatCount="indefinite"></animate>
                         </circle>
                     </svg>
-                    <input @input="handleSearch" ref="searchKey" v-model="searchKey" type="text"
+                    <input @input="handleSearch" @keydown.enter="handleEnterKey" ref="searchKey" v-model="searchKey" type="text"
                         class="rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 font-semibold ltr:tracking-wide text-sm w-full px-10 py-2.5 dark:text-white focus:outline-none placeholder:font-light placeholder:text-gray-400/80 dark:placeholder:text-gray-400/70 placeholder:text-xs placeholder:text-medium"
                         :placeholder="$t('search.minChars')" required autocomplete="off" autocorrect="off"
                         autocapitalize="off" enterkeyhint="go" spellcheck="false" maxlength="" aria-activedescendant=""
@@ -74,6 +74,7 @@
                                 :class="{ 'ring-2 ring-yellow-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-800': activeIndex === index }">
                                 <!-- course -->
                                 <router-link v-if="item.type === 'course'" class=""
+                                    @click="closeSearchModal"
                                     :to="{ name: 'course.show', params: { courseSlug: item.slug } }">
                                     <div class="px-3 py-1.5">
                                         <div class="flex justify-between items-center">
@@ -111,6 +112,7 @@
 
                                 <!-- episode -->
                                 <router-link v-if="item.type === 'episode'" class=""
+                                    @click="closeSearchModal"
                                     :to="episodeShowRoute(item.course.slug, item.order)">
                                     <div class="px-3 py-1">
                                         <div class="flex justify-between items-center">
@@ -118,6 +120,7 @@
                                                 <h3 class="group-hover:text-gray-100 text-sm font-semibold text-gray-800 dark:group-hover:text-gray-100 dark:text-gray-200 line-clamp-1"
                                                     v-html="highlightText(item, 'title')"></h3>
                                                 <router-link
+                                                    @click="closeSearchModal"
                                                     :to="{ name: 'course.show', params: { courseSlug: item.course.slug } }"
                                                     class="mt-0.5 underline underline-offset-2 text-xs font-light text-gray-500 dark:text-gray-400 group-hover:text-gray-100 line-clamp-1">
                                                     {{ $t('course.word') }}: <span class="font-semibold">{{
@@ -145,6 +148,7 @@
 
                                 <!-- question -->
                                 <router-link v-if="item.type === 'question'" class=""
+                                    @click="closeSearchModal"
                                     :to="{ name: 'question-show', params: { questionSlug: item.slug } }">
                                     <div class="px-3 py-1">
                                         <div class="flex justify-between items-center">
@@ -180,6 +184,7 @@
 
                                 <!-- article -->
                                 <router-link v-if="item.type === 'article'"
+                                    @click="closeSearchModal"
                                     :to="{ name: 'article-show', params: { articleSlug: item.slug } }">
                                     <div class="px-3 py-1">
                                         <div class="flex justify-between items-center">
@@ -288,6 +293,9 @@ export default {
         },
     },
     watch: {
+        '$route.fullPath'() {
+            this.closeSearchModal();
+        },
         visible(newVal) {
             if (newVal && this.autoFocus) {
                 // بعد از رندر کامل، اینپوت سرچ را فوکوس کن
@@ -483,15 +491,35 @@ export default {
                 this.$refs.searchKey.blur();
             } else if (event.key === "Enter") {
                 if (this.activeIndex !== null) {
-                    const activeElement = this.$refs[`searchItem-${this.activeIndex}`][0];
+                    const activeElement = this.$refs[`searchItem-${this.activeIndex}`]?.[0];
 
                     if (activeElement) {
                         const routerLink = activeElement.querySelector("a");
                         if (routerLink) {
+                            this.closeSearchModal();
                             routerLink.click();
+                            return;
                         }
                     }
                 }
+                this.handleEnterKey();
+            }
+        },
+        closeSearchModal() {
+            this.bottomSheetVisible = false;
+        },
+        handleEnterKey() {
+            const query = this.searchKey?.trim();
+            if (query && query.length > 0) {
+                this.closeSearchModal();
+                this.$router.push({
+                    path: '/search',
+                    query: {
+                        q: query,
+                        ...(this.activeType && this.activeType !== 'all' ? { type: this.activeType } : {}),
+                        ...(this.activeSort && this.activeSort !== 'relevance' ? { sort: this.activeSort } : {})
+                    }
+                });
             }
         },
     },

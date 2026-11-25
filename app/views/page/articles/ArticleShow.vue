@@ -28,16 +28,16 @@
                 </router-link>
             </nav> -->
 
-            <section class="mb-20">
-                <div class="grid lg:grid-cols-12 gap-6">
+            <section class="mb-20 min-w-0 max-w-full">
+                <div class="grid lg:grid-cols-12 gap-6 min-w-0 max-w-full items-start">
                     <!-- Main column (right in RTL) -->
-                    <div class="order-2 lg:order-1 lg:col-span-9 col-span-12 space-y-6">
+                    <div id="article-main-card" class="order-2 lg:order-1 lg:col-span-9 col-span-12 space-y-6 min-w-0 max-w-full">
                         <!-- Article card -->
-                        <article class="relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 shadow-[0_4px_24px_-4px_rgba(59,130,246,0.08)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3)]">
+                        <article class="relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 shadow-[0_4px_24px_-4px_rgba(59,130,246,0.08)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3)] min-w-0 max-w-full">
                             <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50/40 via-white to-sky-50/30 dark:from-[#0f1524] dark:via-gray-900 dark:to-[#0f1a2e]" aria-hidden="true"></div>
                             <div class="pointer-events-none absolute -top-20 -start-16 w-56 h-56 rounded-full bg-blue-400/10 dark:bg-blue-500/5 blur-3xl" aria-hidden="true"></div>
 
-                            <div class="relative p-5 sm:p-8 lg:p-10">
+                            <div class="relative p-5 sm:p-8 lg:p-10 min-w-0 max-w-full overflow-hidden">
                                 <!-- Cover -->
                                 <div
                                     
@@ -95,7 +95,7 @@
                                 </div>
 
                                 <!-- Content -->
-                                <div ref="contentRef" class="article-content content-area prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400">
+                                <div ref="contentRef" class="article-content content-area prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400 min-w-0 overflow-hidden">
                                     <MarkdownRenderer startClass="rendered-content github-markdown-body" :source="article.content" />
                                 </div>
 
@@ -124,6 +124,21 @@
                                             <svg class="shrink-0 opacity-75" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5.99646 0.827528C7.17456 0.827528 8.09169 0.881027 8.80899 1.01903C9.52386 1.15656 10.0045 1.37154 10.3411 1.66825C11.0098 2.25772 11.2804 3.32306 11.2804 5.47101C11.2804 6.85518 11.1561 7.87367 10.8215 8.53718C10.661 8.85564 10.4576 9.07995 10.2017 9.22916C9.94304 9.37996 9.59628 9.474 9.11892 9.474C8.5035 9.474 8.0416 9.61219 7.68041 9.85692C7.32786 10.0958 7.11521 10.4085 6.95703 10.6574C6.9331 10.6951 6.91069 10.7307 6.88949 10.7643C6.75685 10.9749 6.67103 11.1111 6.55187 11.2181C6.44568 11.3134 6.29728 11.3954 5.99659 11.3954C5.69593 11.3954 5.54754 11.3133 5.44133 11.218C5.32218 11.1111 5.23635 10.9749 5.10373 10.7643C5.08251 10.7307 5.0601 10.6951 5.03616 10.6574C4.87797 10.4085 4.66531 10.0958 4.31276 9.8569C3.95156 9.61218 3.48966 9.474 2.87424 9.474C2.39941 9.474 2.05376 9.37759 1.79518 9.22368C1.53855 9.07092 1.33387 8.84146 1.17225 8.51818C0.836472 7.84655 0.712507 6.82628 0.712507 5.47101C0.712507 3.35035 0.982347 2.28225 1.65335 1.68581C1.99094 1.38572 2.47232 1.1667 3.18628 1.02566C3.90284 0.884101 4.81936 0.827528 5.99646 0.827528Z" stroke="currentColor" stroke-width="0.96" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.47668 4.67017H8.39812M3.59465 6.5918H8.39825" stroke="currentColor" stroke-width="0.96" stroke-linecap="round"/></svg>
                                             <span>{{ article.comments_count || 0 }}</span>
                                         </a>
+
+                                        <button
+                                            type="button"
+                                            @click="toggleFocusMode"
+                                            class="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-semibold transition-all duration-200"
+                                            :class="isFocusMode
+                                                ? 'bg-amber-400 text-gray-900 shadow-sm shadow-amber-400/30 font-bold'
+                                                : 'text-slate-600 dark:text-slate-300 bg-white dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/60 hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-500/10 dark:hover:text-amber-400'"
+                                            title="حالت تمرکز و مطالعه آسوده">
+                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <span>{{ isFocusMode ? 'خروج از تمرکز' : 'حالت تمرکز' }}</span>
+                                        </button>
 
                                         <template v-if="isLoggedin">
                                             <button
@@ -303,6 +318,7 @@
                         :related-courses="relatedCourses"
                         :related-questions="relatedQuestions"
                         :toc-items="tocItems"
+                        :active-heading-id="activeHeadingId"
                         :is-loggedin="isLoggedin"
                         :current-user-id="currentUser?.id"
                         :follow-loading="followLoading"
@@ -311,6 +327,117 @@
                 </div>
             </section>
         </div>
+
+        <!-- Focus Mode Full-Screen Reader -->
+        <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 scale-[0.98]"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-[0.98]">
+            <div
+                v-if="isFocusMode && article"
+                class="fixed inset-0 z-[100] bg-[#fafafa] dark:bg-[#0c111d] overflow-y-auto custom-scrollbar">
+                <!-- Focus Sticky Top Header -->
+                <header class="sticky top-0 z-20 backdrop-blur-md bg-white/95 dark:bg-[#0c111d]/95 border-b border-gray-200/80 dark:border-gray-800 px-4 sm:px-8 py-3 flex items-center justify-between gap-4 shadow-sm">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <button
+                            type="button"
+                            @click="isFocusMode = false"
+                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold text-xs shadow-sm transition shrink-0"
+                            title="خروج از حالت تمرکز">
+                            <svg class="w-4 h-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            <span>خروج از حالت تمرکز</span>
+                            <span class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-black/15 rounded font-mono font-normal">Esc</span>
+                        </button>
+                        <h2 class="hidden md:block text-sm font-bold text-gray-700 dark:text-gray-300 truncate max-w-md">
+                            {{ article.title }}
+                        </h2>
+                    </div>
+
+                    <div class="flex items-center gap-3 shrink-0">
+                        <!-- Reading Progress -->
+                        <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                            <span>{{ Math.round(readingProgress) }}%</span>
+                            <div class="w-20 sm:w-28 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                                <div
+                                    class="h-full bg-gradient-to-r from-blue-500 to-amber-400 rounded-full transition-all duration-100"
+                                    :style="{ width: readingProgress + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <!-- Font Size Adjuster -->
+                        <div class="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800/80 shadow-sm">
+                            <button
+                                type="button"
+                                @click="changeFocusFontSize(-2)"
+                                :disabled="focusFontSize <= 14"
+                                class="px-2.5 py-1 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 transition"
+                                title="کوچک‌تر">
+                                A-
+                            </button>
+                            <span class="px-2 text-[11px] font-mono text-gray-500">{{ focusFontSize }}px</span>
+                            <button
+                                type="button"
+                                @click="changeFocusFontSize(2)"
+                                :disabled="focusFontSize >= 28"
+                                class="px-2.5 py-1 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 transition"
+                                title="بزرگ‌تر">
+                                A+
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Reading Container -->
+                <main class="max-w-3xl mx-auto px-5 sm:px-8 py-10 sm:py-16">
+                    <div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-800">
+                        <span v-if="article.category" class="inline-block text-xs font-bold text-blue-600 dark:text-blue-400 mb-2">
+                            {{ article.category.title }}
+                        </span>
+                        <h1 class="text-2xl sm:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4">
+                            {{ article.title }}
+                        </h1>
+                        <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span v-if="authorName" class="font-semibold text-gray-700 dark:text-gray-300">{{ authorName }}</span>
+                            <span v-if="article.published_at">{{ timeAgo(article.published_at) }}</span>
+                            <span>{{ $t('articles.card.readTime', { min: article.reading_time_minutes || 1 }) }}</span>
+                        </div>
+                    </div>
+
+                    <div v-if="article.cover_image && !coverImageError" class="mb-10 rounded-2xl overflow-hidden shadow-md">
+                        <SeoImage
+                            :src="article.cover_image"
+                            :alt="article.title"
+                            sizes-preset="hero"
+                            img-class="w-full max-h-[460px] object-cover"
+                            @error="coverImageError = true"
+                        />
+                    </div>
+
+                    <div
+                        class="article-content prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400 min-w-0 overflow-hidden"
+                        :style="{ fontSize: focusFontSize + 'px', lineHeight: '2.1' }">
+                        <MarkdownRenderer startClass="rendered-content github-markdown-body" :source="article.content" />
+                    </div>
+
+                    <div class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                        <button
+                            type="button"
+                            @click="isFocusMode = false"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold text-xs transition shadow-sm">
+                            <svg class="w-4 h-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            خروج از حالت تمرکز و بازگشت به نمای عادی
+                        </button>
+                    </div>
+                </main>
+            </div>
+        </Transition>
 
         <ReportBottomSheet
             v-model="isOpenReportModal"
@@ -374,6 +501,9 @@ export default {
             readingProgress: 0,
             scrollRafId: null,
             articleRatings: emptyCourseRatings(),
+            isFocusMode: false,
+            focusFontSize: 18,
+            activeHeadingId: '',
         };
     },
     computed: {
@@ -398,20 +528,53 @@ export default {
     mounted() {
         window.addEventListener("scroll", this.onScroll, { passive: true });
         window.addEventListener("resize", this.onScroll, { passive: true });
+        window.addEventListener("keydown", this.onKeyDown);
     },
     beforeUnmount() {
         window.removeEventListener("scroll", this.onScroll);
         window.removeEventListener("resize", this.onScroll);
+        window.removeEventListener("keydown", this.onKeyDown);
         if (this.scrollRafId) cancelAnimationFrame(this.scrollRafId);
         if (this.linkCopiedTimer) clearTimeout(this.linkCopiedTimer);
     },
     methods: {
+        onKeyDown(e) {
+            if (e.key === "Escape" && this.isFocusMode) {
+                this.isFocusMode = false;
+            }
+        },
+        toggleFocusMode() {
+            this.isFocusMode = !this.isFocusMode;
+        },
+        changeFocusFontSize(delta) {
+            const next = this.focusFontSize + delta;
+            if (next >= 14 && next <= 28) {
+                this.focusFontSize = next;
+            }
+        },
         onScroll() {
             if (this.scrollRafId) return;
             this.scrollRafId = requestAnimationFrame(() => {
                 this.scrollRafId = null;
                 this.updateReadingProgress();
+                this.updateActiveHeading();
             });
+        },
+        updateActiveHeading() {
+            const contentEl = this.$refs.contentRef;
+            if (!contentEl || !this.tocItems.length) return;
+            const headings = contentEl.querySelectorAll("h1, h2, h3, h4, h5, h6");
+            const topThreshold = 140;
+            let current = "";
+            headings.forEach((h) => {
+                const rect = h.getBoundingClientRect();
+                if (rect.top <= topThreshold) {
+                    current = h.id;
+                }
+            });
+            if (current) {
+                this.activeHeadingId = current;
+            }
         },
         updateReadingProgress() {
             const el = this.$refs.contentRef;
@@ -478,25 +641,43 @@ export default {
         },
         syncTocFromDom() {
             const contentEl = this.$refs.contentRef;
-            if (!contentEl || !this.article?.content) {
-                this.tocItems = [];
-                return;
-            }
             const items = [];
-            contentEl.querySelectorAll("h2, h3, h4").forEach((el) => {
-                const text = el.textContent?.trim();
-                if (!text) return;
-                let id = el.getAttribute("id");
-                if (!id) {
-                    id = text
-                        .replace(/\s+/g, "-")
-                        .replace(/[^\w\u0600-\u06FF-]/g, "")
-                        .toLowerCase();
-                    el.id = id;
+            if (contentEl) {
+                contentEl.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach((el) => {
+                    const text = el.textContent?.trim();
+                    if (!text) return;
+                    let id = el.getAttribute("id");
+                    if (!id) {
+                        id = text
+                            .replace(/\s+/g, "-")
+                            .replace(/[^\w\u0600-\u06FF-]/g, "")
+                            .toLowerCase();
+                        el.id = id;
+                    }
+                    items.push({ id, text, level: parseInt(el.tagName.slice(1), 10) });
+                });
+            }
+            if (!items.length && this.article?.content) {
+                const lines = this.article.content.split(/\r?\n/);
+                for (const line of lines) {
+                    const match = line.match(/^(#{1,6})\s+(.+)$/);
+                    if (match) {
+                        const level = match[1].length;
+                        const text = match[2].replace(/[#*`_~]/g, "").trim();
+                        if (text) {
+                            const id = text
+                                .replace(/\s+/g, "-")
+                                .replace(/[^\w\u0600-\u06FF-]/g, "")
+                                .toLowerCase();
+                            items.push({ id, text, level });
+                        }
+                    }
                 }
-                items.push({ id, text, level: parseInt(el.tagName.slice(1), 10) });
-            });
+            }
             this.tocItems = items;
+            if (items.length && !this.activeHeadingId) {
+                this.activeHeadingId = items[0].id;
+            }
         },
         scrollToHeading(id) {
             const contentEl = this.$refs.contentRef;
@@ -506,13 +687,14 @@ export default {
             if (!el || !contentEl.contains(el)) {
                 const item = this.tocItems.find((entry) => entry.id === id);
                 if (item) {
-                    el = [...contentEl.querySelectorAll("h2, h3, h4")].find(
+                    el = [...contentEl.querySelectorAll("h1, h2, h3, h4, h5, h6")].find(
                         (heading) => heading.textContent?.trim() === item.text
                     );
                 }
             }
             if (!el) return;
 
+            this.activeHeadingId = id;
             const headerOffset = 96;
             const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
             window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
@@ -643,6 +825,18 @@ export default {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+.article-content {
+    font-weight: 400 !important;
+}
+.article-content :deep(p),
+.article-content :deep(li),
+.article-content :deep(div) {
+    font-weight: 400;
+}
+.article-content :deep(strong),
+.article-content :deep(b) {
+    font-weight: 700 !important;
 }
 .article-content :deep(h2),
 .article-content :deep(h3),

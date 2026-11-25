@@ -297,7 +297,7 @@ apiBaseUrl: config.apiBaseUrl,
             }
         },
         handleUploadedFiles(files) {
-            if (files && files.length > 0) this.attach_file = files[0].url;
+            if (files && files.length > 0) this.attach_file = files[0].fileUrl || files[0].url || "";
             else this.attach_file = "";
         },
         onInputMinPrice() {
@@ -394,7 +394,7 @@ apiBaseUrl: config.apiBaseUrl,
     },
     computed: {
         dropzoneHeader() {
-            const token = this.authStore?.status?.loggedIn ? getAuthTokenSync() : null;
+            const token = getAuthTokenSync();
             return token ? { Authorization: `Bearer ${token}` } : {};
         },
         currentUser() {

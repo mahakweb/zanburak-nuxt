@@ -43,17 +43,19 @@
                 <div v-for="i in 5" :key="i"
                     class="relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 md:p-5 shadow-sm">
                     <span class="absolute inset-y-0 start-0 w-1.5 bg-gray-200 dark:bg-gray-700"></span>
-                    <div class="flex items-center gap-4 ms-1">
-                        <div class="animate-pulse shrink-0 w-16 h-16 md:w-[4.5rem] md:h-[4.5rem] rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                        <div class="flex-1 min-w-0 space-y-3">
-                            <div class="animate-pulse h-3.5 w-2/3 max-w-[16rem] rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <div class="animate-pulse h-5 w-20 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                                <div class="animate-pulse h-5 w-16 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                                <div class="animate-pulse h-5 w-24 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ms-1">
+                        <div class="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+                            <div class="animate-pulse shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-[4.5rem] md:h-[4.5rem] rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                            <div class="flex-1 min-w-0 space-y-3">
+                                <div class="animate-pulse h-3.5 w-2/3 max-w-[16rem] rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="animate-pulse h-5 w-20 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                                    <div class="animate-pulse h-5 w-16 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                                    <div class="animate-pulse h-5 w-24 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="animate-pulse shrink-0 h-9 w-20 md:w-24 rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+                        <div class="animate-pulse shrink-0 self-end sm:self-center h-9 w-20 md:w-24 rounded-xl bg-gray-200 dark:bg-gray-700"></div>
                     </div>
                 </div>
             </div>
@@ -64,64 +66,67 @@
                     class="group relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 md:p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
                     <span class="absolute inset-y-0 start-0 w-1.5" :class="accentBar(item)"></span>
 
-                    <div class="flex items-center gap-4 ms-1">
-                        <!-- Score ring -->
-                        <div class="relative shrink-0 w-16 h-16 md:w-[4.5rem] md:h-[4.5rem]">
-                            <svg class="w-full h-full -rotate-90" viewBox="0 0 48 48">
-                                <circle cx="24" cy="24" r="20" fill="none" stroke-width="5"
-                                    class="stroke-current text-gray-100 dark:text-gray-800" />
-                                <circle v-if="scorePct(item) != null" cx="24" cy="24" r="20" fill="none" stroke-width="5"
-                                    stroke-linecap="round"
-                                    class="stroke-current transition-all duration-700"
-                                    :class="ringColor(item)"
-                                    :stroke-dasharray="ringCircumference"
-                                    :stroke-dashoffset="ringOffset(item)" />
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <template v-if="scorePct(item) != null">
-                                    <span class="text-sm md:text-base font-extrabold leading-none" :class="scoreText(item)">{{ scorePct(item) }}<span class="text-[10px]">%</span></span>
-                                </template>
-                                <svg v-else class="w-6 h-6 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ms-1">
+                        <!-- Score ring & Info -->
+                        <div class="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+                            <!-- Score ring -->
+                            <div class="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-[4.5rem] md:h-[4.5rem]">
+                                <svg class="w-full h-full -rotate-90" viewBox="0 0 48 48">
+                                    <circle cx="24" cy="24" r="20" fill="none" stroke-width="5"
+                                        class="stroke-current text-gray-100 dark:text-gray-800" />
+                                    <circle v-if="scorePct(item) != null" cx="24" cy="24" r="20" fill="none" stroke-width="5"
+                                        stroke-linecap="round"
+                                        class="stroke-current transition-all duration-700"
+                                        :class="ringColor(item)"
+                                        :stroke-dasharray="ringCircumference"
+                                        :stroke-dashoffset="ringOffset(item)" />
                                 </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <template v-if="scorePct(item) != null">
+                                        <span class="text-sm md:text-base font-extrabold leading-none" :class="scoreText(item)">{{ scorePct(item) }}<span class="text-[10px]">%</span></span>
+                                    </template>
+                                    <svg v-else class="w-6 h-6 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Info -->
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-bold text-gray-800 dark:text-white text-sm md:text-base line-clamp-1">{{ item.quiz?.title || $t('quiz.history.untitled') }}</h3>
-                            <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 mt-2 text-[11px] md:text-xs text-gray-500 dark:text-gray-400">
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold" :class="statusBadge(item.status)">
-                                    <span class="w-1.5 h-1.5 rounded-full" :class="statusDot(item.status)"></span>
-                                    {{ statusLabel(item.status) }}
-                                </span>
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10a2 2 0 002 2h12a2 2 0 002-2V7M4 7l8 5 8-5M4 7h16" /></svg>
-                                    {{ $t('quiz.history.attemptNumber', { number: item.attempt_number }) }}
-                                </span>
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    {{ formatTime(item.time_spent) }}
-                                </span>
-                                <span v-if="formatDate(item.created_at)" class="inline-flex items-center gap-1" dir="ltr">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    {{ formatDate(item.created_at) }}
-                                </span>
+                            <!-- Info -->
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-gray-800 dark:text-white text-sm md:text-base line-clamp-1">{{ item.quiz?.title || $t('quiz.history.untitled') }}</h3>
+                                <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 mt-2 text-[11px] md:text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold" :class="statusBadge(item.status)">
+                                        <span class="w-1.5 h-1.5 rounded-full" :class="statusDot(item.status)"></span>
+                                        {{ statusLabel(item.status) }}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10a2 2 0 002 2h12a2 2 0 002-2V7M4 7l8 5 8-5M4 7h16" /></svg>
+                                        {{ $t('quiz.history.attemptNumber', { number: item.attempt_number }) }}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        {{ formatTime(item.time_spent) }}
+                                    </span>
+                                    <span v-if="formatDate(item.created_at)" class="inline-flex items-center gap-1" dir="ltr">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        {{ formatDate(item.created_at) }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- CTA -->
-                        <div class="shrink-0 self-stretch flex items-center">
+                        <div class="shrink-0 self-end sm:self-center flex items-center justify-end">
                             <router-link v-if="item.status === 'in_progress'"
                                 :to="{ name: 'quiz-resume', params: { attemptUuid: item.uuid } }"
                                 class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-900 bg-gradient-to-r from-amber-400 to-yellow-500 hover:shadow-md rounded-xl px-3.5 md:px-4 py-2 transition-all active:scale-95">
                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                                <span class="hidden sm:inline">{{ $t('quiz.history.resume') }}</span>
+                                <span>{{ $t('quiz.history.resume') }}</span>
                             </router-link>
                             <router-link v-else
                                 :to="{ name: 'quiz-result', params: { attemptUuid: item.uuid } }"
                                 class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl px-3.5 md:px-4 py-2 transition-all active:scale-95">
-                                <span class="hidden sm:inline">{{ $t('quiz.history.result') }}</span>
+                                <span>{{ $t('quiz.history.result') }}</span>
                                 <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                             </router-link>
                         </div>

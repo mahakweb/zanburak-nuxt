@@ -132,12 +132,54 @@ provide('ssrCoursesBootstrap', ssrCoursesBootstrap)
 
         <section class="pb-10 pt-6 md:pb-16 md:pt-8">
             <div class="mx-auto max-w-screen-xl px-3 md:px-4">
-                <div class="mb-4 flex items-end justify-between gap-4 px-1">
+                <div class="mb-5 flex flex-col md:flex-row md:items-end md:justify-between gap-4 px-1">
                     <div>
                         <h2 class="text-xl font-extrabold tracking-tight text-gray-800 dark:text-gray-50 md:text-2xl">
                             {{ $t('course.list.title') }}
                         </h2>
                         <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">{{ $t('course.list.subtitle') }}</p>
+                    </div>
+
+                    <!-- Gemini AI Search Bar -->
+                    <div class="w-full md:max-w-md relative">
+                        <div class="relative group">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-yellow-400 via-amber-500 to-rose-500 rounded-2xl blur-md opacity-30 group-hover:opacity-60 group-focus-within:opacity-80 transition duration-500"></div>
+                            <div class="relative flex items-center bg-white dark:bg-gray-900 rounded-2xl shadow-md border border-gray-200/80 dark:border-gray-800 p-1.5">
+                                <div class="flex items-center ps-2.5 text-amber-500 pointer-events-none">
+                                    <svg class="w-4 h-4 animate-pulse" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    v-model="search"
+                                    type="text"
+                                    class="w-full bg-transparent border-0 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-xs md:text-sm px-2.5 py-1.5 focus:ring-0 focus:outline-none font-medium"
+                                    placeholder="جستجوی سریع در دوره‌ها..."
+                                    @input="onSearchInput"
+                                    @keyup.enter="onSearchSubmit"
+                                />
+                                <button
+                                    v-if="search"
+                                    type="button"
+                                    @click="clearSearch"
+                                    class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg me-1 transition"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="onSearchSubmit"
+                                    class="shrink-0 inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-950 font-bold text-xs shadow-sm transition-all active:scale-95"
+                                >
+                                    <span>جستجو</span>
+                                    <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -346,6 +388,8 @@ export default {
             courses: [],
             paths: [],
             currentPage: 1,
+            search: '',
+            searchDebounceTimer: null,
             filters: {
                 type: [],
                 order: 'newest',
@@ -368,6 +412,10 @@ export default {
             return current < last;
         },
         activeFilterChips() {
+            const chips = [];
+            if (this.search && this.search.trim()) {
+                chips.push({ group: 'search', value: this.search.trim(), label: `جستجو: «${this.search.trim()}»` });
+            }
             const typeLabels = {
                 free: this.$t('course.list.free'),
                 cash: this.$t('course.list.cashOnly'),
@@ -375,11 +423,13 @@ export default {
                 installment: this.$t('course.list.installmentCourses'),
                 discounted: this.$t('course.list.discountedCourses'),
             };
-            const chips = this.filters.type.map((value) => ({
-                group: 'type',
-                value,
-                label: typeLabels[value] || value,
-            }));
+            this.filters.type.forEach((value) => {
+                chips.push({
+                    group: 'type',
+                    value,
+                    label: typeLabels[value] || value,
+                });
+            });
             this.filters.status.forEach((value) => {
                 chips.push({ group: 'status', value, label: value });
             });
@@ -393,7 +443,26 @@ export default {
         },
     },
     methods: {
+        onSearchInput() {
+            clearTimeout(this.searchDebounceTimer);
+            this.searchDebounceTimer = setTimeout(() => {
+                this.currentPage = 1;
+                this.getCourses();
+            }, 1500);
+        },
+        onSearchSubmit() {
+            clearTimeout(this.searchDebounceTimer);
+            this.currentPage = 1;
+            this.getCourses();
+        },
+        clearSearch() {
+            this.search = '';
+            clearTimeout(this.searchDebounceTimer);
+            this.currentPage = 1;
+            this.getCourses();
+        },
         clearFilters() {
+            this.search = '';
             this.filters.type = [];
             this.filters.cat = [];
             this.filters.status = [];
@@ -401,7 +470,9 @@ export default {
             this.getCourses();
         },
         removeFilterChip(chip) {
-            if (chip.group === 'order') {
+            if (chip.group === 'search') {
+                this.search = '';
+            } else if (chip.group === 'order') {
                 this.filters.order = 'newest';
             } else {
                 this.filters[chip.group] = this.filters[chip.group].filter((item) => item !== chip.value);
@@ -417,6 +488,10 @@ export default {
         },
         buildReadableQueryString() {
             const parts = [];
+
+            if (this.search && this.search.trim()) {
+                parts.push(`search=${encodeURIComponent(this.search.trim())}`);
+            }
 
             this.filters.cat.forEach((category, index) => {
                 parts.push(`cat[${index}]=${category}`);
@@ -458,6 +533,10 @@ export default {
                 page: this.currentPage,
                 order: this.filters.order || 'newest',
             };
+
+            if (this.search && this.search.trim()) {
+                params.search = this.search.trim();
+            }
 
             if (this.filters.cat.length) {
                 params.cat = this.filters.cat;
@@ -587,10 +666,10 @@ export default {
         },
         clearSidebarPinStyles(panel) {
             this.sidebarPinned = false;
-            if (!panel) {
-                return;
-            }
+            if (!panel) return;
             panel.style.height = '';
+            panel.style.maxHeight = '';
+            panel.style.minHeight = '';
             panel.style.width = '';
             panel.style.left = '';
             panel.style.right = '';
@@ -598,37 +677,43 @@ export default {
         },
         updateSidebarPin() {
             const panel = this.$refs.sidebarPanel;
-
             if (!import.meta.client || window.innerWidth < 1024) {
                 this.clearSidebarPinStyles(panel);
                 return;
             }
-            if (!panel) {
-                return;
-            }
+            if (!panel) return;
             const host = panel.parentElement;
-            const list = document.getElementById('courses-list');
+            const content = document.getElementById('courses-list');
             if (!host) {
                 this.clearSidebarPinStyles(panel);
                 return;
             }
 
             const hostRect = host.getBoundingClientRect();
-            const listTop = list ? list.getBoundingClientRect().top : hostRect.top;
+            const contentTop = content ? content.getBoundingClientRect().top : hostRect.top;
             const footer = document.querySelector('footer');
             const footerTop = footer
                 ? footer.getBoundingClientRect().top - 8
                 : Number.POSITIVE_INFINITY;
 
-            if (!this.sidebarPinned && listTop <= 8) {
+            if (!this.sidebarPinned && contentTop <= 8) {
                 this.sidebarPinned = true;
-            } else if (this.sidebarPinned && listTop > 72) {
+            } else if (this.sidebarPinned && contentTop > 72) {
                 this.sidebarPinned = false;
             }
 
             const usedTop = this.sidebarPinned ? 0 : Math.max(hostRect.top, 12);
-            const bottomLimit = Math.min(footerTop, hostRect.bottom, window.innerHeight);
-            panel.style.height = `${Math.max(0, Math.round(bottomLimit - usedTop))}px`;
+            const viewportAvailable = Math.max(0, Math.min(footerTop, window.innerHeight) - usedTop);
+
+            if (viewportAvailable > 0) {
+                panel.style.maxHeight = Math.round(viewportAvailable) + 'px';
+                if (this.sidebarPinned) {
+                    panel.style.height = Math.round(viewportAvailable) + 'px';
+                } else {
+                    panel.style.height = '';
+                }
+            }
+            panel.style.minHeight = '0px';
             panel.style.width = '';
             panel.style.left = '';
             panel.style.right = '';
@@ -701,6 +786,9 @@ export default {
 
     created() {
         const query = this.$route.query;
+        if (query.search) {
+            this.search = String(query.search);
+        }
         this.filters.cat = Object.keys(query)
             .filter((key) => key.startsWith("cat["))
             .map((key) => query[key]);
@@ -716,7 +804,7 @@ export default {
         const ssr = this.ssrCoursesBootstrap;
         const payload = ssr && typeof ssr === 'object' && 'value' in ssr ? ssr.value : ssr;
         const hasFilterQuery = Object.keys(query || {}).some((k) =>
-            k.startsWith('cat[') || k.startsWith('type[') || k.startsWith('status[') || k === 'order' || k === 'page' || k === 'installment'
+            k.startsWith('cat[') || k.startsWith('type[') || k.startsWith('status[') || k === 'order' || k === 'page' || k === 'installment' || k === 'search'
         );
         if (payload && !hasFilterQuery) {
             this.courses = payload.courses || [];
@@ -803,17 +891,18 @@ export default {
 
 @media (min-width: 1024px) {
     .courses-sidebar-col {
-        height: 0;
         min-height: 100%;
         overflow-anchor: none;
     }
 
     .courses-sidebar-panel {
+        max-height: calc(100vh - 1.5rem);
         position: sticky;
         top: 0.75rem;
+        min-height: 0;
         overflow-x: hidden;
         overflow-y: auto;
-        overscroll-behavior: contain;
+        overscroll-behavior: auto;
         border-radius: 1.5rem;
         overflow-anchor: none;
         scrollbar-width: none;
@@ -832,6 +921,7 @@ export default {
     }
 
     .courses-sidebar-panel.is-pinned {
+        max-height: 100vh;
         top: 0;
         padding: 1rem 0.7rem;
         border-radius: 0;

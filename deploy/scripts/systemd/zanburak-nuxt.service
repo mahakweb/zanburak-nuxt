@@ -1,0 +1,27 @@
+[Unit]
+Description=Zanburak Nuxt SSR
+After=network.target
+
+[Service]
+Type=simple
+User={{WEB_USER}}
+Group={{WEB_GROUP}}
+WorkingDirectory={{REMOTE_DIR}}
+Environment=NODE_ENV=production
+Environment=PORT={{NUXT_PORT}}
+Environment=NITRO_PORT={{NUXT_PORT}}
+Environment=HOST={{NUXT_HOST}}
+Environment=NITRO_HOST={{NUXT_HOST}}
+Environment=NUXT_PUBLIC_APP_URL=https://zanburak.ir
+Environment=NUXT_PUBLIC_API_BASE_URL=https://api.zanburak.ir/api
+Environment=NUXT_PUBLIC_PUSHER_KEY=zanburak-key
+Environment=NUXT_PUBLIC_PUSHER_WS_HOST=zanburak.ir
+Environment=NUXT_PUBLIC_PUSHER_WS_PORT=443
+Environment=NUXT_PUBLIC_PUSHER_WSS_PORT=443
+Environment=NUXT_PUBLIC_PUSHER_FORCE_TLS=true
+ExecStart={{NODE_PATH}} {{REMOTE_DIR}}/.output/server/index.mjs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

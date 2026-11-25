@@ -1,8 +1,42 @@
 <script setup>
+import axiosInstance from '@/store/axiosInstance'
+import { useSEO } from '@/composables/useSEO'
+
 definePageMeta({
   name: "profile-page",
   props: true,
 })
+
+const route = useRoute()
+const cleanUsername = String(route.params.username || '').replace(/^@+/, '')
+
+const { data: ssrProfile } = await useAsyncData(
+  `profile-${cleanUsername}`,
+  async () => {
+    try {
+      const response = await axiosInstance.get(`/@${cleanUsername}`)
+      return response.data?.user || null
+    } catch {
+      return null
+    }
+  }
+)
+
+if (ssrProfile.value) {
+  const u = ssrProfile.value
+  const fullName = [u.first_name, u.last_name].filter(Boolean).join(' ').trim() || u.username
+  const bio = u.info?.bio || u.info?.about || `پروفایل کاربری ${fullName} در آکادمی زنبورک`
+  useSEO({
+    title: `پروفایل ${fullName} (@${u.username})`,
+    description: bio,
+    url: `/@${u.username}`,
+    image: u.profile_pic || undefined,
+    keywords: [fullName, u.username, 'پروفایل کاربری', 'زنبورک'],
+    noindex: false,
+  })
+}
+
+provide('ssrProfileData', ssrProfile)
 </script>
 
 <template>
@@ -70,23 +104,35 @@ definePageMeta({
 
                     <!-- Actions -->
                     <div class="flex flex-col items-center md:items-end gap-3 shrink-0">
-                        <button
-                            v-if="!isLoggedin || user.id !== currentUser?.id"
-                            @click="toggleFollow"
-                            :disabled="followLoading"
-                            type="button"
-                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-white dark:ring-offset-gray-900 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5"
-                            :class="user.follow.hasFlollow
-                                ? 'text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 focus:ring-gray-400/60'
-                                : 'text-white bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-600 hover:to-fuchsia-600 shadow-lg shadow-pink-500/30 dark:shadow-pink-800/40 focus:ring-pink-500'">
-                            <svg v-if="!user.follow.hasFlollow" class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                            </svg>
-                            <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            {{ user.follow.hasFlollow ? $t('profile.common.unfollow') : $t('profile.common.follow') }}
-                        </button>
+                        <div v-if="!isLoggedin || user.id !== currentUser?.id" class="flex flex-wrap items-center justify-center md:justify-end gap-2.5">
+                            <router-link
+                                v-if="user.can_chat !== false"
+                                :to="'/messenger/@' + user.username"
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 hover:from-violet-500 hover:via-indigo-500 hover:to-blue-500 shadow-lg shadow-indigo-500/25 dark:shadow-indigo-900/40 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ring-offset-white dark:ring-offset-gray-900"
+                            >
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>{{ $t('profile.common.sendMessage') }}</span>
+                            </router-link>
+
+                            <button
+                                @click="toggleFollow"
+                                :disabled="followLoading"
+                                type="button"
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-white dark:ring-offset-gray-900 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5"
+                                :class="user.follow.hasFlollow
+                                    ? 'text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 focus:ring-gray-400/60'
+                                    : 'text-white bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-600 hover:to-fuchsia-600 shadow-lg shadow-pink-500/30 dark:shadow-pink-800/40 focus:ring-pink-500'">
+                                <svg v-if="!user.follow.hasFlollow" class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                                <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                {{ user.follow.hasFlollow ? $t('profile.common.unfollow') : $t('profile.common.follow') }}
+                            </button>
+                        </div>
                         <router-link
                             v-else
                             :to="{ name: 'panel-profile' }"
@@ -137,7 +183,7 @@ definePageMeta({
                 </div>
 
                 <!-- Quick stats -->
-                <div class="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                <div class="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
                     <button type="button" @click="openFollowSheet('followers')" class="stat-chip stat-chip--btn">
                         <span class="stat-chip__value">{{ formatNumber(user.follow.numberOfFollowers) }}</span>
                         <span class="stat-chip__label">{{ $t('profile.public.followers') }}</span>
@@ -145,6 +191,10 @@ definePageMeta({
                     <button type="button" @click="openFollowSheet('followings')" class="stat-chip stat-chip--btn">
                         <span class="stat-chip__value">{{ formatNumber(user.follow.numberOfFollowings) }}</span>
                         <span class="stat-chip__label">{{ $t('profile.public.followings') }}</span>
+                    </button>
+                    <button type="button" @click="changeFilter('articles')" class="stat-chip stat-chip--btn">
+                        <span class="stat-chip__value">{{ formatNumber(user.numberOfArticles ?? 0) }}</span>
+                        <span class="stat-chip__label">{{ $t('profile.public.myArticles') }}</span>
                     </button>
                     <div class="stat-chip">
                         <span class="stat-chip__value">{{ formatNumber(user.discuss.numberOfQuestions) }}</span>
@@ -541,8 +591,18 @@ export default {
                 });
         },
     },
+    inject: {
+        ssrProfileData: { default: null },
+    },
     mounted() {
-        this.getUserDetails();
+        if (this.ssrProfileData?.value) {
+            this.user = this.ssrProfileData.value;
+            this.loading = false;
+            this.avatarError = false;
+            this.updateProfileSEO();
+        } else {
+            this.getUserDetails();
+        }
     },
 };
 </script>

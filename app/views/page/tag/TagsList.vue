@@ -93,48 +93,47 @@
                         </div>
 
                         <!-- Search -->
-                        <div class="relative flex-1 min-w-0">
-                            <svg
-                                class="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 pointer-events-none"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
-                                <path d="M20 20L16.5 16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-
-                            <input
-                                ref="searchInput"
-                                v-model="search"
-                                @input="onSearchInput"
-                                @keydown.esc="clearSearch"
-                                type="text"
-                                role="searchbox"
-                                :placeholder="$t('tags.searchPlaceholderLong')"
-                                autocomplete="off"
-                                autocorrect="off"
-                                spellcheck="false"
-                                class="tag-page-search-input w-full h-11 rounded-lg border border-gray-200 dark:border-[#2a3850] bg-white dark:bg-[#1a2332] ps-10 pe-10 text-sm font-semibold text-gray-600 dark:text-gray-400 placeholder:text-gray-400 dark:placeholder:text-gray-500 transition" />
-
-                            <div class="absolute end-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                                <svg
-                                    v-if="searchLoading"
-                                    class="w-5 h-5 text-amber-400 animate-spin"
-                                    viewBox="0 0 24 24"
-                                    fill="none">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                                <button
-                                    v-if="search.trim()"
-                                    type="button"
-                                    @click="clearSearch"
-                                    class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#243044] transition"
-                                    :aria-label="$t('tags.searchClear')">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <div class="relative flex-1 min-w-[200px] w-full">
+                            <div class="relative group">
+                                <div class="absolute -inset-0.5 bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 rounded-2xl blur-md opacity-25 group-hover:opacity-55 group-focus-within:opacity-75 transition duration-300"></div>
+                                <div class="relative flex items-center bg-white dark:bg-gray-900 rounded-2xl p-1.5 border border-slate-200/80 dark:border-white/10 shadow-sm transition">
+                                    <div class="flex items-center ps-3 pe-2 pointer-events-none text-amber-500 dark:text-amber-400">
+                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M22 22L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <input
+                                        ref="searchInput"
+                                        v-model="search"
+                                        @input="onSearchInput"
+                                        @keydown.esc="clearSearch"
+                                        type="text"
+                                        role="searchbox"
+                                        :placeholder="$t('tags.searchPlaceholderLong')"
+                                        autocomplete="off"
+                                        class="w-full bg-transparent border-0 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm px-2 py-1.5 focus:ring-0 focus:outline-none font-medium"
+                                    />
+                                    <svg
+                                        v-if="searchLoading"
+                                        class="w-4 h-4 text-amber-500 animate-spin me-2"
+                                        viewBox="0 0 24 24"
+                                        fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" />
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
-                                </button>
+                                    <button
+                                        v-else-if="search.trim()"
+                                        type="button"
+                                        @click="clearSearch"
+                                        class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg me-1 transition"
+                                        :aria-label="$t('tags.searchClear')"
+                                    >
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -332,7 +331,7 @@ export default {
         },
         onSearchInput() {
             clearTimeout(this.searchTimer);
-            this.searchTimer = setTimeout(() => this.resetAndFetch(), 350);
+            this.searchTimer = setTimeout(() => this.resetAndFetch(), 1500);
         },
         clearSearch() {
             this.search = "";

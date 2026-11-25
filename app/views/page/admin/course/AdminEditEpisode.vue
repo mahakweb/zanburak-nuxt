@@ -380,6 +380,14 @@ definePageMeta({
                                                 </button>
                                             </div>
                                         </div>
+                                        <div v-if="(episode?.download_qualities && episode.download_qualities.length) || (episode?.qualities && episode.qualities.length)"
+                                            class="mt-2.5 flex items-center gap-1.5 flex-wrap px-1">
+                                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">کیفیت‌های آماده:</span>
+                                            <span v-for="q in (episode.download_qualities || episode.qualities)" :key="q"
+                                                class="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                                                {{ q }}p
+                                            </span>
+                                        </div>
                                     </div>
                                     <label v-else for="video"
                                         class="relative group flex flex-col items-center justify-center w-full rounded-lg cursor-pointer transition overflow-hidden aspect-video"

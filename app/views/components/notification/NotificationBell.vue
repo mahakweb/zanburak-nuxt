@@ -320,17 +320,16 @@ watch(
                         v-for="notification in notifications"
                         :key="notification.id"
                         type="button"
-                        class="relative group w-full flex items-center gap-2.5 mb-2 last:mb-0 rounded-xl border px-2.5 py-2 text-start transition-all duration-200 outline-none ring-0 active:scale-[0.99] border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/60 hover:bg-gray-50 dark:hover:bg-gray-800/80"
-                        
+                        class="relative group w-full flex items-center gap-3.5 mb-2.5 last:mb-0 rounded-2xl border px-3.5 py-3 text-start transition-all duration-200 outline-none ring-0 active:scale-[0.99] border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/60 hover:bg-gray-50 dark:hover:bg-gray-800/80 shadow-sm"
                         @click="openNotificationDetail(notification)"
                     >
                         <div
                             v-if="!notification.read_at"
-                            class="absolute start-0 h-[60%] top-[20%] shrink-0 w-1 self-stretch rounded-e-full bg-gradient-to-b from-yellow-300 to-amber-500"
+                            class="absolute start-0 h-[60%] top-[20%] shrink-0 w-1.5 self-stretch rounded-e-full bg-gradient-to-b from-yellow-300 to-amber-500"
                         ></div>
 
                         <div
-                            class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border"
+                            class="shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center border [&>svg]:w-5 [&>svg]:h-5"
                             :class="
                                 notification.read_at
                                     ? 'bg-gray-100 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'
@@ -342,14 +341,14 @@ watch(
                         <div class="flex-1 min-w-0">
                             <div
                                 v-html="safeHtml(notification.data?.message)"
-                                class="text-xs leading-5 line-clamp-1 notification-sheet-message"
+                                class="text-xs sm:text-sm leading-6 line-clamp-2 notification-sheet-message"
                                 :class="
                                     notification.read_at
                                         ? 'text-gray-500 dark:text-gray-400'
                                         : 'text-gray-800 dark:text-gray-100 font-medium'
                                 "
                             ></div>
-                            <span class="text-[10px] text-gray-400 dark:text-gray-500">
+                            <span class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 block">
                                 {{ formatTime(notification.created_at) }}
                             </span>
                         </div>

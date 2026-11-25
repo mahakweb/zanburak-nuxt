@@ -695,9 +695,13 @@
               </button>
             </div>
             <div class="menu-settings-group mb-3">
-              <div class="menu-settings-row menu-settings-row-last">
+              <div class="menu-settings-row border-b border-black/[0.06] dark:border-white/[0.06]">
                 <span>{{ $t('messenger.showEmail') }}</span>
                 <MessengerToggle :model-value="!!settings.show_email" @update:modelValue="toggleSetting('show_email', $event)" />
+              </div>
+              <div class="menu-settings-row menu-settings-row-last">
+                <span>{{ $t('messenger.showProfileChat') }}</span>
+                <MessengerToggle :model-value="settings.show_profile_chat !== false" @update:modelValue="toggleSetting('show_profile_chat', $event)" />
               </div>
             </div>
             <p class="menu-section-title">{{ $t('messenger.security') }}</p>

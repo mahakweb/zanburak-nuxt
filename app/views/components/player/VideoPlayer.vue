@@ -1,7 +1,7 @@
 <template>
     <div class="relative group/player">
         <vue-plyr ref="playerRef" :options="playerOptions">
-            <video id="video" controls playsinline controlsList="nodownload" :data-poster="poster"></video>
+            <video id="video" controls playsinline preload="auto" controlsList="nodownload" :data-poster="poster"></video>
         </vue-plyr>
         <Teleport v-if="props.title && showTitleOverlay && playerContainerEl" :to="playerContainerEl">
             <PlayerTitleBadge :title="props.title" />
@@ -63,8 +63,10 @@
         </teleport>
 
         <!-- Hidden canvas & video for scrubber thumbnail generation -->
-        <canvas ref="thumbCanvasRef" class="hidden" width="160" height="90"></canvas>
-        <video ref="thumbVideoRef" class="hidden" muted playsinline preload="metadata" crossorigin="anonymous"></video>
+        <div style="position: fixed; top: -9999px; left: -9999px; width: 160px; height: 90px; opacity: 0.01; pointer-events: none; z-index: -999;" aria-hidden="true">
+        <canvas ref="thumbCanvasRef" width="160" height="90"></canvas>
+        <video ref="thumbVideoRef" muted playsinline preload="auto" crossorigin="anonymous" width="160" height="90"></video>
+    </div>
 
         <!-- Scrubbing Thumbnail Tooltip -->
         <teleport v-if="playerContainerEl && scrubThumbVisible" :to="playerContainerEl">
@@ -453,30 +455,75 @@ const applyControlVisibility = () => {
     } catch (_) { /* noop */ }
 };
 
+const handlePlayerContainerClick = (e) => {
+    const settingsBtn = e.target.closest?.('.zb-settings-btn');
+    if (settingsBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (menuOpen.value && !menuSegmentsOnly.value) {
+            closeMenu();
+        } else {
+            openMenu('settings', 'main', { currentTarget: settingsBtn });
+        }
+        return;
+    }
+
+    const segmentsBtn = e.target.closest?.('.zb-segments-btn');
+    if (segmentsBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (menuOpen.value && menuSegmentsOnly.value) {
+            closeMenu();
+        } else {
+            openMenu('segments', 'segments', { currentTarget: segmentsBtn });
+        }
+        return;
+    }
+
+    const heatmapBtn = e.target.closest?.('.zb-watch-heatmap-btn');
+    if (heatmapBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWatchHeatmap();
+        return;
+    }
+};
+
+const rebindControls = () => {
+    try {
+        const container = playerRef.value?.player?.elements?.container
+            || playerRef.value?.$el?.querySelector?.('.plyr')
+            || playerRef.value?.$el
+            || null;
+        if (container) {
+            playerContainerEl.value = container;
+            container.style.position = 'relative';
+        }
+    } catch (_) {}
+
+    applyControlVisibility();
+    updateSegmentsButtonVisibility();
+    updateWatchHeatmapButtonVisibility();
+    renderSegmentMarkers();
+    attachProgressScrubberListeners();
+    attachMenuButtonListeners();
+};
+
 onMounted(() => {
-    setTimeout(applyControlVisibility, 0);
+    setTimeout(rebindControls, 0);
     const player = playerRef.value?.player;
     if (player && typeof player.on === 'function') {
-        try { player.on('ready', applyControlVisibility); } catch (_) { /* noop */ }
+        try {
+            player.on('ready', rebindControls);
+            player.on('controlsshown', rebindControls);
+        } catch (_) { /* noop */ }
     }
 
     updateIsMobile();
     window.addEventListener('resize', updateIsMobile);
 
-    setTimeout(() => {
-        try {
-            const container = playerRef.value?.player?.elements?.container || playerRef.value?.$el?.querySelector?.('.plyr') || null;
-            playerContainerEl.value = container;
-            if (container) container.style.position = 'relative';
-        } catch (e) {
-            playerContainerEl.value = playerRef.value?.$el?.querySelector?.('.plyr') || null;
-        }
-        attachMenuButtonListeners();
-        updateSegmentsButtonVisibility();
-        updateWatchHeatmapButtonVisibility();
-        renderSegmentMarkers();
-        attachProgressScrubberListeners();
-    }, 200);
+    setTimeout(rebindControls, 200);
+    setTimeout(rebindControls, 800);
 
     window.addEventListener('zan:video-seek', onExternalSeekEvent);
     window.addEventListener('zan:video-segments', onExternalSegmentsEvent);
@@ -491,12 +538,7 @@ watch(menuOpen, (open) => {
 });
 
 watch(locale, () => {
-    menuButtonsBound = false;
-    setTimeout(() => {
-        attachMenuButtonListeners();
-        updateSegmentsButtonVisibility();
-        updateWatchHeatmapButtonVisibility();
-    }, 300);
+    setTimeout(rebindControls, 200);
 });
 
 watch(() => props.controlsConfig, () => {
@@ -519,9 +561,12 @@ const scrubThumbPosition = ref({ x: 0, bottom: 48 });
 const thumbCache = new Map();
 const thumbFailedUrls = new Set();
 let consecutiveThumbErrors = 0;
+let staticThumbnailsFailed = false;
 const thumbnailsDisabled = ref(false);
 let isCapturingThumb = false;
+let pendingCaptureTime = null;
 let thumbHls = null;
+const resolvedStreamUrl = ref('');
 
 const formatScrubTime = (seconds) => {
     if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
@@ -548,38 +593,34 @@ const getCourseIdFromSource = () => {
     return match ? match[1] : null;
 };
 
-let maxValidThumbIndex = null;
 let currentThumbToken = 0;
 let removeScrubberListeners = null;
 
 const getThumbInfoForTime = (timeSec) => {
-    const duration = playerRef.value?.player?.duration || 0;
-    const totalEstimate = duration > 0 ? Math.max(1, Math.ceil(duration / 5)) : 9999;
     const calculatedIndex = Math.max(1, Math.floor(Math.max(0, timeSec) / 5) + 1);
-    const maxIdx = maxValidThumbIndex !== null ? maxValidThumbIndex : totalEstimate;
-    const index = Math.max(1, Math.min(calculatedIndex, maxIdx));
-    const indexPadded = String(index).padStart(4, '0');
+    const indexPadded = String(calculatedIndex).padStart(4, '0');
 
     let url = null;
-    if (props.source && props.source.includes('/stream/')) {
-        const streamBase = props.source.substring(0, props.source.lastIndexOf('/'));
+    const streamSource = resolvedStreamUrl.value || props.source;
+    if (streamSource && streamSource.includes('/stream/')) {
+        const streamBase = streamSource.substring(0, streamSource.lastIndexOf('/'));
         url = `${streamBase}/thumbnails/thumb_${indexPadded}.jpg`;
     } else {
         const epId = getEpisodeIdFromSource();
         if (epId) {
-            url = `${config.apiBaseUrl}/episode/${epId}/thumbnail/${index}`;
+            url = `${config.apiBaseUrl}/episode/${epId}/thumbnail/${calculatedIndex}`;
         } else {
             const cId = getCourseIdFromSource();
             if (cId) {
-                url = `${config.apiBaseUrl}/course/${cId}/thumbnail/${index}`;
+                url = `${config.apiBaseUrl}/course/${cId}/thumbnail/${calculatedIndex}`;
             } else if (props.streamVideoId) {
-                url = `${config.apiBaseUrl}/video/${props.streamVideoId}/thumbnail/${index}`;
+                url = `${config.apiBaseUrl}/video/${props.streamVideoId}/thumbnail/${calculatedIndex}`;
             }
         }
     }
 
     if (!url) return null;
-    return { url, index };
+    return { url, index: calculatedIndex };
 };
 
 const getThumbUrlForTime = (timeSec) => {
@@ -592,13 +633,31 @@ const onThumbImageLoad = () => {
 };
 
 const onThumbImageError = () => {
-    // Handled by background load pipeline
+    // Handled by load pipeline with fallback to client capture
+};
+
+const getClosestCachedThumb = (targetSec) => {
+    let closestUrl = null;
+    let minDiff = Infinity;
+    for (const [key, val] of thumbCache.entries()) {
+        if (typeof key === 'string' && key.startsWith('seek_') && typeof val === 'string') {
+            const sec = parseInt(key.replace('seek_', ''), 10);
+            if (!isNaN(sec)) {
+                const diff = Math.abs(sec - targetSec);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestUrl = val;
+                }
+            }
+        }
+    }
+    return closestUrl || props.poster || '';
 };
 
 const initThumbVideoSource = () => {
     const video = thumbVideoRef.value;
     if (!video) return;
-    const src = props.source;
+    const src = resolvedStreamUrl.value || props.source;
     if (!src) return;
 
     video.crossOrigin = 'anonymous';
@@ -612,14 +671,38 @@ const initThumbVideoSource = () => {
             }
             thumbHls = new Hls({
                 autoStartLoad: true,
-                maxBufferLength: 4,
-                maxMaxBufferLength: 8,
+                maxBufferLength: 6,
+                maxMaxBufferLength: 12,
                 startLevel: 0,
+                startFragPrefetch: true,
                 xhrSetup: (xhr, url) => {
                     const headers = getPlayerRequestHeaders();
                     Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
                 }
             });
+
+            thumbHls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                if (Array.isArray(data.levels) && data.levels.length > 0) {
+                    let lowestIdx = 0;
+                    let minH = Infinity;
+                    data.levels.forEach((lvl, idx) => {
+                        if (lvl.height && lvl.height < minH) {
+                            minH = lvl.height;
+                            lowestIdx = idx;
+                        }
+                    });
+                    if (thumbHls) {
+                        thumbHls.currentLevel = lowestIdx;
+                        thumbHls.loadLevel = lowestIdx;
+                    }
+                }
+                // Pre-warm initial frames in background
+                setTimeout(() => {
+                    captureThumbAt(1);
+                    captureThumbAt(8);
+                }, 150);
+            });
+
             thumbHls.loadSource(src);
             thumbHls.attachMedia(video);
         } catch (e) {
@@ -631,16 +714,23 @@ const initThumbVideoSource = () => {
 };
 
 const captureThumbAt = async (timeSec) => {
+    if (!Number.isFinite(timeSec) || timeSec < 0) return;
     const rounded = Math.round(timeSec);
-    if (thumbCache.has(`seek_${rounded}`)) {
-        scrubThumbUrl.value = thumbCache.get(`seek_${rounded}`);
+    const seekKey = `seek_${rounded}`;
+    if (thumbCache.has(seekKey)) {
+        scrubThumbUrl.value = thumbCache.get(seekKey);
         scrubThumbLoaded.value = true;
+        return;
+    }
+
+    if (isCapturingThumb) {
+        pendingCaptureTime = timeSec;
         return;
     }
 
     const video = thumbVideoRef.value;
     const canvas = thumbCanvasRef.value;
-    if (!video || !canvas || isCapturingThumb) return;
+    if (!video || !canvas) return;
 
     if (!video.src && !thumbHls) {
         initThumbVideoSource();
@@ -652,7 +742,7 @@ const captureThumbAt = async (timeSec) => {
             const timeout = setTimeout(() => {
                 cleanup();
                 resolve();
-            }, 600);
+            }, 450);
 
             const onSeeked = () => {
                 cleanup();
@@ -661,8 +751,8 @@ const captureThumbAt = async (timeSec) => {
                     if (ctx && video.videoWidth > 0) {
                         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                         const url = canvas.toDataURL('image/jpeg', 0.65);
-                        thumbCache.set(`seek_${rounded}`, url);
-                        if (Math.round(scrubThumbTime.value) === rounded) {
+                        thumbCache.set(seekKey, url);
+                        if (Math.abs(scrubThumbTime.value - timeSec) <= 4) {
                             scrubThumbUrl.value = url;
                             scrubThumbLoaded.value = true;
                         }
@@ -678,7 +768,8 @@ const captureThumbAt = async (timeSec) => {
 
             video.addEventListener('seeked', onSeeked);
             try {
-                video.currentTime = Math.max(0, Math.min(video.duration || 99999, timeSec));
+                const dur = video.duration || playerRef.value?.player?.duration || 99999;
+                video.currentTime = Math.max(0, Math.min(dur, timeSec));
             } catch (e) {
                 cleanup();
                 resolve();
@@ -686,30 +777,41 @@ const captureThumbAt = async (timeSec) => {
         });
     } finally {
         isCapturingThumb = false;
+        if (pendingCaptureTime !== null) {
+            const nextTime = pendingCaptureTime;
+            pendingCaptureTime = null;
+            captureThumbAt(nextTime);
+        }
     }
 };
 
 const checkAndPreloadThumbnails = () => {
-    thumbnailsDisabled.value = false;
     consecutiveThumbErrors = 0;
-    maxValidThumbIndex = null;
+    staticThumbnailsFailed = false;
     thumbCache.clear();
     thumbFailedUrls.clear();
 
+    if (props.poster) {
+        thumbCache.set('seek_0', props.poster);
+        scrubThumbUrl.value = props.poster;
+        scrubThumbLoaded.value = true;
+    }
+
+    // Immediately pre-warm thumbnail video pipeline
+    initThumbVideoSource();
+
     const testUrl = getThumbUrlForTime(1);
     if (!testUrl) {
-        thumbnailsDisabled.value = true;
+        staticThumbnailsFailed = true;
         return;
     }
     const img = new Image();
     img.onload = () => {
         thumbCache.set(testUrl, true);
-        thumbnailsDisabled.value = false;
-        if (!scrubThumbUrl.value) {
+        if (!scrubThumbUrl.value || scrubThumbUrl.value === props.poster) {
             scrubThumbUrl.value = testUrl;
             scrubThumbLoaded.value = true;
         }
-        // Pre-warm the next few thumbnail frames (e.g. 5s, 10s)
         [6, 11, 16].forEach((sec) => {
             const nextUrl = getThumbUrlForTime(sec);
             if (nextUrl && !thumbCache.has(nextUrl)) {
@@ -721,12 +823,13 @@ const checkAndPreloadThumbnails = () => {
     };
     img.onerror = () => {
         thumbFailedUrls.add(testUrl);
-        thumbnailsDisabled.value = true;
+        staticThumbnailsFailed = true;
     };
     img.src = testUrl;
 };
 
 const preloadAdjacent = (timeSec) => {
+    if (staticThumbnailsFailed) return;
     [timeSec + 5, timeSec + 10, Math.max(0, timeSec - 5)].forEach((sec) => {
         const nextInfo = getThumbInfoForTime(sec);
         if (nextInfo?.url && !thumbCache.has(nextInfo.url) && !thumbFailedUrls.has(nextInfo.url)) {
@@ -734,9 +837,6 @@ const preloadAdjacent = (timeSec) => {
             preImg.onload = () => thumbCache.set(nextInfo.url, true);
             preImg.onerror = () => {
                 thumbFailedUrls.add(nextInfo.url);
-                if (nextInfo.index > 1 && (maxValidThumbIndex === null || nextInfo.index <= maxValidThumbIndex)) {
-                    maxValidThumbIndex = nextInfo.index - 1;
-                }
             };
             preImg.src = nextInfo.url;
         }
@@ -744,20 +844,35 @@ const preloadAdjacent = (timeSec) => {
 };
 
 const loadThumbAt = (timeSec) => {
-    if (thumbnailsDisabled.value) return;
+    const rounded = Math.round(timeSec);
+    const seekKey = `seek_${rounded}`;
+    if (thumbCache.has(seekKey)) {
+        scrubThumbUrl.value = thumbCache.get(seekKey);
+        scrubThumbLoaded.value = true;
+        return;
+    }
+
+    // Immediately show closest available frame or poster so spinner doesn't spin
+    const fallback = getClosestCachedThumb(timeSec);
+    if (fallback) {
+        scrubThumbUrl.value = fallback;
+        scrubThumbLoaded.value = true;
+    }
+
+    if (staticThumbnailsFailed) {
+        captureThumbAt(timeSec);
+        return;
+    }
 
     const info = getThumbInfoForTime(timeSec);
-    if (!info || !info.url) return;
-    const { url, index } = info;
+    if (!info || !info.url) {
+        captureThumbAt(timeSec);
+        return;
+    }
+    const { url } = info;
 
     if (thumbFailedUrls.has(url)) {
-        if (index > 1) {
-            maxValidThumbIndex = index - 1;
-            const fallbackInfo = getThumbInfoForTime(timeSec);
-            if (fallbackInfo && fallbackInfo.url !== url && !thumbFailedUrls.has(fallbackInfo.url)) {
-                loadThumbAt(timeSec);
-            }
-        }
+        captureThumbAt(timeSec);
         return;
     }
 
@@ -773,7 +888,6 @@ const loadThumbAt = (timeSec) => {
         return;
     }
 
-    // Keep current visible thumbnail during fetch to avoid blanking or black box
     const token = ++currentThumbToken;
     const img = new Image();
     img.onload = () => {
@@ -786,10 +900,11 @@ const loadThumbAt = (timeSec) => {
     };
     img.onerror = () => {
         thumbFailedUrls.add(url);
-        if (index > 1 && (maxValidThumbIndex === null || index <= maxValidThumbIndex)) {
-            maxValidThumbIndex = index - 1;
-            loadThumbAt(timeSec);
+        consecutiveThumbErrors++;
+        if (consecutiveThumbErrors >= 2) {
+            staticThumbnailsFailed = true;
         }
+        captureThumbAt(timeSec);
     };
     img.src = url;
 };
@@ -921,14 +1036,22 @@ const createHlsInstance = () => new Hls({
     abrBandWidthFactor: 0.8,
     abrBandWidthUpFactor: 0.6,
     xhrSetup: (xhr, url) => {
-        const headers = getPlayerRequestHeaders();
-        Object.entries(headers).forEach(([key, value]) => {
-            xhr.setRequestHeader(key, value);
-        });
+        let isApiRequest = false;
         try {
-            xhr.withCredentials = new URL(url, window.location.href).origin
-                === new URL(config.apiBaseUrl, window.location.href).origin;
-        } catch {
+            const targetOrigin = new URL(url, window.location.href).origin;
+            const apiOrigin = new URL(config.apiBaseUrl, window.location.href).origin;
+            isApiRequest = (targetOrigin === apiOrigin) || url.includes('/api/');
+        } catch (_) {
+            isApiRequest = url.includes('/api/');
+        }
+
+        if (isApiRequest) {
+            const headers = getPlayerRequestHeaders();
+            Object.entries(headers).forEach(([key, value]) => {
+                xhr.setRequestHeader(key, value);
+            });
+            xhr.withCredentials = true;
+        } else {
             xhr.withCredentials = false;
         }
     },
@@ -1380,15 +1503,50 @@ const loadVideoSource = async () => {
     last5AlertShown.value = false;
     showEndPopup.value = false;
 
-    const isHLS = props.source.includes('playlist')
-        || props.source.includes('.m3u8')
-        || props.source.includes('/hls/manifest');
+    // If source is a backend API playlist endpoint, pre-resolve the direct signed stream URL
+    // via axiosInstance (which properly includes Sanctum cookies, session and bearer tokens).
+    // This allows HLS to connect directly to the download host as a simple cross-origin GET request
+    // with no 302 redirects, no cookie dependencies on the storage host, and no CORS wildcard issues.
+    let effectiveSource = props.source;
+    if (props.source && !props.source.includes('.m3u8') && (props.source.includes('/playlist') || props.source.includes('/api/'))) {
+        try {
+            const res = await axiosInstance.get(props.source, {
+                headers: { Accept: 'application/json' },
+            });
+            if (token !== loadToken) return;
+            if (res.data?.stream_url || res.data?.url) {
+                effectiveSource = res.data.stream_url || res.data.url;
+            }
+        } catch (error) {
+            if (token !== loadToken) return;
+            console.warn('Failed to pre-resolve stream URL via API, falling back to source', error);
+        }
+    }
+
+    const isHLS = effectiveSource.includes('playlist')
+        || effectiveSource.includes('.m3u8')
+        || effectiveSource.includes('/hls/manifest');
+
+    resolvedStreamUrl.value = effectiveSource;
+    consecutiveThumbErrors = 0;
+    staticThumbnailsFailed = false;
+    thumbCache.clear();
+    thumbFailedUrls.clear();
+    if (props.poster) {
+        thumbCache.set('seek_0', props.poster);
+        scrubThumbUrl.value = props.poster;
+        scrubThumbLoaded.value = true;
+    } else {
+        scrubThumbUrl.value = '';
+    }
+    checkAndPreloadThumbnails();
 
     await waitForPlayerMedia();
     if (token !== loadToken) return;
 
     const media = playerRef.value?.player?.media;
     if (!media) return;
+    media.preload = 'auto';
 
     if (isHLS) {
         try {
@@ -1399,8 +1557,16 @@ const loadVideoSource = async () => {
                     setupQualityOptions(data.levels);
                     // Start on the lowest rung for quick first paint, then ABR can climb.
                     if (hlsInstance && Array.isArray(data.levels) && data.levels.length > 1) {
-                        hlsInstance.startLevel = data.levels.length - 1;
-                        hlsInstance.loadLevel = data.levels.length - 1;
+                        let lowestIdx = 0;
+                        let minBitrate = Infinity;
+                        data.levels.forEach((lvl, idx) => {
+                            const rate = lvl.bitrate || (lvl.height ? lvl.height * 1000 : Infinity);
+                            if (rate < minBitrate) {
+                                minBitrate = rate;
+                                lowestIdx = idx;
+                            }
+                        });
+                        hlsInstance.startLevel = lowestIdx;
                     }
                 });
 
@@ -1417,29 +1583,33 @@ const loadVideoSource = async () => {
                 });
 
                 hlsInstance.attachMedia(media);
-                // Load API URL directly (with player headers via xhrSetup) — skips extra
-                // blob round-trip so first segment starts sooner.
-                hlsInstance.loadSource(props.source);
+                hlsInstance.loadSource(effectiveSource);
             } else if (media.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari native HLS: fetch once then assign (needs player header).
-                const response = await fetch(props.source, {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: getPlayerRequestHeaders(),
-                });
-                if (!response.ok) throw new Error(`Failed to load playlist (${response.status})`);
-                const text = await response.text();
-                masterBlobUrl = URL.createObjectURL(new Blob([text], { type: 'application/vnd.apple.mpegurl' }));
-                media.src = masterBlobUrl;
-                setupQualityOptions([]);
+                // Safari native HLS: if it is already a direct signed URL, assign directly
+                if (effectiveSource.includes('.m3u8')) {
+                    media.src = effectiveSource;
+                    setupQualityOptions([]);
+                } else {
+                    const response = await fetch(effectiveSource, {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: getPlayerRequestHeaders(),
+                    });
+                    if (!response.ok) throw new Error(`Failed to load playlist (${response.status})`);
+                    const text = await response.text();
+                    masterBlobUrl = URL.createObjectURL(new Blob([text], { type: 'application/vnd.apple.mpegurl' }));
+                    media.src = masterBlobUrl;
+                    setupQualityOptions([]);
+                }
             } else {
                 throw new Error('HLS is not supported in this browser');
             }
 
             bindPlayerEvents();
             media.addEventListener('loadedmetadata', () => {
-                renderSegmentMarkers();
+                rebindControls();
             }, { once: true });
+            setTimeout(rebindControls, 300);
         } catch (error) {
             console.error('Failed to load HLS source', error);
             destroyHls();
@@ -1447,12 +1617,13 @@ const loadVideoSource = async () => {
         return;
     }
 
-    media.src = props.source;
+    media.src = effectiveSource;
     setupQualityOptions([]);
     bindPlayerEvents();
     media.addEventListener('loadedmetadata', () => {
-        renderSegmentMarkers();
+        rebindControls();
     }, { once: true });
+    setTimeout(rebindControls, 300);
 };
 
 // Watch for source changes
@@ -1723,16 +1894,19 @@ const updateActiveSegmentUI = (currentTime) => {
     }
 };
 
-let menuButtonsBound = false;
-
 const attachMenuButtonListeners = () => {
-    if (menuButtonsBound) return;
+    const root = playerContainerEl.value || playerRef.value?.$el;
+    if (root && !root.__zbDelegatedClick) {
+        root.addEventListener('click', handlePlayerContainerClick);
+        root.__zbDelegatedClick = true;
+    }
 
     const settingsBtn = queryPlayerEl('.zb-settings-btn');
     const segmentsBtn = queryPlayerEl('.zb-segments-btn');
     const heatmapBtn = queryPlayerEl('.zb-watch-heatmap-btn');
 
-    if (settingsBtn) {
+    if (settingsBtn && !settingsBtn.__zbBound) {
+        settingsBtn.__zbBound = true;
         settingsBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -1744,7 +1918,8 @@ const attachMenuButtonListeners = () => {
         });
     }
 
-    if (segmentsBtn) {
+    if (segmentsBtn && !segmentsBtn.__zbBound) {
+        segmentsBtn.__zbBound = true;
         segmentsBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -1756,16 +1931,13 @@ const attachMenuButtonListeners = () => {
         });
     }
 
-    if (heatmapBtn) {
+    if (heatmapBtn && !heatmapBtn.__zbBound) {
+        heatmapBtn.__zbBound = true;
         heatmapBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             toggleWatchHeatmap();
         });
-    }
-
-    if (settingsBtn || segmentsBtn || heatmapBtn) {
-        menuButtonsBound = true;
     }
 };
 </script>

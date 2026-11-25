@@ -121,9 +121,13 @@
           </button>
         </div>
         <div class="menu-settings-group mb-3">
-          <div class="menu-settings-row menu-settings-row-last">
+          <div class="menu-settings-row border-b border-black/[0.06] dark:border-white/[0.06]">
             <span>{{ $t('messenger.showEmail') }}</span>
             <input type="checkbox" :checked="settings.show_email" @change="toggleSetting('show_email', $event.target.checked)" class="toggle toggle-warning toggle-sm" />
+          </div>
+          <div class="menu-settings-row menu-settings-row-last">
+            <span>{{ $t('messenger.showProfileChat') }}</span>
+            <input type="checkbox" :checked="settings.show_profile_chat !== false" @change="toggleSetting('show_profile_chat', $event.target.checked)" class="toggle toggle-warning toggle-sm" />
           </div>
         </div>
         <div class="tg-card mx-3 overflow-hidden">

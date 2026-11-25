@@ -375,19 +375,13 @@ export default {
             }
             fileForUpload.status = "uploading";
             let xsrfToken = null;
-            try {
-                if (this.withCredentials) {
+            if (this.withCredentials) {
+                try {
                     await ensureCsrfCookie();
                     xsrfToken = getXsrfToken();
-                    if (!xsrfToken) {
-                        throw new Error("The CSRF cookie was not set by the API.");
-                    }
+                } catch (error) {
+                    console.warn("[Dropzone] Failed to initialize CSRF cookie, proceeding with request headers:", error);
                 }
-            } catch (error) {
-                fileForUpload.status = "error";
-                console.error("Failed to initialize CSRF for file upload:", error);
-                this.handleError(fileForUpload);
-                return;
             }
 
             const attemptUpload = () => {
@@ -423,7 +417,8 @@ export default {
                         try {
                             const response = JSON.parse(xhr.responseText);
                             fileForUpload.status = "uploaded";
-                            fileForUpload.fileUrl = response.fileUrl;
+                            fileForUpload.fileUrl = response.fileUrl || response.url || "";
+                            fileForUpload.url = response.fileUrl || response.url || "";
 
                             delete this.uploadRequests[file.name];
 
